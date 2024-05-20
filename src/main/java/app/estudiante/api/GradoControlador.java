@@ -17,7 +17,8 @@ import java.util.List;
 @CrossOrigin(value = "http://localhost:3000")
 public class GradoControlador {
 
-    private static final Logger logger = LoggerFactory.getLogger(GradoControlador.class);//Infomacion de la consola
+    private static final
+    Logger logger = LoggerFactory.getLogger(GradoControlador.class);//Infomacion de la consola
     @Autowired
     private IGradoServicio gradoServicio;
     //http://localhost:8080/estudiante-app/grados
@@ -53,7 +54,7 @@ public class GradoControlador {
 
     }
 
-@PostMapping("/grados/create") // agrear grado
+   @PostMapping("/grados/create") // agrear grado
     public void agregarGrado(@RequestBody Grado grado){
         logger.info("el empledo a agregar "+grado);
          gradoServicio.guardarGrado(grado);
