@@ -11,7 +11,9 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class Usuario{
+@Table(name = "usuario")
+@PrimaryKeyJoinColumn(name = "idpersona")
+public class Usuario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column

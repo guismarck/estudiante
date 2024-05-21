@@ -2,7 +2,6 @@ package app.estudiante.api;
 
 import app.estudiante.exception.recurosNoEncontradoException;
 import app.estudiante.modelo.Docente;
-import app.estudiante.modelo.Estudiante;
 import app.estudiante.servicio.InterfacesServicios.IDocenteServicio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
