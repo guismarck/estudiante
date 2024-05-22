@@ -20,7 +20,7 @@ public class EstudianteControler {
     @Autowired
     private IEstudianteServicio  estudianteServicio;
 
-    //http://localhost:8080/estudiante-app/estudinates
+    //http://localhost:8080/estudiante-app/estudiantes
     @GetMapping(path = "/estudiantes")
    public List<Estudiante>obternerEstudiantes(){
         var estudiates = estudianteServicio.ListarEstudiantes();
