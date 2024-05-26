@@ -29,9 +29,15 @@ public class EstudianteControler {
     }
 
    @PostMapping(path = "/estudiantes/create") // agregar estudiante
-   public void agregarEstudiante(@RequestBody Estudiante estudiante){
+   public ResponseEntity agregarEstudiante(@RequestBody Estudiante estudiante){
        logger.info("el empledo a agregar " + estudiante);
-       estudianteServicio.guardarEstudiante(estudiante);
+       try {
+           estudianteServicio.guardarEstudiante(estudiante);
+         return  ResponseEntity.ok("OK");
+       }catch (Exception e){
+           return ResponseEntity.badRequest().body(e.getMessage());
+       }
+
    }
 
    @GetMapping(path = "/estudiantes/{id}")// buscar por ID
