@@ -22,10 +22,10 @@ public class EstudianteControler {
 
     //http://localhost:8080/estudiante-app/estudiantes
     @GetMapping(path = "/estudiantes")
-   public List<Estudiante>obternerEstudiantes(){
-        var estudiates = estudianteServicio.ListarEstudiantes();
-        estudiates.forEach((estudiante -> logger.info(estudiante.toString())));
-        return estudiates;
+   public List<Estudiante>obternerEstudiantes(@RequestParam(value = "search",required = false) String search){
+        if (search == null || search.trim().isEmpty())
+            return  estudianteServicio.ListarEstudiantes();
+        return estudianteServicio.busquedaGeneral(search);
     }
 
    @PostMapping(path = "/estudiantes/create") // agregar estudiante
