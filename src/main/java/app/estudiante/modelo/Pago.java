@@ -21,7 +21,7 @@ public class Pago {
     @Column
     private  String concepto;
     @Column
-    private Date  echa_pago;
+    private Date  fecha_pago;
     @Column
     private  String tipo_pago;
 

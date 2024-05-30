@@ -14,13 +14,13 @@ import java.util.Date;
 @NoArgsConstructor //vacio
 @AllArgsConstructor//lleno
 @ToString
-@Table
+@Table(name = "plan_de_estudio")
 public class PlandeEstudio  {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
  private  Integer idPlan_de_estudio;
     @ManyToOne
-    @JoinColumn(name = "idSalon", referencedColumnName = "idsalon")
+    @JoinColumn(name = "idSalon", referencedColumnName = "idSalon")
     private Salon salon;
  @Column
  private  Date año_electivo;

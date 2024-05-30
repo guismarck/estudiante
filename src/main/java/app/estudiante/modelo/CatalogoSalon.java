@@ -11,11 +11,11 @@ import lombok.ToString;
 @NoArgsConstructor //vacio
 @AllArgsConstructor//lleno
 @ToString
-@Table
+@Table (name ="catalaogo_salon")
 public class CatalogoSalon {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer idcatalaogo_salon;
+    private Integer idcatalogo_salon;
     @Column
     private  String nombre_salon;
 }
