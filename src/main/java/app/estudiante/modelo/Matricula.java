@@ -18,7 +18,8 @@ public class Matricula {
     private  Integer  idmatricula;
     @ManyToOne
     @JoinColumn(name = "idpersona", referencedColumnName = "idpersona")
-    private Persona persona ;
+    //private Persona persona ;
+    private Estudiante estudiante;
     @ManyToOne
     @JoinColumn(name = " idPlan_de_estudio", referencedColumnName = " idPlan_de_estudio")
     private  PlandeEstudio plandeEstudio;

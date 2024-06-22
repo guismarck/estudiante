@@ -17,7 +17,7 @@ public class DetallePago {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private  Integer iddetalle_pago;
     @Column
-    private  float costo_mesualidad;
+    private  float costo_mesualidad; // todo cambiar el mombre a costo como variable generica 
     @Column
     private float descuento ;
     @Column

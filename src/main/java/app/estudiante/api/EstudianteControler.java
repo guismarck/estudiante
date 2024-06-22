@@ -69,6 +69,7 @@ public class EstudianteControler {
        estudianteServicio.guardarEstudiante(estudiante);
         return ResponseEntity.ok(estudiante);
    }
+
    @DeleteMapping(path = "/estudiantes/{id}")// eliminar estudiante
     public  void eliminarEstudinateporID(@PathVariable Integer id){
         estudianteServicio.eliminarEstudinate(estudianteServicio.buscarEstudinatePorId(id));
