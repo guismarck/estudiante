@@ -14,7 +14,9 @@ import java.util.List;
 @RestController
 ////http://localhost:8080/estudiante-app/catalogo/salon/1
 @RequestMapping("estudiante-app")
-@CrossOrigin(value = "http://localhost:3000")
+@CrossOrigin(
+    origins = "https://miniature-space-enigma-65prg5v459vh46xx-3000.app.github.dev"
+)
 public class CatalogoSalonControler {
     private static final
     Logger logger = LoggerFactory.getLogger(CatalogoSalonControler.class);//Infomacion de la consola
