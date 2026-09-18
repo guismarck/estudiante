@@ -54,7 +54,7 @@ public class DocenteControler {
         docente.setApellido_completo(docenteResivido.getApellido_completo());
         docente.setSexo(docenteResivido.getSexo());
         docente.setDireccion(docenteResivido.getDireccion());
-        docente.setPartidad_nacimiento(docenteResivido.getPartidad_nacimiento());
+        //docente.setPart(docenteResivido.getPartidad_nacimiento());
         docente.setFecha_nacimiento(docenteResivido.getFecha_nacimiento());
         docente.setCedula(docenteResivido.getCedula());
         docente.setEstado(docenteResivido.isEstado());

@@ -9,4 +9,5 @@ public interface IcalificacionesServicio {
     public Calificaciones buscarCalificacionesPorId(Integer idcalificaciones);
     public void guardarCalificaciones(Calificaciones calificaciones);
     public  void eliminarCalificaciones(Calificaciones calificaciones);
+    
 }

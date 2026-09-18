@@ -39,8 +39,8 @@ public class GradoControlador {
             throw  new recurosNoEncontradoException("No exite el a actualizar con Id"+id);
         }
        // grado.setIdGrado(gradoResivido.getIdGrado());
-        grado.setCategoria(gradoResivido.getCategoria());
         grado.setNombre(gradoResivido.getNombre());
+        grado.setNivelEducativo(gradoResivido.getNivelEducativo());
         gradoServicio.guardarGrado(grado);
         return  ResponseEntity.ok(grado);
     }

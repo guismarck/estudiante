@@ -57,7 +57,7 @@ public class MatriculaControler {
             throw  new recurosNoEncontradoException("No exite el a actualizar con Id"+id);
         }
         matricula.setTurno(matriculaResivido.getTurno());
-        matricula.setCosto_matricula(matriculaResivido.getCosto_matricula());
+        matricula.setCostoMatricula(matriculaResivido.getCostoMatricula());
         matriculaServicio.guardarMatricula(matricula);
         return ResponseEntity.ok(matricula);
     }

@@ -66,7 +66,7 @@ public class UsuarioControler {
         docente.setApellido_completo(usuarioResivido.getDocente().getApellido_completo());
         docente.setSexo(usuarioResivido.getDocente().getSexo());
         docente.setDireccion(usuarioResivido.getDocente().getDireccion());
-        docente.setPartidad_nacimiento(usuarioResivido.getDocente().getPartidad_nacimiento());
+       // docente.setPartidad_nacimiento(usuarioResivido.getDocente().getPartidad_nacimiento());
         docente.setFecha_nacimiento(usuarioResivido.getDocente().getFecha_nacimiento());
         docente.setCedula(usuarioResivido.getDocente().getCedula());
         docente.setEstado(usuarioResivido.getDocente().isEstado());

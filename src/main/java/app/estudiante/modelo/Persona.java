@@ -30,7 +30,7 @@ public class Persona {
     @Column
     private String direccion;
     @Column
-    private String partidad_nacimiento;
+    private String partida_nacimiento;
     @Column
     private Date fecha_nacimiento ;
     @Column

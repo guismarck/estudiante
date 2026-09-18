@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import app.estudiante.utils.*;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
 
@@ -67,6 +69,14 @@ public class PagoControler {
     public  void eliminarporID(@PathVariable Integer id){
         pagoServicio.
                 eliminarPago(pagoServicio.buscarPagoPorId(id));
+    }
+
+    @PostMapping("/procesar-emision")
+    public ResponseEntity<String> procesarEmisionRecibo(
+             @RequestBody EmisionReciboRequestDTO requestDTO) {
+        
+        String respuesta = pagoServicio.emitirRecibo(requestDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(respuesta);
     }
 
 

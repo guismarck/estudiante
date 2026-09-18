@@ -7,6 +7,7 @@ import app.estudiante.utils.NumerUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 @Service
 public class MatriculaServicio implements IMatriculaServicio {
@@ -34,6 +35,8 @@ public class MatriculaServicio implements IMatriculaServicio {
 
     @Override
     public void guardarMatricula(Matricula matricula) {
+        matricula.setFechaMatricula(LocalDateTime.now());
+        matricula.setEstadoMatricula("AC");
      matriculaRepositorio.save(matricula);
     }
 

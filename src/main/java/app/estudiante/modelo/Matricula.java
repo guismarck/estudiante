@@ -1,38 +1,70 @@
 package app.estudiante.modelo;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
-@Data //get a set
-@NoArgsConstructor //vacio
-@AllArgsConstructor//lleno
-@ToString
-@Table
+@Table(
+    name = "matricula", 
+    uniqueConstraints = {
+        @UniqueConstraint(name = "uk_estudiante_anio", columnNames = {"idpersona", "anio_lectivo"})
+    }
+)
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Matricula {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private  Integer  idmatricula;
-    @ManyToOne
-    @JoinColumn(name = "idpersona", referencedColumnName = "idpersona")
-    //private Persona persona ;
+    @Column(name = "idmatricula")
+    private Integer idMatricula;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idpersona", nullable = false)
     private Estudiante estudiante;
-    @ManyToOne
-    @JoinColumn(name = " idPlan_de_estudio", referencedColumnName = " idPlan_de_estudio")
-    private  PlandeEstudio plandeEstudio;
-    @ManyToOne
-    @JoinColumn(name = "idGrado", referencedColumnName = " idGrado")
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idGrado", nullable = false)
     private Grado grado;
-    @ManyToOne
-    @JoinColumn(name = "idpago", referencedColumnName = " idpago")
-    private  Pago pago;
-    @Column
-    private  String turno;
-    @Column
-    private  float costo_matricula;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idPlan_de_estudio", referencedColumnName = "idPlan_de_estudio", nullable = false)
+    private PlandeEstudio planDeEstudio;
 
+    @Column(name = "anio_lectivo", nullable = false)
+    private Short anioLectivo;
+
+    @Column(name = "turno", nullable = false)
+    private String turno;
+
+    @Column(name = "seccion", nullable = false, length = 5)
+    private String seccion;
+
+    @Column(name = "costo_matricula", nullable = false, precision = 10, scale = 2)
+    private BigDecimal costoMatricula;
+
+    @Column(name = "fecha_matricula", nullable = true, updatable = false)
+    private LocalDateTime fechaMatricula;
+
+    @Column(name = "estado_matricula", nullable = false)
+    private String estadoMatricula;
+
+    @PrePersist
+    public void prePersist() {
+        if (this.fechaMatricula == null) {
+            this.fechaMatricula = LocalDateTime.now();
+        }
+        if (this.estadoMatricula == null) {
+            this.estadoMatricula = "AC";
+        }
+        if (this.seccion == null || this.seccion.isBlank()) {
+            this.seccion = "A";
+        }
+    }
 }

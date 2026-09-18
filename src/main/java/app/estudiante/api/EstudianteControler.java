@@ -30,7 +30,7 @@ public class EstudianteControler {
 
    @PostMapping(path = "/estudiantes/create") // agregar estudiante
    public ResponseEntity agregarEstudiante(@RequestBody Estudiante estudiante){
-       logger.info("el empledo a agregar " + estudiante);
+       logger.info("el estudiante a agregar " + estudiante);
        try {
            estudianteServicio.guardarEstudiante(estudiante);
          return  ResponseEntity.ok("OK");
@@ -59,13 +59,12 @@ public class EstudianteControler {
        estudiante.setApellido_completo(estudianteResivido.getApellido_completo());
        estudiante.setSexo(estudianteResivido.getSexo());
        estudiante.setDireccion(estudianteResivido.getDireccion());
-       estudiante.setPartidad_nacimiento(estudiante.getPartidad_nacimiento());
+       estudiante.setPartida_nacimiento(estudiante.getPartida_nacimiento());
        estudiante.setFecha_nacimiento(estudianteResivido.getFecha_nacimiento());
        estudiante.setCedula(estudianteResivido.getCedula());
-       estudiante.setCod_estudiante(estudianteResivido.getCod_estudiante());
-       estudiante.setCodigo_MINED(estudianteResivido.getCodigo_MINED());
-       estudiante.setNombre_tutor(estudianteResivido.getNombre_tutor());
-       estudiante.setEstado(estudianteResivido.isEstado());
+       estudiante.setCodEstudiante(estudianteResivido.getCodEstudiante());
+       estudiante.setCodigoMined(estudianteResivido.getCodigoMined());
+       estudiante.setEstado(estudianteResivido.getEstado());
        estudianteServicio.guardarEstudiante(estudiante);
         return ResponseEntity.ok(estudiante);
    }

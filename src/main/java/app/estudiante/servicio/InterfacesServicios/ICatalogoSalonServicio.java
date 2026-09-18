@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface ICatalogoSalonServicio {
     public List<CatalogoSalon> ListarCatalogoSalon();
-    public CatalogoSalon buscarCatalogoSalonPorId(Integer idcatalaogo_salon);
+    public CatalogoSalon buscarCatalogoSalonPorId(Integer idcatalogo_salon);
     public void guardarCatalogoSalon(CatalogoSalon catalogoSalon);
     public  void eliminarCatalogoSalon(CatalogoSalon catalogoSalon);
 }

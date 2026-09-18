@@ -2,23 +2,31 @@ package app.estudiante.modelo;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
 @Entity
-@Data //get a set
-@NoArgsConstructor //vacio
-@AllArgsConstructor//lleno
-@ToString
-@Table
-public class Grado {
-    @Id
+@Table(name = "grado")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Grado extends AuditableEntity {
+ @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "idGrado")
     private Integer idGrado;
-    @Column
-    private  String categoria;
-    @Column
-    private  String nombre;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idnivel", nullable = false, foreignKey = @ForeignKey(name = "fk_grado_nivel"))
+    private NivelEducativo nivelEducativo;
+
+    @Column(name = "nombre", nullable = false, length = 50)
+    private String nombre;
 
 }
