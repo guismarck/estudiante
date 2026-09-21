@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.Year;
 
 import javax.validation.constraints.NotNull;
 
@@ -25,7 +24,7 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CatalogoTarifa {
+public class CatalogoTarifa extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,13 +32,13 @@ public class CatalogoTarifa {
     private Integer idTarifa;
 
     @NotNull(message = "El grado es obligatorio")
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    @JoinColumn(name = "idGrado", nullable = false, foreignKey = @ForeignKey(name = "fk_tarifa_grado"))
-    private Grado grado;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idnivel", nullable = false)
+    private NivelEducativo idnivel;
 
     @NotNull(message = "El año lectivo es obligatorio")
-    @Column(name = "anio_lectivo", nullable = false, columnDefinition = "YEAR")
-    private Year anioLectivo;
+    @Column(name = "anio_lectivo", nullable = false, length = 4)
+    private Integer anioLectivo;
 
     @NotNull(message = "El concepto de la tarifa es obligatorio")
     @Column(name = "concepto", nullable = false)

@@ -2,26 +2,28 @@ package app.estudiante.api;
 
 import app.estudiante.modelo.CatalogoTarifa;
 import app.estudiante.servicio.InterfacesServicios.ICatalogoTarifaServicio;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.Year;
 import java.util.List;
 
 import javax.validation.Valid;
 
 @RestController
 @RequestMapping("estudiante-app")
-@CrossOrigin(value = "http://localhost:3000")
+@CrossOrigin(
+    origins = "https://miniature-space-enigma-65prg5v459vh46xx-3000.app.github.dev"
+)
 public class CatalogoTarifaController {
-
+    @Autowired
     private final ICatalogoTarifaServicio tarifaServicio = null;
 
     @GetMapping
-    public ResponseEntity<List<CatalogoTarifa>> listarTodas(@RequestParam(required = false) Year anioLectivo) {
+    public ResponseEntity<List<CatalogoTarifa>> listarTodas(@RequestParam(required = false) Integer anioLectivo) {
         List<CatalogoTarifa> tarifas = (anioLectivo != null)
                 ? tarifaServicio.obtenerPorAnio(anioLectivo)
                 : tarifaServicio.obtenerTodas();
@@ -53,22 +55,23 @@ public class CatalogoTarifaController {
     }
 
     @GetMapping("/reportes/pdf")
-    public ResponseEntity<byte[]> descargarReportePdf(@RequestParam Year anioLectivo) {
+    public ResponseEntity<byte[]> descargarReportePdf(@RequestParam Integer anioLectivo) {
         byte[] pdfContent = tarifaServicio.generarReporteTarifasPdf(anioLectivo);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
-        headers.setContentDispositionFormData("filename", "Arancel_Escolar_" + anioLectivo.getValue() + ".pdf");
+        headers.setContentDispositionFormData("filename", "Arancel_Escolar_" + anioLectivo + ".pdf");
 
         return new ResponseEntity<>(pdfContent, headers, HttpStatus.OK);
     }
 
     @GetMapping("/buscar")
     public ResponseEntity<CatalogoTarifa> obtenerTarifaPorGradoYConcepto(
-            @RequestParam Integer idNivel,
-            @RequestParam Year anioLectivo,
-            @RequestParam String concepto) {
-        CatalogoTarifa tarifa = tarifaServicio.obtenerTarifaPorGradoYConcepto(idNivel, anioLectivo, concepto);
+            @RequestParam(name = "idGrado") Integer idGrado,
+            @RequestParam(name = "anioLectivo") Integer anioLectivo,
+            @RequestParam(name = "concepto") String concepto) {
+               // Year anio = Year.of(anioLectivo);
+        CatalogoTarifa tarifa = tarifaServicio.buscarPorGradoAnioYConcepto(idGrado, anioLectivo, concepto);
         return ResponseEntity.ok(tarifa);
     }
 }

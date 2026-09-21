@@ -4,14 +4,17 @@ import app.estudiante.modelo.CatalogoTarifa;
 
 import java.time.Year;
 import java.util.List;
+import java.util.Optional;
+
+import org.springframework.data.repository.query.Param;
 
 public interface ICatalogoTarifaServicio {
     List<CatalogoTarifa> obtenerTodas();
-    List<CatalogoTarifa> obtenerPorAnio(Year anioLectivo);
+    List<CatalogoTarifa> obtenerPorAnio(Integer anioLectivo);
     CatalogoTarifa obtenerPorId(Integer id);
     CatalogoTarifa crear(CatalogoTarifa tarifa);
     CatalogoTarifa actualizar(Integer id, CatalogoTarifa tarifa);
-    CatalogoTarifa obtenerTarifaPorGradoYConcepto(Integer idNivel, Year anioLectivo, String concepto);
+    CatalogoTarifa buscarPorGradoAnioYConcepto(Integer idNivel, Integer anioLectivo, String concepto);
     void eliminar(Integer id);
-    byte[] generarReporteTarifasPdf(Year anioLectivo);
+    byte[] generarReporteTarifasPdf(Integer  anioLectivo);
 }

@@ -9,4 +9,5 @@ public interface IGradoServicio {
     public Grado buscarGradoPorId(Integer idGrado);
     public void guardarGrado(Grado grado);
     public  void eliminarGrado(Grado grado);
+    List<Grado> obtenerGradosPorNivel(Integer idNivel);
 }

@@ -13,7 +13,7 @@ import app.estudiante.servicio.InterfacesServicios.IJasperReportService;
 import app.estudiante.utils.ReporteRequestDTO;
 
 @RestController
-@RequestMapping("/api/v1/reportes")
+@RequestMapping("/reportes")
 public class ReporteController {
 
     private final IJasperReportService jasperReportService = null;

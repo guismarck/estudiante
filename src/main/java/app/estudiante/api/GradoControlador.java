@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-////http://localhost:8080/estudiante-app/estudiante/1
 @RequestMapping("estudiante-app")
 @CrossOrigin(value = "http://localhost:3000")
 public class GradoControlador {
@@ -65,6 +64,12 @@ public class GradoControlador {
     public void eliminarGradoporID(@PathVariable Integer id) {
         gradoServicio.eliminarGrado(gradoServicio.buscarGradoPorId(id));
 
+    }
+
+    @GetMapping("/nivel/{idNivel}")
+    public ResponseEntity<List<Grado>> obtenerGradosPorNivel(@PathVariable Integer idNivel) {
+        List<Grado> grados = gradoServicio.obtenerGradosPorNivel(idNivel);
+        return ResponseEntity.ok(grados);
     }
 
 }
