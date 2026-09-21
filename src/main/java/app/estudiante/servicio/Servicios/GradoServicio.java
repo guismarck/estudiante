@@ -33,4 +33,11 @@ public class GradoServicio implements IGradoServicio {
     public void eliminarGrado(Grado grado) {
       gradoRepositorio.delete(grado);
     }
+
+    @Override
+    public List<Grado> obtenerGradosPorNivel(Integer idNivel) {
+        List<Grado> grados = gradoRepositorio.findByNivelEducativoIdnivel(idNivel);
+
+        return grados;
+    }
 }

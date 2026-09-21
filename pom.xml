@@ -58,7 +58,6 @@
         <exclusions>
             <exclusion>
                 <groupId>com.lowagie</groupId>
-                <artifactId>itext</artifactId>
             </exclusion>
         </exclusions>
     </dependency>

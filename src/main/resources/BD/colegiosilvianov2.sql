@@ -14,19 +14,20 @@ CREATE TABLE `persona` (
   `idpersona` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `nombre_completo` VARCHAR(150) NOT NULL,
   `apellido_completo` VARCHAR(150) NOT NULL,
-  `sexo` ENUM('MASCULINO', 'FEMENINO') NOT NULL,
+  /* Reemplazo de ENUM: Valores sugeridos -> 'MASCULINO', 'FEMENINO', 'OTRO' */
+  `sexo` VARCHAR(20) NOT NULL,
   `fecha_nacimiento` DATE NOT NULL,
   `cedula` VARCHAR(20) DEFAULT NULL,
   `partida_nacimiento` VARCHAR(30) DEFAULT NULL,
   `direccion` VARCHAR(300) NOT NULL,
-  -- Campos de Auditoria
   `creado_por` VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
   `creado_el` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `actualizado_por` VARCHAR(50) DEFAULT NULL,
   `actualizado_el` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`idpersona`),
   UNIQUE KEY `uk_persona_cedula` (`cedula`),
-  INDEX `idx_persona_apellidos` (`apellido_completo`, `nombre_completo`)
+  INDEX `idx_persona_apellidos` (`apellido_completo`, `nombre_completo`),
+  CONSTRAINT `chk_persona_sexo` CHECK (`sexo` IN ('MASCULINO', 'FEMENINO', 'OTRO'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `tutor`;
@@ -36,7 +37,6 @@ CREATE TABLE `tutor` (
   `ocupacion` VARCHAR(100) DEFAULT NULL,
   `telefono_principal` VARCHAR(15) NOT NULL,
   `telefono_secundario` VARCHAR(15) DEFAULT NULL,
-  -- Campos de Auditoria
   `creado_por` VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
   `creado_el` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `actualizado_por` VARCHAR(50) DEFAULT NULL,
@@ -53,7 +53,6 @@ CREATE TABLE `estudiante` (
   `cod_estudiante` VARCHAR(20) NOT NULL,
   `codigo_MINED` VARCHAR(30) DEFAULT NULL,
   `estado` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '1 = Activo, 0 = Inactivo',
-  -- Campos de Auditoria
   `creado_por` VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
   `creado_el` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `actualizado_por` VARCHAR(50) DEFAULT NULL,
@@ -69,9 +68,9 @@ DROP TABLE IF EXISTS `estudiante_tutor`;
 CREATE TABLE `estudiante_tutor` (
   `idpersona_estudiante` INT UNSIGNED NOT NULL,
   `idtutor` INT UNSIGNED NOT NULL,
-  `parentesco` ENUM('MADRE', 'PADRE', 'TUTOR_LEGAL', 'ABUELO', 'TIO', 'OTRO') NOT NULL,
+  /* Reemplazo de ENUM: Valores sugeridos -> 'MADRE', 'PADRE', 'TUTOR_LEGAL', 'ABUELO', 'TIO', 'OTRO' */
+  `parentesco` VARCHAR(30) NOT NULL,
   `es_representante_legal` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 = Si, 0 = No',
-  -- Campos de Auditoria
   `creado_por` VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
   `creado_el` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `actualizado_por` VARCHAR(50) DEFAULT NULL,
@@ -89,7 +88,6 @@ CREATE TABLE `docente` (
   `cod_docente` VARCHAR(20) NOT NULL,
   `especialidad` VARCHAR(100) DEFAULT NULL,
   `estado` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '1 = Activo, 0 = Inactivo',
-  -- Campos de Auditoria
   `creado_por` VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
   `creado_el` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `actualizado_por` VARCHAR(50) DEFAULT NULL,
@@ -106,10 +104,10 @@ CREATE TABLE `usuario` (
   `idpersona` INT UNSIGNED NOT NULL,
   `username` VARCHAR(50) NOT NULL,
   `password_hash` VARCHAR(255) NOT NULL,
-  `tipo_usuario` ENUM('ADMIN', 'SECRETARIA', 'DOCENTE', 'ESTUDIANTE') NOT NULL,
+  /* Reemplazo de ENUM: Valores sugeridos -> 'ADMIN', 'SECRETARIA', 'DOCENTE', 'ESTUDIANTE', 'TUTOR' */
+  `tipo_usuario` VARCHAR(30) NOT NULL,
   `correo` VARCHAR(100) NOT NULL,
   `estado` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '1 = Activo, 0 = Inactivo',
-  -- Campos de Auditoria
   `creado_por` VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
   `creado_el` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `actualizado_por` VARCHAR(50) DEFAULT NULL,
@@ -121,7 +119,6 @@ CREATE TABLE `usuario` (
     REFERENCES `persona` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-
 -- ==========================================
 -- 2. ESTRUCTURA ACADÉMICA BASE
 -- ==========================================
@@ -131,7 +128,6 @@ CREATE TABLE `nivel_educativo` (
   `idnivel` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `nombre` VARCHAR(50) NOT NULL,
   `descripcion` VARCHAR(150) DEFAULT NULL,
-  -- Campos de Auditoria
   `creado_por` VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
   `creado_el` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `actualizado_por` VARCHAR(50) DEFAULT NULL,
@@ -145,7 +141,6 @@ CREATE TABLE `grado` (
   `idGrado` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `idnivel` INT UNSIGNED NOT NULL,
   `nombre` VARCHAR(50) NOT NULL,
-  -- Campos de Auditoria
   `creado_por` VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
   `creado_el` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `actualizado_por` VARCHAR(50) DEFAULT NULL,
@@ -161,7 +156,6 @@ CREATE TABLE `asignatura` (
   `idAsignatura` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `nombre` VARCHAR(60) NOT NULL,
   `codigo` VARCHAR(10) NOT NULL,
-  -- Campos de Auditoria
   `creado_por` VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
   `creado_el` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `actualizado_por` VARCHAR(50) DEFAULT NULL,
@@ -173,9 +167,8 @@ CREATE TABLE `asignatura` (
 DROP TABLE IF EXISTS `catalogo_salon`;
 CREATE TABLE `catalogo_salon` (
   `idcatalogo_salon` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `nombre_salon` VARCHAR(50) NOT NULL,
+  `nombre_salon` VARCHAR(50) NOT NULL COMMENT 'Ej: Aula 101, Lab Cómputo A',
   `capacidad` SMALLINT UNSIGNED NOT NULL DEFAULT 35,
-  -- Campos de Auditoria
   `creado_por` VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
   `creado_el` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `actualizado_por` VARCHAR(50) DEFAULT NULL,
@@ -188,23 +181,24 @@ DROP TABLE IF EXISTS `salon`;
 CREATE TABLE `salon` (
   `idSalon` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `idGrado` INT UNSIGNED NOT NULL,
-  `turno` ENUM('MANANA', 'TARDE', 'SABATINO', 'NOCTURNO') NOT NULL,
-  `seccion` VARCHAR(5) NOT NULL DEFAULT 'A',
   `idcatalogo_salon` INT UNSIGNED NOT NULL,
-  -- Campos de Auditoria
+  `anio_lectivo` YEAR NOT NULL COMMENT 'Permite dimensionar la oferta por ciclo escolar',
+  /* Reemplazo de ENUM: Valores sugeridos -> 'MANANA', 'TARDE', 'SABATINO', 'NOCTURNO' */
+  `turno` VARCHAR(20) NOT NULL,
+  `seccion` VARCHAR(5) NOT NULL DEFAULT 'A',
   `creado_por` VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
   `creado_el` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `actualizado_por` VARCHAR(50) DEFAULT NULL,
   `actualizado_el` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`idSalon`),
-  -- Evita asignación duplicada del mismo espacio físico en un mismo turno
-  UNIQUE KEY `uk_salon_catalogo_turno` (`idcatalogo_salon`, `turno`),
+  UNIQUE KEY `uk_salon_catalogo_turno_anio` (`idcatalogo_salon`, `turno`, `anio_lectivo`),
+  UNIQUE KEY `uk_grado_seccion_turno_anio` (`idGrado`, `seccion`, `turno`, `anio_lectivo`),
   CONSTRAINT `fk_salon_grado` FOREIGN KEY (`idGrado`) 
     REFERENCES `grado` (`idGrado`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_salon_catalogo` FOREIGN KEY (`idcatalogo_salon`) 
-    REFERENCES `catalogo_salon` (`idcatalogo_salon`) ON DELETE RESTRICT ON UPDATE CASCADE
+    REFERENCES `catalogo_salon` (`idcatalogo_salon`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `chk_salon_turno` CHECK (`turno` IN ('MANANA', 'TARDE', 'SABATINO', 'NOCTURNO'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 
 -- ==========================================
 -- 3. PLANIFICACIÓN Y MATRÍCULA
@@ -216,7 +210,6 @@ CREATE TABLE `plan_de_estudio` (
   `idGrado` INT UNSIGNED NOT NULL,
   `anio_lectivo` YEAR NOT NULL,
   `estado` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '1 = Vigente, 0 = Inactivo',
-  -- Campos de Auditoria
   `creado_por` VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
   `creado_el` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `actualizado_por` VARCHAR(50) DEFAULT NULL,
@@ -235,21 +228,22 @@ CREATE TABLE `matricula` (
   `anio_lectivo` YEAR NOT NULL,
   `costo_matricula` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
   `fecha_matricula` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `estado` ENUM('ACTIVA', 'RETIRADO', 'SUSPENDIDO', 'CANCELADA') NOT NULL DEFAULT 'ACTIVA',
-  -- Campos de Auditoria
+  /* Reemplazo de ENUM: Valores sugeridos -> 'ACTIVA', 'RETIRADO', 'SUSPENDIDO', 'CANCELADA' */
+  `estado` VARCHAR(20) NOT NULL DEFAULT 'ACTIVA',
   `creado_por` VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
   `creado_el` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `actualizado_por` VARCHAR(50) DEFAULT NULL,
   `actualizado_el` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`idmatricula`),
   UNIQUE KEY `uk_estudiante_anio` (`idpersona`, `anio_lectivo`),
+  INDEX `idx_matricula_salon_anio` (`idSalon`, `anio_lectivo`, `estado`),
   CONSTRAINT `fk_mat_estudiante` FOREIGN KEY (`idpersona`) 
     REFERENCES `estudiante` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_mat_salon` FOREIGN KEY (`idSalon`) 
     REFERENCES `salon` (`idSalon`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `chk_costo_matricula` CHECK (`costo_matricula` >= 0)
+  CONSTRAINT `chk_costo_matricula` CHECK (`costo_matricula` >= 0),
+  CONSTRAINT `chk_matricula_estado` CHECK (`estado` IN ('ACTIVA', 'RETIRADO', 'SUSPENDIDO', 'CANCELADA'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 
 -- ==========================================
 -- 4. EVALUACIONES Y CALIFICACIONES
@@ -262,7 +256,6 @@ CREATE TABLE `periodo_evaluativo` (
   `numero_periodo` TINYINT UNSIGNED NOT NULL,
   `anio_escolar` YEAR NOT NULL,
   `estado` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '1 = Activo, 0 = Cerrado',
-  -- Campos de Auditoria
   `creado_por` VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
   `creado_el` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `actualizado_por` VARCHAR(50) DEFAULT NULL,
@@ -277,7 +270,6 @@ CREATE TABLE `detalle_plan_de_estudio` (
   `idPlan_de_estudio` INT UNSIGNED NOT NULL,
   `idAsignatura` INT UNSIGNED NOT NULL,
   `idDocente` INT UNSIGNED NOT NULL,
-  -- Campos de Auditoria
   `creado_por` VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
   `creado_el` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `actualizado_por` VARCHAR(50) DEFAULT NULL,
@@ -301,7 +293,6 @@ CREATE TABLE `calificaciones` (
   `acumulado` DECIMAL(5,2) NOT NULL DEFAULT 0.00,
   `examen` DECIMAL(5,2) NOT NULL DEFAULT 0.00,
   `nota_final` DECIMAL(5,2) GENERATED ALWAYS AS (`acumulado` + `examen`) STORED,
-  -- Campos de Auditoria
   `creado_por` VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
   `creado_el` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `actualizado_por` VARCHAR(50) DEFAULT NULL,
@@ -318,7 +309,6 @@ CREATE TABLE `calificaciones` (
   CONSTRAINT `chk_examen_rango` CHECK (`examen` BETWEEN 0.00 AND 40.00)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-
 -- ==========================================
 -- 5. MÓDULO FINANCIERO
 -- ==========================================
@@ -326,20 +316,24 @@ CREATE TABLE `calificaciones` (
 DROP TABLE IF EXISTS `catalogo_tarifa`;
 CREATE TABLE `catalogo_tarifa` (
   `idtarifa` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `idnivel` INT UNSIGNED NOT NULL,
+  `idnivel` INT UNSIGNED DEFAULT NULL,
+  `idGrado` INT UNSIGNED DEFAULT NULL,
   `anio_lectivo` YEAR NOT NULL,
-  `concepto` VARCHAR(50) NOT NULL,
+  `concepto` VARCHAR(100) NOT NULL,
   `monto` DECIMAL(10,2) NOT NULL,
-  -- Campos de Auditoria
+  `es_obligatorio` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '1 = Arancel obligatorio, 0 = Opcional',
   `creado_por` VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
   `creado_el` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `actualizado_por` VARCHAR(50) DEFAULT NULL,
   `actualizado_el` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`idtarifa`),
-  UNIQUE KEY `uk_tarifa_nivel_anio_concepto` (`idnivel`, `anio_lectivo`, `concepto`),
+  UNIQUE KEY `uk_tarifa_ambito` (`anio_lectivo`, `concepto`, `idnivel`, `idGrado`),
   CONSTRAINT `fk_tarifa_nivel` FOREIGN KEY (`idnivel`) 
     REFERENCES `nivel_educativo` (`idnivel`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `chk_monto_tarifa` CHECK (`monto` >= 0)
+  CONSTRAINT `fk_tarifa_grado` FOREIGN KEY (`idGrado`) 
+    REFERENCES `grado` (`idGrado`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `chk_monto_tarifa` CHECK (`monto` >= 0),
+  CONSTRAINT `chk_tarifa_jerarquia` CHECK ((`idnivel` IS NOT NULL) OR (`idGrado` IS NOT NULL))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `pago`;
@@ -348,9 +342,9 @@ CREATE TABLE `pago` (
   `idmatricula` INT UNSIGNED NOT NULL,
   `num_recibo` VARCHAR(30) NOT NULL,
   `fecha_pago` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `tipo_pago` ENUM('EFECTIVO', 'TRANSFERENCIA', 'TARJETA', 'DEPOSITO') NOT NULL,
+  /* Reemplazo de ENUM: Valores sugeridos -> 'EFECTIVO', 'TRANSFERENCIA', 'TARJETA', 'DEPOSITO' */
+  `tipo_pago` VARCHAR(30) NOT NULL,
   `monto_total` DECIMAL(10,2) NOT NULL,
-  -- Campos de Auditoria
   `creado_por` VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
   `creado_el` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `actualizado_por` VARCHAR(50) DEFAULT NULL,
@@ -360,7 +354,8 @@ CREATE TABLE `pago` (
   INDEX `idx_pago_fecha` (`fecha_pago`),
   CONSTRAINT `fk_pago_matricula` FOREIGN KEY (`idmatricula`) 
     REFERENCES `matricula` (`idmatricula`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `chk_monto_pago` CHECK (`monto_total` >= 0)
+  CONSTRAINT `chk_monto_pago` CHECK (`monto_total` >= 0),
+  CONSTRAINT `chk_pago_tipo` CHECK (`tipo_pago` IN ('EFECTIVO', 'TRANSFERENCIA', 'TARJETA', 'DEPOSITO'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `detalle_pago`;
@@ -370,7 +365,6 @@ CREATE TABLE `detalle_pago` (
   `idtarifa` INT UNSIGNED DEFAULT NULL,
   `concepto` VARCHAR(100) NOT NULL,
   `monto` DECIMAL(10,2) NOT NULL,
-  -- Campos de Auditoria
   `creado_por` VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
   `creado_el` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `actualizado_por` VARCHAR(50) DEFAULT NULL,
@@ -383,9 +377,8 @@ CREATE TABLE `detalle_pago` (
   CONSTRAINT `chk_monto_detpago` CHECK (`monto` >= 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-
 -- ==========================================
--- 6. CARGA INICIAL DE DATOS (DML CONSOLIDADO)
+-- 6. CARGA INICIAL / LIMPIEZA
 -- ==========================================
 
 SET FOREIGN_KEY_CHECKS = 0;
@@ -411,8 +404,10 @@ TRUNCATE TABLE `tutor`;
 TRUNCATE TABLE `persona`;
 
 SET FOREIGN_KEY_CHECKS = 1;
+-- ==========================================
+-- 1. POBLADO DE PERSONAS Y ROLES
+-- ==========================================
 
--- Poblado de Personas
 INSERT INTO `persona` 
   (`idpersona`, `nombre_completo`, `apellido_completo`, `sexo`, `fecha_nacimiento`, `cedula`, `partida_nacimiento`, `direccion`, `creado_por`) 
 VALUES
@@ -427,95 +422,136 @@ VALUES
   (9, 'Lucas Gabriel', 'García Ruiz', 'MASCULINO', '2011-01-05', NULL, 'PN-2011-00987', 'Reparto San Juan, Managua', 'ADMIN'),
   (10, 'Admin', 'Sistema Silviano', 'MASCULINO', '1995-06-01', '001-010695-0000A', NULL, 'Oficina Central Colegio', 'ADMIN');
 
--- Tutores
-INSERT INTO `tutor` (`idtutor`, `idpersona`, `ocupacion`, `telefono_principal`, `telefono_secundario`, `creado_por`) VALUES
-(1, 1, 'Ingeniero Civil', '88881111', '22221111', 'ADMIN'),
-(2, 2, 'Contadora Pública', '88882222', NULL, 'ADMIN');
+INSERT INTO `tutor` 
+  (`idtutor`, `idpersona`, `ocupacion`, `telefono_principal`, `telefono_secundario`, `creado_por`) 
+VALUES
+  (1, 1, 'Ingeniero Civil', '88881111', '22221111', 'ADMIN'),
+  (2, 2, 'Contadora Pública', '88882222', NULL, 'ADMIN');
 
--- Estudiantes
-INSERT INTO `estudiante` (`idpersona`, `cod_estudiante`, `codigo_MINED`, `estado`, `creado_por`) VALUES
-(6, 'EST-2026-001', 'MINED-6661', 1, 'ADMIN'),
-(7, 'EST-2026-002', 'MINED-6662', 1, 'ADMIN');
+INSERT INTO `estudiante` 
+  (`idpersona`, `cod_estudiante`, `codigo_MINED`, `estado`, `creado_por`) 
+VALUES
+  (6, 'EST-2026-001', 'MINED-6661', 1, 'ADMIN'),
+  (7, 'EST-2026-002', 'MINED-6662', 1, 'ADMIN');
 
--- Estudiante - Tutor
-INSERT INTO `estudiante_tutor` (`idpersona_estudiante`, `idtutor`, `parentesco`, `es_representante_legal`, `creado_por`) VALUES
-(6, 1, 'PADRE', 1, 'ADMIN'),
-(7, 2, 'MADRE', 1, 'ADMIN');
+INSERT INTO `estudiante_tutor` 
+  (`idpersona_estudiante`, `idtutor`, `parentesco`, `es_representante_legal`, `creado_por`) 
+VALUES
+  (6, 1, 'PADRE', 1, 'ADMIN'),
+  (7, 2, 'MADRE', 1, 'ADMIN');
 
--- Docentes
-INSERT INTO `docente` (`idpersona`, `cod_docente`, `especialidad`, `estado`, `creado_por`) VALUES
-(4, 'DOC-001', 'Licenciatura en Matemáticas', 1, 'ADMIN'),
-(5, 'DOC-002', 'Licenciatura en Lengua y Literatura', 1, 'ADMIN');
+INSERT INTO `docente` 
+  (`idpersona`, `cod_docente`, `especialidad`, `estado`, `creado_por`) 
+VALUES
+  (4, 'DOC-001', 'Licenciatura en Matemáticas', 1, 'ADMIN'),
+  (5, 'DOC-002', 'Licenciatura en Lengua y Literatura', 1, 'ADMIN');
 
--- Usuarios
-INSERT INTO `usuario` (`idusuario`, `idpersona`, `username`, `password_hash`, `tipo_usuario`, `correo`, `estado`, `creado_por`) VALUES
-(1, 10, 'admin', '$2a$12$eImiTXuWVxfM37uY4JANjOL.8844884488448844884488', 'ADMIN', 'admin@colegiosilviano.edu.ni', 1, 'ADMIN'),
-(2, 4, 'atorres', '$2a$12$eImiTXuWVxfM37uY4JANjOL.8844884488448844884488', 'DOCENTE', 'atorres@colegiosilviano.edu.ni', 1, 'ADMIN');
+INSERT INTO `usuario` 
+  (`idusuario`, `idpersona`, `username`, `password_hash`, `tipo_usuario`, `correo`, `estado`, `creado_por`) 
+VALUES
+  (1, 10, 'admin', '$2a$12$eImiTXuWVxfM37uY4JANjOL.884488448844884488448844884488', 'ADMIN', 'admin@colegiosilviano.edu.ni', 1, 'ADMIN'),
+  (2, 4, 'atorres', '$2a$12$eImiTXuWVxfM37uY4JANjOL.884488448844884488448844884488', 'DOCENTE', 'atorres@colegiosilviano.edu.ni', 1, 'ADMIN');
 
--- Niveles Educativos
-INSERT INTO `nivel_educativo` (`idnivel`, `nombre`, `descripcion`, `creado_por`) VALUES
-(1, 'Primaria', 'Educación Básica Primaria de 1er a 6to Grado', 'ADMIN'),
-(2, 'Secundaria', 'Educación Secundaria de 7mo a 11mo Año', 'ADMIN');
+-- ==========================================
+-- 2. ESTRUCTURA ACADÉMICA Y INFRAESTRUCTURA
+-- ==========================================
 
--- Grados
-INSERT INTO `grado` (`idGrado`, `idnivel`, `nombre`, `creado_por`) VALUES
-(1, 1, '5to Grado', 'ADMIN'),
-(2, 2, '7mo Año', 'ADMIN');
+INSERT INTO `nivel_educativo` 
+  (`idnivel`, `nombre`, `descripcion`, `creado_por`) 
+VALUES
+  (1, 'Primaria', 'Educación Básica Primaria de 1er a 6to Grado', 'ADMIN'),
+  (2, 'Secundaria', 'Educación Secundaria de 7mo a 11mo Año', 'ADMIN');
 
--- Asignaturas
-INSERT INTO `asignatura` (`idAsignatura`, `nombre`, `codigo`, `creado_por`) VALUES
-(1, 'Matemáticas', 'MAT-101', 'ADMIN'),
-(2, 'Lengua y Literatura', 'LEN-101', 'ADMIN');
+INSERT INTO `grado` 
+  (`idGrado`, `idnivel`, `nombre`, `creado_por`) 
+VALUES
+  (1, 1, '5to Grado', 'ADMIN'),
+  (2, 2, '7mo Año', 'ADMIN');
 
--- Catálogo Salones
-INSERT INTO `catalogo_salon` (`idcatalogo_salon`, `nombre_salon`, `capacidad`, `creado_por`) VALUES
-(1, 'Aula A-101 (Pabellón Primaria)', 35, 'ADMIN'),
-(2, 'Aula B-201 (Pabellón Secundaria)', 40, 'ADMIN');
+INSERT INTO `asignatura` 
+  (`idAsignatura`, `nombre`, `codigo`, `creado_por`) 
+VALUES
+  (1, 'Matemáticas', 'MAT-101', 'ADMIN'),
+  (2, 'Lengua y Literatura', 'LEN-101', 'ADMIN');
 
--- Salones
-INSERT INTO `salon` (`idSalon`, `idGrado`, `turno`, `seccion`, `idcatalogo_salon`, `creado_por`) VALUES
-(1, 1, 'MANANA', 'A', 1, 'ADMIN'),
-(2, 2, 'MANANA', 'A', 2, 'ADMIN');
+INSERT INTO `catalogo_salon` 
+  (`idcatalogo_salon`, `nombre_salon`, `capacidad`, `creado_por`) 
+VALUES
+  (1, 'Aula A-101 (Pabellón Primaria)', 35, 'ADMIN'),
+  (2, 'Aula B-201 (Pabellón Secundaria)', 40, 'ADMIN');
 
--- Plan de Estudio
-INSERT INTO `plan_de_estudio` (`idPlan_de_estudio`, `idGrado`, `anio_lectivo`, `estado`, `creado_por`) VALUES
-(1, 1, 2026, 1, 'ADMIN'),
-(2, 2, 2026, 1, 'ADMIN');
+-- Ajuste Crítico: Inserción de anio_lectivo alineado a la oferta del salón
+INSERT INTO `salon` 
+  (`idSalon`, `idGrado`, `idcatalogo_salon`, `anio_lectivo`, `turno`, `seccion`, `creado_por`) 
+VALUES
+  (1, 1, 1, 2026, 'MANANA', 'A', 'ADMIN'),
+  (2, 2, 2, 2026, 'MANANA', 'A', 'ADMIN');
 
--- Matrícula
-INSERT INTO `matricula` (`idmatricula`, `idpersona`, `idSalon`, `anio_lectivo`, `costo_matricula`, `fecha_matricula`, `estado`, `creado_por`) VALUES
-(1, 6, 1, 2024, 1200.00, '2024-01-15 08:30:00', 'ACTIVA', 'ADMIN'),
-(2, 7, 2, 2024, 1500.00, '2024-01-16 09:15:00', 'ACTIVA', 'ADMIN');
+-- ==========================================
+-- 3. PLANIFICACIÓN Y MATRÍCULA (AÑO LECTIVO 2026)
+-- ==========================================
 
--- Periodos Evaluativos
-INSERT INTO `periodo_evaluativo` (`idperiodo_evaluativo`, `nombre_periodo`, `numero_periodo`, `anio_escolar`, `estado`, `creado_por`) VALUES
-(1, 'I Bloque', 1, 2026, 1, 'ADMIN'),
-(2, 'II Bloque', 2, 2026, 1, 'ADMIN');
+INSERT INTO `plan_de_estudio` 
+  (`idPlan_de_estudio`, `idGrado`, `anio_lectivo`, `estado`, `creado_por`) 
+VALUES
+  (1, 1, 2026, 1, 'ADMIN'),
+  (2, 2, 2026, 1, 'ADMIN');
 
--- Detalle Plan de Estudio
-INSERT INTO `detalle_plan_de_estudio` (`iddetalle_plan_de_estudio`, `idPlan_de_estudio`, `idAsignatura`, `idDocente`, `creado_por`) VALUES
-(1, 1, 1, 4, 'ADMIN'),
-(2, 2, 2, 5, 'ADMIN');
+-- Ajuste Crítico: Corrección del año lectivo y fechas de matriculación a 2026
+INSERT INTO `matricula` 
+  (`idmatricula`, `idpersona`, `idSalon`, `anio_lectivo`, `costo_matricula`, `fecha_matricula`, `estado`, `creado_por`) 
+VALUES
+  (1, 6, 1, 2026, 1200.00, '2026-01-15 08:30:00', 'ACTIVA', 'ADMIN'),
+  (2, 7, 2, 2026, 1500.00, '2026-01-16 09:15:00', 'ACTIVA', 'ADMIN');
 
--- Calificaciones
-INSERT INTO `calificaciones` (`idcalificacion`, `idmatricula`, `iddetalle_plan_de_estudio`, `idperiodo_evaluativo`, `acumulado`, `examen`, `creado_por`) VALUES
-(1, 1, 1, 1, 55.00, 38.00, 'DOC-001'),
-(2, 2, 2, 1, 48.00, 32.00, 'DOC-002');
+-- ==========================================
+-- 4. EVALUACIONES Y CALIFICACIONES
+-- ==========================================
 
--- Tarifas
-INSERT INTO `catalogo_tarifa` (`idtarifa`, `idnivel`, `anio_lectivo`, `concepto`, `monto`, `creado_por`) VALUES
-(1, 1, 2026, 'MENSUALIDAD', 1000.00, 'ADMIN'),
-(2, 2, 2026, 'MENSUALIDAD', 1300.00, 'ADMIN');
+INSERT INTO `periodo_evaluativo` 
+  (`idperiodo_evaluativo`, `nombre_periodo`, `numero_periodo`, `anio_escolar`, `estado`, `creado_por`) 
+VALUES
+  (1, 'I Bloque', 1, 2026, 1, 'ADMIN'),
+  (2, 'II Bloque', 2, 2026, 1, 'ADMIN');
 
--- Pagos
-INSERT INTO `pago` (`idpago`, `idmatricula`, `num_recibo`, `fecha_pago`, `tipo_pago`, `monto_total`, `creado_por`) VALUES
-(1, 1, 'REC-2026-0001', '2024-02-05 10:00:00', 'EFECTIVO', 1000.00, 'ADMIN'),
-(2, 2, 'REC-2026-0002', '2024-02-06 11:30:00', 'TRANSFERENCIA', 1300.00, 'ADMIN');
+INSERT INTO `detalle_plan_de_estudio` 
+  (`iddetalle_plan_de_estudio`, `idPlan_de_estudio`, `idAsignatura`, `idDocente`, `creado_por`) 
+VALUES
+  (1, 1, 1, 4, 'ADMIN'),
+  (2, 2, 2, 5, 'ADMIN');
 
--- Detalle Pago
-INSERT INTO `detalle_pago` (`iddetalle_pago`, `idpago`, `idtarifa`, `concepto`, `monto`, `creado_por`) VALUES
-(1, 1, 1, 'Mensualidad de Febrero 2024 - Primaria', 1000.00, 'ADMIN'),
-(2, 2, 2, 'Mensualidad de Febrero 2024 - Secundaria', 1300.00, 'ADMIN');
+INSERT INTO `calificaciones` 
+  (`idcalificacion`, `idmatricula`, `iddetalle_plan_de_estudio`, `idperiodo_evaluativo`, `acumulado`, `examen`, `creado_por`) 
+VALUES
+  (1, 1, 1, 1, 55.00, 38.00, 'ADMIN'),
+  (2, 2, 2, 1, 48.00, 32.00, 'ADMIN');
+
+-- ==========================================
+-- 5. MÓDULO FINANCIERO Y COBROS
+-- ==========================================
+
+INSERT INTO `catalogo_tarifa` 
+  (`idtarifa`, `idnivel`, `anio_lectivo`, `concepto`, `monto`, `creado_por`) 
+VALUES
+  (1, 1, 2026, 'MENSUALIDAD FEBRERO', 1000.00, 'ADMIN'),
+  (2, 2, 2026, 'MENSUALIDAD FEBRERO', 1300.00, 'ADMIN');
+
+-- Ajuste Crítico: Fechas de pago coherentes con el ciclo escolar 2026
+INSERT INTO `pago` 
+  (`idpago`, `idmatricula`, `num_recibo`, `fecha_pago`, `tipo_pago`, `monto_total`, `creado_por`) 
+VALUES
+  (1, 1, 'REC-2026-0001', '2026-02-05 10:00:00', 'EFECTIVO', 1000.00, 'ADMIN'),
+  (2, 2, 'REC-2026-0002', '2026-02-06 11:30:00', 'TRANSFERENCIA', 1300.00, 'ADMIN');
+
+-- Ajuste Crítico: Completado el registro cortado e inyectadas relaciones correctas
+INSERT INTO `detalle_pago` 
+  (`iddetalle_pago`, `idpago`, `idtarifa`, `concepto`, `monto`, `creado_por`) 
+VALUES
+  (1, 1, 1, 'Mensualidad de Febrero 2026 - Primaria', 1000.00, 'ADMIN'),
+  (2, 2, 2, 'Mensualidad de Febrero 2026 - Secundaria', 1300.00, 'ADMIN');
+
+-- Reactivar validación de llaves foráneas
+SET FOREIGN_KEY_CHECKS = 1;
 
 -- Ajuste de Autoincrementales
 ALTER TABLE `persona` AUTO_INCREMENT = 11;

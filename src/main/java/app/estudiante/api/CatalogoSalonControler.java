@@ -2,7 +2,10 @@ package app.estudiante.api;
 
 import app.estudiante.exception.recurosNoEncontradoException;
 import app.estudiante.modelo.CatalogoSalon;
+import app.estudiante.modelo.Salon;
 import app.estudiante.servicio.InterfacesServicios.ICatalogoSalonServicio;
+import app.estudiante.servicio.InterfacesServicios.ISalonServicio;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,14 +17,14 @@ import java.util.List;
 @RestController
 ////http://localhost:8080/estudiante-app/catalogo/salon/1
 @RequestMapping("estudiante-app")
-@CrossOrigin(
-    origins = "https://miniature-space-enigma-65prg5v459vh46xx-3000.app.github.dev"
-)
+@CrossOrigin(value = "http://localhost:3000")
 public class CatalogoSalonControler {
     private static final
     Logger logger = LoggerFactory.getLogger(CatalogoSalonControler.class);//Infomacion de la consola
     @Autowired
     private ICatalogoSalonServicio iCatalogoSalonServicio;
+    @Autowired
+    private ISalonServicio salonServicio;
     //http://localhost:8080/estudiante-app/grados
     @GetMapping(path = "/catalogo/salon")
     public List<CatalogoSalon> obtenerCatalogoSalon(){
@@ -39,7 +42,7 @@ public class CatalogoSalonControler {
             throw  new recurosNoEncontradoException("No existe el salon a actualizar con Id"+id);
         }
         // cat_salon.setIdcatalogo_Salon(gradoResivido.getIdGrado());
-        cat_salon.setNombre_salon(CatSalonRecibido.getNombre_salon());
+        cat_salon.setNombreSalon(CatSalonRecibido.getNombreSalon());
         iCatalogoSalonServicio.guardarCatalogoSalon(cat_salon);
         return  ResponseEntity.ok(cat_salon);
     }
@@ -62,5 +65,11 @@ public class CatalogoSalonControler {
     @DeleteMapping("/catalogo/salon/{id}")  // eliminar salon
     public void eliminarCatSalonporID(@PathVariable Integer id) {
         iCatalogoSalonServicio.eliminarCatalogoSalon(iCatalogoSalonServicio.buscarCatalogoSalonPorId(id));
+    }
+
+    @GetMapping("/disponibles/grado/{idGrado}")
+    public ResponseEntity<List<Salon>> obtenerSalonesDisponiblesPorGrado(@PathVariable Integer idGrado) {
+        List<Salon> salones = salonServicio.obtenerSalonesDisponiblesPorGrado(idGrado);
+        return ResponseEntity.ok(salones);
     }
 }

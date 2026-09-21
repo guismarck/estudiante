@@ -32,4 +32,11 @@ public class SalonServicio implements ISalonServicio {
     public void eliminarSalon(Salon salon) {
         salonRepositorio.delete(salon);
     }
+
+    @Override
+    public List<Salon> obtenerSalonesDisponiblesPorGrado(Integer idGrado) {
+        List<Salon> salones = salonRepositorio.obtenerSalonesDisponiblesPorGrado(idGrado);
+
+        return salones;
+    }
 }
