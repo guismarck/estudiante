@@ -377,6 +377,98 @@ CREATE TABLE `detalle_pago` (
   CONSTRAINT `chk_monto_detpago` CHECK (`monto` >= 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+
+-- =============================================================================
+-- ESQUEMA DE SEGURIDAD Y CONTROL DE ACCESO (RBAC) - SISTEMA ESCOLAR
+-- Dialecto: MySQL 8.0+
+-- Engine: InnoDB | Character Set: utf8mb4 | Collation: utf8mb4_unicode_ci
+-- =============================================================================
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+DROP TABLE IF EXISTS sec_permisos_rol;
+DROP TABLE IF EXISTS sec_modulos;
+DROP TABLE IF EXISTS sec_roles_usuario;
+DROP TABLE IF EXISTS sec_roles;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- -----------------------------------------------------------------------------
+--  TABLA: sec_roles
+-- Roles dentro de la institución (Ej: ADMIN, PROFESOR, APODERADO, ALUMNO)
+-- -----------------------------------------------------------------------------
+CREATE TABLE sec_roles (
+    id              INT AUTO_INCREMENT,
+    codigo          VARCHAR(32)  NOT NULL,
+    descripcion     VARCHAR(60)  NOT NULL,
+    creado_en       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    creado_por      INT          NOT NULL,
+    actualizado_en  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    actualizado_por INT          NOT NULL,
+    
+    CONSTRAINT PK_sec_roles PRIMARY KEY (id),
+    CONSTRAINT UQ_sec_roles__codigo UNIQUE (codigo),
+    CONSTRAINT FK_sec_roles__creado_por FOREIGN KEY (creado_por) REFERENCES sec_usuarios(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT FK_sec_roles__actualizado_por FOREIGN KEY (actualizado_por) REFERENCES sec_usuarios(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT CK_sec_roles__actualizado_ge_creado CHECK (actualizado_en >= creado_en)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Catalogo de roles del sistema educativo';
+
+-- -----------------------------------------------------------------------------
+--  TABLA: sec_roles_usuario
+-- Relacion N:M entre Usuarios y Roles
+-- -----------------------------------------------------------------------------
+CREATE TABLE sec_roles_usuario (
+    usuario_id      INT          NOT NULL,
+    role_id         INT          NOT NULL,
+    creado_en       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    creado_por      INT          NOT NULL,
+    
+    CONSTRAINT PK_sec_roles_usuario PRIMARY KEY (usuario_id, role_id),
+    CONSTRAINT FK_sec_roles_usuario__usuario FOREIGN KEY (usuario_id) REFERENCES sec_usuarios(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT FK_sec_roles_usuario__role FOREIGN KEY (role_id) REFERENCES sec_roles(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT FK_sec_roles_usuario__creado_por FOREIGN KEY (creado_por) REFERENCES sec_usuarios(id) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Asignacion de roles por usuario';
+
+-- -----------------------------------------------------------------------------
+--  TABLA: sec_modulos
+-- Jerarquia de pantallas, componentes y recursos del sistema
+-- -----------------------------------------------------------------------------
+CREATE TABLE sec_modulos (
+    id               INT AUTO_INCREMENT,
+    nombre           VARCHAR(100) NOT NULL,
+    codigo           VARCHAR(60)  NOT NULL,
+    recurso          VARCHAR(255) NOT NULL,
+    path_img         VARCHAR(255) NULL,
+    modulo_padre_id  INT          NULL,
+    estado           TINYINT(1)   NOT NULL DEFAULT 1 COMMENT '1: Activo, 0: Inactivo',
+    
+    CONSTRAINT PK_sec_modulos PRIMARY KEY (id),
+    CONSTRAINT UQ_sec_modulos__codigo UNIQUE (codigo),
+    CONSTRAINT FK_sec_modulos__modulo_padre FOREIGN KEY (modulo_padre_id) REFERENCES sec_modulos(id) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Modulos y opciones de menu del sistema';
+
+-- -----------------------------------------------------------------------------
+--  TABLA: sec_permisos_rol
+-- Permisos granulares de cada Rol sobre un Modulo especifico
+-- -----------------------------------------------------------------------------
+CREATE TABLE sec_permisos_rol (
+    role_id         INT          NOT NULL,
+    modulo_id       INT          NOT NULL,
+    puede_buscar    TINYINT(1)   NOT NULL DEFAULT 0,
+    puede_agregar   TINYINT(1)   NOT NULL DEFAULT 0,
+    puede_modificar TINYINT(1)   NOT NULL DEFAULT 0,
+    puede_inactivar TINYINT(1)   NOT NULL DEFAULT 0,
+    puede_procesar  TINYINT(1)   NOT NULL DEFAULT 0,
+    puede_guardar   TINYINT(1)   NOT NULL DEFAULT 0,
+    puede_exportar  TINYINT(1)   NOT NULL DEFAULT 0,
+    estado          TINYINT(1)   NOT NULL DEFAULT 1 COMMENT '1: Activo, 0: Inactivo',
+    actualizado_en  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    CONSTRAINT PK_sec_permisos_rol PRIMARY KEY (role_id, modulo_id),
+    CONSTRAINT FK_sec_permisos_rol__role FOREIGN KEY (role_id) REFERENCES sec_roles(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT FK_sec_permisos_rol__modulo FOREIGN KEY (modulo_id) REFERENCES sec_modulos(id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Matriz de permisos granulares por rol y modulo';
+
 -- ==========================================
 -- 6. CARGA INICIAL / LIMPIEZA
 -- ==========================================
@@ -550,6 +642,110 @@ VALUES
   (1, 1, 1, 'Mensualidad de Febrero 2026 - Primaria', 1000.00, 'ADMIN'),
   (2, 2, 2, 'Mensualidad de Febrero 2026 - Secundaria', 1300.00, 'ADMIN');
 
+-- =============================================================================
+-- SCRIPT DE SEMBRADO (SEEDS) - MÓDULO DE SEGURIDAD (sec_*)
+-- Dominio: Usuario Docente y Permisos al Módulo de Notas
+-- Dialecto: MySQL 8.0+
+-- =============================================================================
+
+START TRANSACTION;
+
+-- -----------------------------------------------------------------------------
+-- 1. REGISTRO DE USUARIOS BASE (sec_usuarios)
+-- -----------------------------------------------------------------------------
+-- Usuario Administrador de Sistema (requerido para traza de auditoria)
+INSERT INTO sec_usuarios (login, password, nombre, apellido, email, estado)
+VALUES ('admin.sys', '$2a$12$E9eZ23uYpX.A.1v8s9a0e.e3m4a5r6k7e8t9a0b1c2d3e4f5g6', 'Carlos', 'Mendoza', 'admin@colegio.edu', 1)
+ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id);
+
+SET @admin_id = LAST_INSERT_ID();
+
+-- Usuario Docente de prueba
+INSERT INTO sec_usuarios (login, password, nombre, apellido, email, estado)
+VALUES ('prof.rodriguez', '$2a$12$X1yZ34vWqY.B.2w9t0b1f.f4n5b6s7l8f9u0b1c2d3e4f5g6', 'Roberto', 'Rodríguez', 'r.rodriguez@colegio.edu', 1)
+ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id);
+
+SET @docente_usuario_id = LAST_INSERT_ID();
+
+-- -----------------------------------------------------------------------------
+-- 2. REGISTRO DE ROLES (sec_roles)
+-- -----------------------------------------------------------------------------
+INSERT INTO sec_roles (codigo, descripcion, creado_por, actualizado_por)
+VALUES ('DOCENTE', 'Profesor de Asignatura / Tutor de Aula', @admin_id, @admin_id)
+ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id);
+
+SET @rol_docente_id = LAST_INSERT_ID();
+
+-- -----------------------------------------------------------------------------
+-- 3. ASIGNACIÓN DE ROL AL USUARIO (sec_roles_usuario)
+-- -----------------------------------------------------------------------------
+INSERT INTO sec_roles_usuario (usuario_id, role_id, creado_por)
+VALUES (@docente_usuario_id, @rol_docente_id, @admin_id)
+ON DUPLICATE KEY UPDATE usuario_id = usuario_id;
+
+-- -----------------------------------------------------------------------------
+-- 4. ESTRUCTURA DE MÓDULOS Y SUBMÓDULOS DE NOTAS (sec_modulos)
+-- -----------------------------------------------------------------------------
+-- Módulo Padre: Calificaciones y Evaluación
+INSERT INTO sec_modulos (nombre, codigo, recurso, path_img, modulo_padre_id, estado)
+VALUES ('Calificaciones', 'MOD_EVALUACIONES', '/evaluaciones', 'assets/icons/grades.svg', NULL, 1)
+ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id);
+
+SET @modulo_padre_id = LAST_INSERT_ID();
+
+-- Submódulo: Registro de Notas
+INSERT INTO sec_modulos (nombre, codigo, recurso, path_img, modulo_padre_id, estado)
+VALUES ('Ingreso de Notas', 'MOD_NOTAS_REGISTRO', '/evaluaciones/registro-notas', 'assets/icons/edit-grades.svg', @modulo_padre_id, 1)
+ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id);
+
+SET @modulo_notas_id = LAST_INSERT_ID();
+
+-- Submódulo: Actas Parciales (Consulta/Exportación)
+INSERT INTO sec_modulos (nombre, codigo, recurso, path_img, modulo_padre_id, estado)
+VALUES ('Actas de Calificaciones', 'MOD_NOTAS_ACTAS', '/evaluaciones/actas', 'assets/icons/reports.svg', @modulo_padre_id, 1)
+ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id);
+
+SET @modulo_actas_id = LAST_INSERT_ID();
+
+-- -----------------------------------------------------------------------------
+-- 5. ASIGNACIÓN DE PERMISOS AL ROL DOCENTE (sec_permisos_rol)
+-- -----------------------------------------------------------------------------
+-- Permisos para "Ingreso de Notas": Buscar, Agregar, Modificar, Guardar y Exportar.
+INSERT INTO sec_permisos_rol (
+    role_id, modulo_id, puede_buscar, puede_agregar, puede_modificar, 
+    puede_inactivar, puede_procesar, puede_guardar, puede_exportar, estado
+) VALUES (
+    @rol_docente_id, @modulo_notas_id, 
+    1, -- puede_buscar
+    1, -- puede_agregar
+    1, -- puede_modificar
+    0, -- puede_inactivar (Restringido para Docentes)
+    0, -- puede_procesar (Cierre oficial solo por Dirección)
+    1, -- puede_guardar
+    1, -- puede_exportar
+    1  -- estado
+) ON DUPLICATE KEY UPDATE 
+    puede_buscar = 1, puede_agregar = 1, puede_modificar = 1, puede_guardar = 1, puede_exportar = 1;
+
+-- Permisos para "Actas de Calificaciones": Solo lectura y exportación.
+INSERT INTO sec_permisos_rol (
+    role_id, modulo_id, puede_buscar, puede_agregar, puede_modificar, 
+    puede_inactivar, puede_procesar, puede_guardar, puede_exportar, estado
+) VALUES (
+    @rol_docente_id, @modulo_actas_id, 
+    1, -- puede_buscar
+    0, -- puede_agregar
+    0, -- puede_modificar
+    0, -- puede_inactivar
+    0, -- puede_procesar
+    0, -- puede_guardar
+    1, -- puede_exportar
+    1  -- estado
+) ON DUPLICATE KEY UPDATE 
+    puede_buscar = 1, puede_exportar = 1;
+
+COMMIT;
+
 -- Reactivar validación de llaves foráneas
 SET FOREIGN_KEY_CHECKS = 1;
 
@@ -683,6 +879,26 @@ END$$
 
 DELIMITER ;
 
+
+SELECT 
+    u.login,
+    r.codigo AS rol,
+    m.codigo AS modulo,
+    p.puede_buscar,
+    p.puede_agregar,
+    p.puede_modificar,
+    p.puede_guardar,
+    p.puede_exportar
+FROM sec_usuarios u
+INNER JOIN sec_roles_usuario ru ON u.id = ru.usuario_id
+INNER JOIN sec_roles r ON ru.role_id = r.id
+INNER JOIN sec_permisos_rol p ON r.id = p.role_id
+INNER JOIN sec_modulos m ON p.modulo_id = m.id
+WHERE u.login = 'prof.rodriguez' 
+  AND m.codigo = 'MOD_NOTAS_REGISTRO'
+  AND u.estado = 1 
+  AND p.estado = 1;
+
 -- ==========================================
 -- VISTA DE ARQUEO DIARIO DE CAJA
 -- ==========================================
@@ -695,3 +911,23 @@ SELECT
     SUM(p.`monto_total`) AS `total_recaudado`
 FROM `pago` p
 GROUP BY DATE(p.`fecha_pago`), p.`tipo_pago`, p.`creado_por`;
+
+
+CREATE OR REPLACE VIEW vw_sec_permisos_usuario AS
+SELECT 
+    ru.usuario_id,
+    m.codigo AS modulo_codigo,
+    m.recurso AS modulo_recurso,
+    MAX(pr.puede_buscar)    AS puede_buscar,
+    MAX(pr.puede_agregar)   AS puede_agregar,
+    MAX(pr.puede_modificar) AS puede_modificar,
+    MAX(pr.puede_inactivar) AS puede_inactivar,
+    MAX(pr.puede_procesar)  AS puede_procesar,
+    MAX(pr.puede_guardar)   AS puede_guardar,
+    MAX(pr.puede_exportar)  AS puede_exportar
+FROM sec_roles_usuario ru
+INNER JOIN sec_roles r ON ru.role_id = r.id
+INNER JOIN sec_permisos_rol pr ON r.id = pr.role_id
+INNER JOIN sec_modulos m ON pr.modulo_id = m.id
+WHERE m.estado = 1 AND pr.estado = 1
+GROUP BY ru.usuario_id, m.codigo, m.recurso;
