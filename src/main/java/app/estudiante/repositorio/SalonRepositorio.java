@@ -20,10 +20,8 @@ public interface SalonRepositorio extends JpaRepository<Salon, Integer> {
         SELECT s FROM Salon s
         JOIN FETCH s.catalogoSalon cs
         JOIN FETCH s.grado g
-        LEFT JOIN Estudiante e ON e.salon.idSalon = s.idSalon
         WHERE g.idGrado = :idGrado
         GROUP BY s
-        HAVING COUNT(e.idEstudiante) < cs.capacidad
     """)
     List<Salon> obtenerSalonesDisponiblesPorGrado(@Param("idGrado") Integer idGrado);
 }

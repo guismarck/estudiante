@@ -9,468 +9,389 @@ USE `colegiosilviano_dev`;
 -- 1. ENTIDADES BASE Y PERSONAS
 -- ==========================================
 
-DROP TABLE IF EXISTS `persona`;
-CREATE TABLE `persona` (
-  `idpersona` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `nombre_completo` VARCHAR(150) NOT NULL,
+CREATE TABLE IF NOT EXISTS `persona` (
+  `idpersona`         INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `nombre_completo`   VARCHAR(150) NOT NULL,
   `apellido_completo` VARCHAR(150) NOT NULL,
-  /* Reemplazo de ENUM: Valores sugeridos -> 'MASCULINO', 'FEMENINO', 'OTRO' */
-  `sexo` VARCHAR(20) NOT NULL,
-  `fecha_nacimiento` DATE NOT NULL,
-  `cedula` VARCHAR(20) DEFAULT NULL,
+  `sexo`              VARCHAR(20)  NOT NULL,
+  `fecha_nacimiento`  DATE         NOT NULL,
+  `cedula`            VARCHAR(20)  DEFAULT NULL,
   `partida_nacimiento` VARCHAR(30) DEFAULT NULL,
-  `direccion` VARCHAR(300) NOT NULL,
-  `creado_por` VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
-  `creado_el` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `actualizado_por` VARCHAR(50) DEFAULT NULL,
-  `actualizado_el` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `direccion`         VARCHAR(300) NOT NULL,
+  `creado_por`        VARCHAR(50)  DEFAULT NULL,
+  `creado_el`         DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `actualizado_por`   VARCHAR(50)  DEFAULT NULL,
+  `actualizado_el`    DATETIME     DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`idpersona`),
   UNIQUE KEY `uk_persona_cedula` (`cedula`),
   INDEX `idx_persona_apellidos` (`apellido_completo`, `nombre_completo`),
   CONSTRAINT `chk_persona_sexo` CHECK (`sexo` IN ('MASCULINO', 'FEMENINO', 'OTRO'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-DROP TABLE IF EXISTS `tutor`;
 CREATE TABLE `tutor` (
-  `idtutor` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `idpersona` INT UNSIGNED NOT NULL,
-  `ocupacion` VARCHAR(100) DEFAULT NULL,
-  `telefono_principal` VARCHAR(15) NOT NULL,
-  `telefono_secundario` VARCHAR(15) DEFAULT NULL,
-  `creado_por` VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
-  `creado_el` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `actualizado_por` VARCHAR(50) DEFAULT NULL,
-  `actualizado_el` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `idtutor`             INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `idpersona`           INT UNSIGNED NOT NULL,
+  `ocupacion`           VARCHAR(100) DEFAULT NULL,
+  `telefono_principal`  VARCHAR(15)  NOT NULL,
+  `telefono_secundario` VARCHAR(15)  DEFAULT NULL,
+  `creado_por`          VARCHAR(50)  DEFAULT NULL,
+  `creado_el`           DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `actualizado_por`     VARCHAR(50)  DEFAULT NULL,
+  `actualizado_el`      DATETIME     DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`idtutor`),
   UNIQUE KEY `uk_tutor_persona` (`idpersona`),
-  CONSTRAINT `fk_tutor_persona` FOREIGN KEY (`idpersona`) 
-    REFERENCES `persona` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE
+  CONSTRAINT `fk_tutor_persona` FOREIGN KEY (`idpersona`) REFERENCES `persona` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-DROP TABLE IF EXISTS `estudiante`;
 CREATE TABLE `estudiante` (
-  `idpersona` INT UNSIGNED NOT NULL,
-  `cod_estudiante` VARCHAR(20) NOT NULL,
-  `codigo_MINED` VARCHAR(30) DEFAULT NULL,
-  `estado` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '1 = Activo, 0 = Inactivo',
-  `creado_por` VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
-  `creado_el` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `idpersona`      INT UNSIGNED NOT NULL,
+  `cod_estudiante` VARCHAR(20)  NOT NULL,
+  `codigo_MINED`   VARCHAR(30)  DEFAULT NULL,
+  `estado`         TINYINT(1)   NOT NULL DEFAULT 1 COMMENT '1 = Activo, 0 = Inactivo',
+  `creado_por`     VARCHAR(50)  DEFAULT NULL,
+  `creado_el`      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `actualizado_por` VARCHAR(50) DEFAULT NULL,
-  `actualizado_el` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `actualizado_el` DATETIME     DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`idpersona`),
   UNIQUE KEY `uk_estudiante_codigo` (`cod_estudiante`),
   UNIQUE KEY `uk_estudiante_mined` (`codigo_MINED`),
-  CONSTRAINT `fk_estudiante_persona` FOREIGN KEY (`idpersona`) 
-    REFERENCES `persona` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE
+  CONSTRAINT `fk_estudiante_persona` FOREIGN KEY (`idpersona`) REFERENCES `persona` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-DROP TABLE IF EXISTS `estudiante_tutor`;
 CREATE TABLE `estudiante_tutor` (
-  `idpersona_estudiante` INT UNSIGNED NOT NULL,
-  `idtutor` INT UNSIGNED NOT NULL,
-  /* Reemplazo de ENUM: Valores sugeridos -> 'MADRE', 'PADRE', 'TUTOR_LEGAL', 'ABUELO', 'TIO', 'OTRO' */
-  `parentesco` VARCHAR(30) NOT NULL,
-  `es_representante_legal` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 = Si, 0 = No',
-  `creado_por` VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
-  `creado_el` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `actualizado_por` VARCHAR(50) DEFAULT NULL,
-  `actualizado_el` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `idpersona_estudiante`   INT UNSIGNED NOT NULL,
+  `idtutor`                INT UNSIGNED NOT NULL,
+  `parentesco`             VARCHAR(30)  NOT NULL,
+  `es_representante_legal` TINYINT(1)   NOT NULL DEFAULT 0,
+  `creado_por`             VARCHAR(50)  DEFAULT NULL,
+  `creado_el`              DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `actualizado_por`        VARCHAR(50)  DEFAULT NULL,
+  `actualizado_el`         DATETIME     DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`idpersona_estudiante`, `idtutor`),
-  CONSTRAINT `fk_et_estudiante` FOREIGN KEY (`idpersona_estudiante`) 
-    REFERENCES `estudiante` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `fk_et_tutor` FOREIGN KEY (`idtutor`) 
-    REFERENCES `tutor` (`idtutor`) ON DELETE RESTRICT ON UPDATE CASCADE
+  CONSTRAINT `fk_et_estudiante` FOREIGN KEY (`idpersona_estudiante`) REFERENCES `estudiante` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_et_tutor` FOREIGN KEY (`idtutor`) REFERENCES `tutor` (`idtutor`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-DROP TABLE IF EXISTS `docente`;
 CREATE TABLE `docente` (
-  `idpersona` INT UNSIGNED NOT NULL,
-  `cod_docente` VARCHAR(20) NOT NULL,
-  `especialidad` VARCHAR(100) DEFAULT NULL,
-  `estado` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '1 = Activo, 0 = Inactivo',
-  `creado_por` VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
-  `creado_el` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `actualizado_por` VARCHAR(50) DEFAULT NULL,
-  `actualizado_el` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `idpersona`      INT UNSIGNED NOT NULL,
+  `cod_docente`    VARCHAR(20)  NOT NULL,
+  `especialidad`   VARCHAR(100) DEFAULT NULL,
+  `estado`         TINYINT(1)   NOT NULL DEFAULT 1,
+  `creado_por`     VARCHAR(50)  DEFAULT NULL,
+  `creado_el`      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `actualizado_por` VARCHAR(50)  DEFAULT NULL,
+  `actualizado_el` DATETIME     DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`idpersona`),
   UNIQUE KEY `uk_docente_codigo` (`cod_docente`),
-  CONSTRAINT `fk_docente_persona` FOREIGN KEY (`idpersona`) 
-    REFERENCES `persona` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-DROP TABLE IF EXISTS `usuario`;
-CREATE TABLE `usuario` (
-  `idusuario` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `idpersona` INT UNSIGNED NOT NULL,
-  `username` VARCHAR(50) NOT NULL,
-  `password_hash` VARCHAR(255) NOT NULL,
-  /* Reemplazo de ENUM: Valores sugeridos -> 'ADMIN', 'SECRETARIA', 'DOCENTE', 'ESTUDIANTE', 'TUTOR' */
-  `tipo_usuario` VARCHAR(30) NOT NULL,
-  `correo` VARCHAR(100) NOT NULL,
-  `estado` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '1 = Activo, 0 = Inactivo',
-  `creado_por` VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
-  `creado_el` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `actualizado_por` VARCHAR(50) DEFAULT NULL,
-  `actualizado_el` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`idusuario`),
-  UNIQUE KEY `uk_usuario_username` (`username`),
-  UNIQUE KEY `uk_usuario_correo` (`correo`),
-  CONSTRAINT `fk_usuario_persona` FOREIGN KEY (`idpersona`) 
-    REFERENCES `persona` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE
+  CONSTRAINT `fk_docente_persona` FOREIGN KEY (`idpersona`) REFERENCES `persona` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ==========================================
--- 2. ESTRUCTURA ACADÉMICA BASE
+-- 2. SEGURIDAD Y CONTROL DE ACCESO (RBAC)
 -- ==========================================
 
-DROP TABLE IF EXISTS `nivel_educativo`;
+CREATE TABLE IF NOT EXISTS `sec_usuarios` (
+    `id`             INT UNSIGNED AUTO_INCREMENT,
+    `idpersona`      INT UNSIGNED NULL COMMENT 'Relación opcional 1:1 con la persona asociada',
+    `username`       VARCHAR(50)  NOT NULL,
+    `password_hash`  VARCHAR(255) NOT NULL,
+    `estado`         TINYINT UNSIGNED NOT NULL DEFAULT 1 COMMENT '1: Activo, 0: Inactivo, 2: Bloqueado',
+    `creado_por`     VARCHAR(50)  DEFAULT NULL,
+    `creado_en`      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `actualizado_en` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    CONSTRAINT `pk_sec_usuarios` PRIMARY KEY (`id`),
+    CONSTRAINT `uq_sec_usuarios__username` UNIQUE (`username`),
+    CONSTRAINT `uq_sec_usuarios__idpersona` UNIQUE (`idpersona`),
+    CONSTRAINT `fk_sec_usuarios__persona` FOREIGN KEY (`idpersona`) REFERENCES `persona` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Usuarios del sistema educativo';
+
+CREATE TABLE IF NOT EXISTS `sec_roles` (
+    `id`              SMALLINT UNSIGNED AUTO_INCREMENT,
+    `codigo`          VARCHAR(32)  NOT NULL COMMENT 'Ej: ROL_PROFESOR, ROL_APODERADO',
+    `descripcion`     VARCHAR(60)  NOT NULL,
+    `creado_en`       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `creado_por`      VARCHAR(50)  DEFAULT NULL,
+    `actualizado_en`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `actualizado_por` VARCHAR(50)  DEFAULT NULL,
+    
+    CONSTRAINT `pk_sec_roles` PRIMARY KEY (`id`),
+    CONSTRAINT `uq_sec_roles__codigo` UNIQUE (`codigo`),
+    CONSTRAINT `ck_sec_roles__actualizado_ge_creado` CHECK (`actualizado_en` >= `creado_en`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Catalogo de roles del sistema educativo';
+
+CREATE TABLE IF NOT EXISTS `sec_roles_usuario` (
+    `usuario_id` INT UNSIGNED      NOT NULL,
+    `rol_id`     SMALLINT UNSIGNED NOT NULL,
+    `creado_en`  DATETIME          NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `creado_por` VARCHAR(50)       DEFAULT NULL,
+    
+    CONSTRAINT `pk_sec_roles_usuario` PRIMARY KEY (`usuario_id`, `rol_id`),
+    CONSTRAINT `fk_sec_roles_usuario__usuario` FOREIGN KEY (`usuario_id`) REFERENCES `sec_usuarios`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_sec_roles_usuario__rol` FOREIGN KEY (`rol_id`) REFERENCES `sec_roles`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Asignación de roles por usuario';
+
+CREATE TABLE IF NOT EXISTS `sec_modulos` (
+    `id`              INT UNSIGNED AUTO_INCREMENT,
+    `nombre`          VARCHAR(100) NOT NULL,
+    `codigo`          VARCHAR(60)  NOT NULL,
+    `recurso`         VARCHAR(255) NOT NULL,
+    `path_img`        VARCHAR(255) NULL,
+    `modulo_padre_id` INT UNSIGNED NULL,
+    `orden`           SMALLINT UNSIGNED NOT NULL DEFAULT 1,
+    `estado`          BOOLEAN      NOT NULL DEFAULT TRUE,
+    
+    CONSTRAINT `pk_sec_modulos` PRIMARY KEY (`id`),
+    CONSTRAINT `uq_sec_modulos__codigo` UNIQUE (`codigo`),
+    CONSTRAINT `fk_sec_modulos__modulo_padre` FOREIGN KEY (`modulo_padre_id`) REFERENCES `sec_modulos`(`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+    INDEX `ix_sec_modulos__modulo_padre` (`modulo_padre_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Módulos y opciones de menú del sistema';
+
+CREATE TABLE IF NOT EXISTS `sec_permisos_rol` (
+    `rol_id`          SMALLINT UNSIGNED NOT NULL,
+    `modulo_id`       INT UNSIGNED      NOT NULL,
+    `puede_buscar`    BOOLEAN           NOT NULL DEFAULT FALSE,
+    `puede_agregar`   BOOLEAN           NOT NULL DEFAULT FALSE,
+    `puede_modificar` BOOLEAN           NOT NULL DEFAULT FALSE,
+    `puede_inactivar` BOOLEAN           NOT NULL DEFAULT FALSE,
+    `puede_procesar`  BOOLEAN           NOT NULL DEFAULT FALSE,
+    `puede_guardar`   BOOLEAN           NOT NULL DEFAULT FALSE,
+    `puede_exportar`  BOOLEAN           NOT NULL DEFAULT FALSE,
+    `estado`          BOOLEAN           NOT NULL DEFAULT TRUE,
+    `actualizado_en`  DATETIME          NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    CONSTRAINT `pk_sec_permisos_rol` PRIMARY KEY (`rol_id`, `modulo_id`),
+    CONSTRAINT `fk_sec_permisos_rol__rol` FOREIGN KEY (`rol_id`) REFERENCES `sec_roles`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_sec_permisos_rol__modulo` FOREIGN KEY (`modulo_id`) REFERENCES `sec_modulos`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Matriz de permisos granulares por rol y módulo';
+
+-- ==========================================
+-- 3. ESTRUCTURA ACADÉMICA BASE
+-- ==========================================
+
 CREATE TABLE `nivel_educativo` (
-  `idnivel` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `nombre` VARCHAR(50) NOT NULL,
-  `descripcion` VARCHAR(150) DEFAULT NULL,
-  `creado_por` VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
-  `creado_el` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `idnivel`        INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `nombre`         VARCHAR(50)  NOT NULL,
+  `descripcion`    VARCHAR(150) DEFAULT NULL,
+  `creado_por`     VARCHAR(50)  DEFAULT NULL,
+  `creado_el`         DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `actualizado_por` VARCHAR(50) DEFAULT NULL,
-  `actualizado_el` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `actualizado_el` DATETIME     DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`idnivel`),
   UNIQUE KEY `uk_nivel_nombre` (`nombre`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-DROP TABLE IF EXISTS `grado`;
 CREATE TABLE `grado` (
-  `idGrado` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `idnivel` INT UNSIGNED NOT NULL,
-  `nombre` VARCHAR(50) NOT NULL,
-  `creado_por` VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
-  `creado_el` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `idGrado`        INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `idnivel`        INT UNSIGNED NOT NULL,
+  `nombre`         VARCHAR(50)  NOT NULL,
+  `creado_por`     VARCHAR(50)  DEFAULT NULL,
+  `creado_el`         DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `actualizado_por` VARCHAR(50) DEFAULT NULL,
-  `actualizado_el` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `actualizado_el` DATETIME     DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`idGrado`),
   UNIQUE KEY `uk_grado_nivel_nombre` (`idnivel`, `nombre`),
-  CONSTRAINT `fk_grado_nivel` FOREIGN KEY (`idnivel`) 
-    REFERENCES `nivel_educativo` (`idnivel`) ON DELETE RESTRICT ON UPDATE CASCADE
+  CONSTRAINT `fk_grado_nivel` FOREIGN KEY (`idnivel`) REFERENCES `nivel_educativo` (`idnivel`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-DROP TABLE IF EXISTS `asignatura`;
 CREATE TABLE `asignatura` (
-  `idAsignatura` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `nombre` VARCHAR(60) NOT NULL,
-  `codigo` VARCHAR(10) NOT NULL,
-  `creado_por` VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
-  `creado_el` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `idAsignatura`   INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `nombre`         VARCHAR(60)  NOT NULL,
+  `codigo`         VARCHAR(10)  NOT NULL,
+  `creado_por`     VARCHAR(50)  DEFAULT NULL,
+  `creado_el`         DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `actualizado_por` VARCHAR(50) DEFAULT NULL,
-  `actualizado_el` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `actualizado_el` DATETIME     DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`idAsignatura`),
   UNIQUE KEY `uk_asignatura_codigo` (`codigo`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-DROP TABLE IF EXISTS `catalogo_salon`;
 CREATE TABLE `catalogo_salon` (
-  `idcatalogo_salon` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `nombre_salon` VARCHAR(50) NOT NULL COMMENT 'Ej: Aula 101, Lab Cómputo A',
-  `capacidad` SMALLINT UNSIGNED NOT NULL DEFAULT 35,
-  `creado_por` VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
-  `creado_el` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `actualizado_por` VARCHAR(50) DEFAULT NULL,
-  `actualizado_el` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `idcatalogo_salon` INT UNSIGNED      NOT NULL AUTO_INCREMENT,
+  `nombre_salon`     VARCHAR(50)       NOT NULL,
+  `capacidad`        SMALLINT UNSIGNED NOT NULL DEFAULT 35,
+  `creado_por`       VARCHAR(50)       DEFAULT NULL,
+  `creado_el`        DATETIME          NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `actualizado_por`  VARCHAR(50)       DEFAULT NULL,
+  `actualizado_el`   DATETIME          DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`idcatalogo_salon`),
   CONSTRAINT `chk_capacidad_positiva` CHECK (`capacidad` > 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-DROP TABLE IF EXISTS `salon`;
 CREATE TABLE `salon` (
-  `idSalon` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `idGrado` INT UNSIGNED NOT NULL,
+  `idSalon`          INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `idGrado`          INT UNSIGNED NOT NULL,
   `idcatalogo_salon` INT UNSIGNED NOT NULL,
-  `anio_lectivo` YEAR NOT NULL COMMENT 'Permite dimensionar la oferta por ciclo escolar',
-  /* Reemplazo de ENUM: Valores sugeridos -> 'MANANA', 'TARDE', 'SABATINO', 'NOCTURNO' */
-  `turno` VARCHAR(20) NOT NULL,
-  `seccion` VARCHAR(5) NOT NULL DEFAULT 'A',
-  `creado_por` VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
-  `creado_el` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `actualizado_por` VARCHAR(50) DEFAULT NULL,
-  `actualizado_el` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `anio_lectivo`     YEAR         NOT NULL,
+  `turno`            VARCHAR(20)  NOT NULL,
+  `seccion`          VARCHAR(5)   NOT NULL DEFAULT 'A',
+  `creado_por`       VARCHAR(50)  DEFAULT NULL,
+  `creado_el`        DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `actualizado_por`  VARCHAR(50)  DEFAULT NULL,
+  `actualizado_el`   DATETIME     DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`idSalon`),
   UNIQUE KEY `uk_salon_catalogo_turno_anio` (`idcatalogo_salon`, `turno`, `anio_lectivo`),
   UNIQUE KEY `uk_grado_seccion_turno_anio` (`idGrado`, `seccion`, `turno`, `anio_lectivo`),
-  CONSTRAINT `fk_salon_grado` FOREIGN KEY (`idGrado`) 
-    REFERENCES `grado` (`idGrado`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `fk_salon_catalogo` FOREIGN KEY (`idcatalogo_salon`) 
-    REFERENCES `catalogo_salon` (`idcatalogo_salon`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_salon_grado` FOREIGN KEY (`idGrado`) REFERENCES `grado` (`idGrado`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_salon_catalogo` FOREIGN KEY (`idcatalogo_salon`) REFERENCES `catalogo_salon` (`idcatalogo_salon`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `chk_salon_turno` CHECK (`turno` IN ('MANANA', 'TARDE', 'SABATINO', 'NOCTURNO'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ==========================================
--- 3. PLANIFICACIÓN Y MATRÍCULA
+-- 4. PLANIFICACIÓN Y MATRÍCULA
 -- ==========================================
 
-DROP TABLE IF EXISTS `plan_de_estudio`;
 CREATE TABLE `plan_de_estudio` (
   `idPlan_de_estudio` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `idGrado` INT UNSIGNED NOT NULL,
-  `anio_lectivo` YEAR NOT NULL,
-  `estado` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '1 = Vigente, 0 = Inactivo',
-  `creado_por` VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
-  `creado_el` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `actualizado_por` VARCHAR(50) DEFAULT NULL,
-  `actualizado_el` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `idGrado`           INT UNSIGNED NOT NULL,
+  `anio_lectivo`      YEAR         NOT NULL,
+  `estado`            TINYINT(1)   NOT NULL DEFAULT 1,
+  `creado_por`        VARCHAR(50)  DEFAULT NULL,
+  `creado_el`         DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `actualizado_por`   VARCHAR(50)  DEFAULT NULL,
+  `actualizado_el`    DATETIME     DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`idPlan_de_estudio`),
   UNIQUE KEY `uk_plan_grado_anio` (`idGrado`, `anio_lectivo`),
-  CONSTRAINT `fk_plan_grado` FOREIGN KEY (`idGrado`) 
-    REFERENCES `grado` (`idGrado`) ON DELETE RESTRICT ON UPDATE CASCADE
+  CONSTRAINT `fk_plan_grado` FOREIGN KEY (`idGrado`) REFERENCES `grado` (`idGrado`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-DROP TABLE IF EXISTS `matricula`;
 CREATE TABLE `matricula` (
-  `idmatricula` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `idpersona` INT UNSIGNED NOT NULL,
-  `idSalon` INT UNSIGNED NOT NULL,
-  `anio_lectivo` YEAR NOT NULL,
+  `idmatricula`     INT UNSIGNED  NOT NULL AUTO_INCREMENT,
+  `idpersona`       INT UNSIGNED  NOT NULL,
+  `idSalon`         INT UNSIGNED  NOT NULL,
+  `anio_lectivo`    YEAR          NOT NULL,
   `costo_matricula` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-  `fecha_matricula` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  /* Reemplazo de ENUM: Valores sugeridos -> 'ACTIVA', 'RETIRADO', 'SUSPENDIDO', 'CANCELADA' */
-  `estado` VARCHAR(20) NOT NULL DEFAULT 'ACTIVA',
-  `creado_por` VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
-  `creado_el` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `actualizado_por` VARCHAR(50) DEFAULT NULL,
-  `actualizado_el` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `fecha_matricula` DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `estado`          VARCHAR(20)   NOT NULL DEFAULT 'ACTIVA',
+  `creado_por`      VARCHAR(50)  DEFAULT NULL,
+  `creado_el`       DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `actualizado_por` VARCHAR(50)  DEFAULT NULL,
+  `actualizado_el`  DATETIME      DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`idmatricula`),
   UNIQUE KEY `uk_estudiante_anio` (`idpersona`, `anio_lectivo`),
   INDEX `idx_matricula_salon_anio` (`idSalon`, `anio_lectivo`, `estado`),
-  CONSTRAINT `fk_mat_estudiante` FOREIGN KEY (`idpersona`) 
-    REFERENCES `estudiante` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `fk_mat_salon` FOREIGN KEY (`idSalon`) 
-    REFERENCES `salon` (`idSalon`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_mat_estudiante` FOREIGN KEY (`idpersona`) REFERENCES `estudiante` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_mat_salon` FOREIGN KEY (`idSalon`) REFERENCES `salon` (`idSalon`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `chk_costo_matricula` CHECK (`costo_matricula` >= 0),
   CONSTRAINT `chk_matricula_estado` CHECK (`estado` IN ('ACTIVA', 'RETIRADO', 'SUSPENDIDO', 'CANCELADA'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ==========================================
--- 4. EVALUACIONES Y CALIFICACIONES
+-- 5. EVALUACIONES Y CALIFICACIONES
 -- ==========================================
 
-DROP TABLE IF EXISTS `periodo_evaluativo`;
 CREATE TABLE `periodo_evaluativo` (
-  `idperiodo_evaluativo` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `nombre_periodo` VARCHAR(30) NOT NULL,
-  `numero_periodo` TINYINT UNSIGNED NOT NULL,
-  `anio_escolar` YEAR NOT NULL,
-  `estado` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '1 = Activo, 0 = Cerrado',
-  `creado_por` VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
-  `creado_el` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `actualizado_por` VARCHAR(50) DEFAULT NULL,
-  `actualizado_el` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `idperiodo_evaluativo` INT UNSIGNED     NOT NULL AUTO_INCREMENT,
+  `nombre_periodo`       VARCHAR(30)      NOT NULL,
+  `numero_periodo`       TINYINT UNSIGNED NOT NULL,
+  `anio_escolar`         YEAR             NOT NULL,
+  `estado`               TINYINT(1)       NOT NULL DEFAULT 1,
+  `creado_por`           VARCHAR(50)      DEFAULT NULL,
+  `creado_el`            DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `actualizado_por`      VARCHAR(50)      DEFAULT NULL,
+  `actualizado_el`       DATETIME         DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`idperiodo_evaluativo`),
   UNIQUE KEY `uk_periodo_anio_numero` (`anio_escolar`, `numero_periodo`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-DROP TABLE IF EXISTS `detalle_plan_de_estudio`;
 CREATE TABLE `detalle_plan_de_estudio` (
   `iddetalle_plan_de_estudio` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `idPlan_de_estudio` INT UNSIGNED NOT NULL,
-  `idAsignatura` INT UNSIGNED NOT NULL,
-  `idDocente` INT UNSIGNED NOT NULL,
-  `creado_por` VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
-  `creado_el` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `actualizado_por` VARCHAR(50) DEFAULT NULL,
-  `actualizado_el` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `idPlan_de_estudio`         INT UNSIGNED NOT NULL,
+  `idAsignatura`              INT UNSIGNED NOT NULL,
+  `idDocente`                 INT UNSIGNED NOT NULL,
+  `creado_por`                VARCHAR(50)  DEFAULT NULL,
+  `creado_el`                 DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `actualizado_por`           VARCHAR(50)  DEFAULT NULL,
+  `actualizado_el`            DATETIME     DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`iddetalle_plan_de_estudio`),
   UNIQUE KEY `uk_plan_asignatura` (`idPlan_de_estudio`, `idAsignatura`),
-  CONSTRAINT `fk_det_plan` FOREIGN KEY (`idPlan_de_estudio`) 
-    REFERENCES `plan_de_estudio` (`idPlan_de_estudio`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `fk_det_asig` FOREIGN KEY (`idAsignatura`) 
-    REFERENCES `asignatura` (`idAsignatura`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `fk_det_docente` FOREIGN KEY (`idDocente`) 
-    REFERENCES `docente` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE
+  CONSTRAINT `fk_det_plan` FOREIGN KEY (`idPlan_de_estudio`) REFERENCES `plan_de_estudio` (`idPlan_de_estudio`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_det_asig` FOREIGN KEY (`idAsignatura`) REFERENCES `asignatura` (`idAsignatura`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_det_docente` FOREIGN KEY (`idDocente`) REFERENCES `docente` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-DROP TABLE IF EXISTS `calificaciones`;
 CREATE TABLE `calificaciones` (
-  `idcalificacion` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `idmatricula` INT UNSIGNED NOT NULL,
+  `idcalificacion`            INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `idmatricula`               INT UNSIGNED NOT NULL,
   `iddetalle_plan_de_estudio` INT UNSIGNED NOT NULL,
-  `idperiodo_evaluativo` INT UNSIGNED NOT NULL,
-  `acumulado` DECIMAL(5,2) NOT NULL DEFAULT 0.00,
-  `examen` DECIMAL(5,2) NOT NULL DEFAULT 0.00,
-  `nota_final` DECIMAL(5,2) GENERATED ALWAYS AS (`acumulado` + `examen`) STORED,
-  `creado_por` VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
-  `creado_el` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `actualizado_por` VARCHAR(50) DEFAULT NULL,
-  `actualizado_el` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `idperiodo_evaluativo`      INT UNSIGNED NOT NULL,
+  `acumulado`                 DECIMAL(5,2) NOT NULL DEFAULT 0.00,
+  `examen`                    DECIMAL(5,2) NOT NULL DEFAULT 0.00,
+  `nota_final`                DECIMAL(5,2) GENERATED ALWAYS AS (`acumulado` + `examen`) STORED,
+  `creado_por`                VARCHAR(50)  DEFAULT NULL,
+  `creado_el`                 DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `actualizado_por`           VARCHAR(50)  DEFAULT NULL,
+  `actualizado_el`            DATETIME     DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`idcalificacion`),
   UNIQUE KEY `uk_nota_periodo_plan` (`idmatricula`, `iddetalle_plan_de_estudio`, `idperiodo_evaluativo`),
-  CONSTRAINT `fk_calif_matricula` FOREIGN KEY (`idmatricula`) 
-    REFERENCES `matricula` (`idmatricula`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `fk_calif_detalle_plan` FOREIGN KEY (`iddetalle_plan_de_estudio`) 
-    REFERENCES `detalle_plan_de_estudio` (`iddetalle_plan_de_estudio`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `fk_calif_periodo` FOREIGN KEY (`idperiodo_evaluativo`) 
-    REFERENCES `periodo_evaluativo` (`idperiodo_evaluativo`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_calif_matricula` FOREIGN KEY (`idmatricula`) REFERENCES `matricula` (`idmatricula`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_calif_detalle_plan` FOREIGN KEY (`iddetalle_plan_de_estudio`) REFERENCES `detalle_plan_de_estudio` (`iddetalle_plan_de_estudio`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_calif_periodo` FOREIGN KEY (`idperiodo_evaluativo`) REFERENCES `periodo_evaluativo` (`idperiodo_evaluativo`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `chk_acumulado_rango` CHECK (`acumulado` BETWEEN 0.00 AND 60.00),
   CONSTRAINT `chk_examen_rango` CHECK (`examen` BETWEEN 0.00 AND 40.00)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ==========================================
--- 5. MÓDULO FINANCIERO
+-- 6. MÓDULO FINANCIERO
 -- ==========================================
 
-DROP TABLE IF EXISTS `catalogo_tarifa`;
 CREATE TABLE `catalogo_tarifa` (
-  `idtarifa` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `idnivel` INT UNSIGNED DEFAULT NULL,
-  `idGrado` INT UNSIGNED DEFAULT NULL,
-  `anio_lectivo` YEAR NOT NULL,
-  `concepto` VARCHAR(100) NOT NULL,
-  `monto` DECIMAL(10,2) NOT NULL,
-  `es_obligatorio` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '1 = Arancel obligatorio, 0 = Opcional',
-  `creado_por` VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
-  `creado_el` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `actualizado_por` VARCHAR(50) DEFAULT NULL,
-  `actualizado_el` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`idtarifa`),
-  UNIQUE KEY `uk_tarifa_ambito` (`anio_lectivo`, `concepto`, `idnivel`, `idGrado`),
-  CONSTRAINT `fk_tarifa_nivel` FOREIGN KEY (`idnivel`) 
-    REFERENCES `nivel_educativo` (`idnivel`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `fk_tarifa_grado` FOREIGN KEY (`idGrado`) 
-    REFERENCES `grado` (`idGrado`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `chk_monto_tarifa` CHECK (`monto` >= 0),
-  CONSTRAINT `chk_tarifa_jerarquia` CHECK ((`idnivel` IS NOT NULL) OR (`idGrado` IS NOT NULL))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `id_tarifa`       INT UNSIGNED  NOT NULL AUTO_INCREMENT,
+  `id_nivel`        INT UNSIGNED  DEFAULT NULL,
+  `id_grado`        INT UNSIGNED  DEFAULT NULL,
+  `anio_lectivo`    YEAR          NOT NULL,
+  `concepto`        VARCHAR(100)  NOT NULL,
+  `monto`           DECIMAL(10,2) NOT NULL,
+  `es_obligatorio`  BOOLEAN       NOT NULL DEFAULT TRUE,
+  `mes_aplicacion`  TINYINT UNSIGNED DEFAULT NULL,
+  `creado_por`      VARCHAR(50)   DEFAULT NULL,
+  `creado_el`       DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `actualizado_por` VARCHAR(50)   DEFAULT NULL,
+  `actualizado_el`  DATETIME      DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_tarifa`),
+  CONSTRAINT `fk_tarifa__nivel` FOREIGN KEY (`id_nivel`) REFERENCES `nivel_educativo` (`idnivel`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_tarifa__grado` FOREIGN KEY (`id_grado`) REFERENCES `grado` (`idGrado`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `chk_tarifa__monto` CHECK (`monto` >= 0.00),
+  CONSTRAINT `chk_tarifa__mes_aplicacion` CHECK (`mes_aplicacion` IS NULL OR `mes_aplicacion` BETWEEN 1 AND 12)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Catálogo de aranceles institucionales';
 
-DROP TABLE IF EXISTS `pago`;
 CREATE TABLE `pago` (
-  `idpago` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `idmatricula` INT UNSIGNED NOT NULL,
-  `num_recibo` VARCHAR(30) NOT NULL,
-  `fecha_pago` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  /* Reemplazo de ENUM: Valores sugeridos -> 'EFECTIVO', 'TRANSFERENCIA', 'TARJETA', 'DEPOSITO' */
-  `tipo_pago` VARCHAR(30) NOT NULL,
-  `monto_total` DECIMAL(10,2) NOT NULL,
-  `creado_por` VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
-  `creado_el` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `actualizado_por` VARCHAR(50) DEFAULT NULL,
-  `actualizado_el` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `idpago`          INT UNSIGNED  NOT NULL AUTO_INCREMENT,
+  `idmatricula`     INT UNSIGNED  NOT NULL,
+  `num_recibo`      VARCHAR(30)   NOT NULL,
+  `fecha_pago`      DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `tipo_pago`       VARCHAR(30)   NOT NULL,
+  `monto_total`     DECIMAL(10,2) NOT NULL,
+  `creado_por`      VARCHAR(50)   DEFAULT NULL,
+  `creado_el`       DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `actualizado_por` VARCHAR(50)   DEFAULT NULL,
+  `actualizado_el`  DATETIME      DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`idpago`),
   UNIQUE KEY `uk_pago_num_recibo` (`num_recibo`),
   INDEX `idx_pago_fecha` (`fecha_pago`),
-  CONSTRAINT `fk_pago_matricula` FOREIGN KEY (`idmatricula`) 
-    REFERENCES `matricula` (`idmatricula`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `chk_monto_pago` CHECK (`monto_total` >= 0),
+  CONSTRAINT `fk_pago_matricula` FOREIGN KEY (`idmatricula`) REFERENCES `matricula` (`idmatricula`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `chk_monto_pago` CHECK (`monto_total` >= 0.00),
   CONSTRAINT `chk_pago_tipo` CHECK (`tipo_pago` IN ('EFECTIVO', 'TRANSFERENCIA', 'TARJETA', 'DEPOSITO'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-DROP TABLE IF EXISTS `detalle_pago`;
 CREATE TABLE `detalle_pago` (
-  `iddetalle_pago` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `idpago` INT UNSIGNED NOT NULL,
-  `idtarifa` INT UNSIGNED DEFAULT NULL,
-  `concepto` VARCHAR(100) NOT NULL,
-  `monto` DECIMAL(10,2) NOT NULL,
-  `creado_por` VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
-  `creado_el` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `actualizado_por` VARCHAR(50) DEFAULT NULL,
-  `actualizado_el` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `iddetalle_pago`  INT UNSIGNED  NOT NULL AUTO_INCREMENT,
+  `idpago`          INT UNSIGNED  NOT NULL,
+  `id_tarifa`       INT UNSIGNED  DEFAULT NULL,
+  `concepto`        VARCHAR(100)  NOT NULL,
+  `monto`           DECIMAL(10,2) NOT NULL,
+  `creado_por`      VARCHAR(50)   DEFAULT NULL,
+  `creado_el`       DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `actualizado_por` VARCHAR(50)   DEFAULT NULL,
+  `actualizado_el`  DATETIME      DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`iddetalle_pago`),
-  CONSTRAINT `fk_detpago_cabecera` FOREIGN KEY (`idpago`) 
-    REFERENCES `pago` (`idpago`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_detpago_tarifa` FOREIGN KEY (`idtarifa`) 
-    REFERENCES `catalogo_tarifa` (`idtarifa`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `chk_monto_detpago` CHECK (`monto` >= 0)
+  CONSTRAINT `fk_detpago_cabecera` FOREIGN KEY (`idpago`) REFERENCES `pago` (`idpago`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_detpago_tarifa` FOREIGN KEY (`id_tarifa`) REFERENCES `catalogo_tarifa` (`id_tarifa`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `chk_monto_detpago` CHECK (`monto` >= 0.00)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-
--- =============================================================================
--- ESQUEMA DE SEGURIDAD Y CONTROL DE ACCESO (RBAC) - SISTEMA ESCOLAR
--- Dialecto: MySQL 8.0+
--- Engine: InnoDB | Character Set: utf8mb4 | Collation: utf8mb4_unicode_ci
--- =============================================================================
-
-SET FOREIGN_KEY_CHECKS = 0;
-
-DROP TABLE IF EXISTS sec_permisos_rol;
-DROP TABLE IF EXISTS sec_modulos;
-DROP TABLE IF EXISTS sec_roles_usuario;
-DROP TABLE IF EXISTS sec_roles;
-
-SET FOREIGN_KEY_CHECKS = 1;
-
--- -----------------------------------------------------------------------------
---  TABLA: sec_roles
--- Roles dentro de la institución (Ej: ADMIN, PROFESOR, APODERADO, ALUMNO)
--- -----------------------------------------------------------------------------
-CREATE TABLE sec_roles (
-    id              INT AUTO_INCREMENT,
-    codigo          VARCHAR(32)  NOT NULL,
-    descripcion     VARCHAR(60)  NOT NULL,
-    creado_en       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    creado_por      INT          NOT NULL,
-    actualizado_en  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    actualizado_por INT          NOT NULL,
-    
-    CONSTRAINT PK_sec_roles PRIMARY KEY (id),
-    CONSTRAINT UQ_sec_roles__codigo UNIQUE (codigo),
-    CONSTRAINT FK_sec_roles__creado_por FOREIGN KEY (creado_por) REFERENCES sec_usuarios(id) ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT FK_sec_roles__actualizado_por FOREIGN KEY (actualizado_por) REFERENCES sec_usuarios(id) ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT CK_sec_roles__actualizado_ge_creado CHECK (actualizado_en >= creado_en)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Catalogo de roles del sistema educativo';
-
--- -----------------------------------------------------------------------------
---  TABLA: sec_roles_usuario
--- Relacion N:M entre Usuarios y Roles
--- -----------------------------------------------------------------------------
-CREATE TABLE sec_roles_usuario (
-    usuario_id      INT          NOT NULL,
-    role_id         INT          NOT NULL,
-    creado_en       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    creado_por      INT          NOT NULL,
-    
-    CONSTRAINT PK_sec_roles_usuario PRIMARY KEY (usuario_id, role_id),
-    CONSTRAINT FK_sec_roles_usuario__usuario FOREIGN KEY (usuario_id) REFERENCES sec_usuarios(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT FK_sec_roles_usuario__role FOREIGN KEY (role_id) REFERENCES sec_roles(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT FK_sec_roles_usuario__creado_por FOREIGN KEY (creado_por) REFERENCES sec_usuarios(id) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Asignacion de roles por usuario';
-
--- -----------------------------------------------------------------------------
---  TABLA: sec_modulos
--- Jerarquia de pantallas, componentes y recursos del sistema
--- -----------------------------------------------------------------------------
-CREATE TABLE sec_modulos (
-    id               INT AUTO_INCREMENT,
-    nombre           VARCHAR(100) NOT NULL,
-    codigo           VARCHAR(60)  NOT NULL,
-    recurso          VARCHAR(255) NOT NULL,
-    path_img         VARCHAR(255) NULL,
-    modulo_padre_id  INT          NULL,
-    estado           TINYINT(1)   NOT NULL DEFAULT 1 COMMENT '1: Activo, 0: Inactivo',
-    
-    CONSTRAINT PK_sec_modulos PRIMARY KEY (id),
-    CONSTRAINT UQ_sec_modulos__codigo UNIQUE (codigo),
-    CONSTRAINT FK_sec_modulos__modulo_padre FOREIGN KEY (modulo_padre_id) REFERENCES sec_modulos(id) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Modulos y opciones de menu del sistema';
-
--- -----------------------------------------------------------------------------
---  TABLA: sec_permisos_rol
--- Permisos granulares de cada Rol sobre un Modulo especifico
--- -----------------------------------------------------------------------------
-CREATE TABLE sec_permisos_rol (
-    role_id         INT          NOT NULL,
-    modulo_id       INT          NOT NULL,
-    puede_buscar    TINYINT(1)   NOT NULL DEFAULT 0,
-    puede_agregar   TINYINT(1)   NOT NULL DEFAULT 0,
-    puede_modificar TINYINT(1)   NOT NULL DEFAULT 0,
-    puede_inactivar TINYINT(1)   NOT NULL DEFAULT 0,
-    puede_procesar  TINYINT(1)   NOT NULL DEFAULT 0,
-    puede_guardar   TINYINT(1)   NOT NULL DEFAULT 0,
-    puede_exportar  TINYINT(1)   NOT NULL DEFAULT 0,
-    estado          TINYINT(1)   NOT NULL DEFAULT 1 COMMENT '1: Activo, 0: Inactivo',
-    actualizado_en  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
-    CONSTRAINT PK_sec_permisos_rol PRIMARY KEY (role_id, modulo_id),
-    CONSTRAINT FK_sec_permisos_rol__role FOREIGN KEY (role_id) REFERENCES sec_roles(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT FK_sec_permisos_rol__modulo FOREIGN KEY (modulo_id) REFERENCES sec_modulos(id) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Matriz de permisos granulares por rol y modulo';
-
 -- ==========================================
--- 6. CARGA INICIAL / LIMPIEZA
+-- 7. TRUNCATE Y LIMPIEZA
 -- ==========================================
 
 SET FOREIGN_KEY_CHECKS = 0;
@@ -478,6 +399,11 @@ SET FOREIGN_KEY_CHECKS = 0;
 TRUNCATE TABLE `detalle_pago`;
 TRUNCATE TABLE `pago`;
 TRUNCATE TABLE `catalogo_tarifa`;
+TRUNCATE TABLE `sec_permisos_rol`;
+TRUNCATE TABLE `sec_modulos`;
+TRUNCATE TABLE `sec_roles_usuario`;
+TRUNCATE TABLE `sec_roles`;
+TRUNCATE TABLE `sec_usuarios`;
 TRUNCATE TABLE `calificaciones`;
 TRUNCATE TABLE `detalle_plan_de_estudio`;
 TRUNCATE TABLE `periodo_evaluativo`;
@@ -488,7 +414,6 @@ TRUNCATE TABLE `catalogo_salon`;
 TRUNCATE TABLE `asignatura`;
 TRUNCATE TABLE `grado`;
 TRUNCATE TABLE `nivel_educativo`;
-TRUNCATE TABLE `usuario`;
 TRUNCATE TABLE `docente`;
 TRUNCATE TABLE `estudiante_tutor`;
 TRUNCATE TABLE `estudiante`;
@@ -538,11 +463,11 @@ VALUES
   (4, 'DOC-001', 'Licenciatura en Matemáticas', 1, 'ADMIN'),
   (5, 'DOC-002', 'Licenciatura en Lengua y Literatura', 1, 'ADMIN');
 
-INSERT INTO `usuario` 
-  (`idusuario`, `idpersona`, `username`, `password_hash`, `tipo_usuario`, `correo`, `estado`, `creado_por`) 
+INSERT INTO `sec_usuarios` 
+  (`id`, `idpersona`, `username`, `password_hash`, `estado`, `creado_por`) 
 VALUES
-  (1, 10, 'admin', '$2a$12$eImiTXuWVxfM37uY4JANjOL.884488448844884488448844884488', 'ADMIN', 'admin@colegiosilviano.edu.ni', 1, 'ADMIN'),
-  (2, 4, 'atorres', '$2a$12$eImiTXuWVxfM37uY4JANjOL.884488448844884488448844884488', 'DOCENTE', 'atorres@colegiosilviano.edu.ni', 1, 'ADMIN');
+  (1, 10, 'admin', '$2a$12$eImiTXuWVxfM37uY4JANjOL.884488448844884488448844884488', 1, 'ADMIN'),
+  (2, 4, 'atorres', '$2a$12$eImiTXuWVxfM37uY4JANjOL.884488448844884488448844884488', 1, 'ADMIN');
 
 -- ==========================================
 -- 2. ESTRUCTURA ACADÉMICA Y INFRAESTRUCTURA
@@ -623,7 +548,7 @@ VALUES
 -- ==========================================
 
 INSERT INTO `catalogo_tarifa` 
-  (`idtarifa`, `idnivel`, `anio_lectivo`, `concepto`, `monto`, `creado_por`) 
+  (`id_tarifa`, `id_nivel`, `anio_lectivo`, `concepto`, `monto`, `creado_por`) 
 VALUES
   (1, 1, 2026, 'MENSUALIDAD FEBRERO', 1000.00, 'ADMIN'),
   (2, 2, 2026, 'MENSUALIDAD FEBRERO', 1300.00, 'ADMIN');
@@ -637,7 +562,7 @@ VALUES
 
 -- Ajuste Crítico: Completado el registro cortado e inyectadas relaciones correctas
 INSERT INTO `detalle_pago` 
-  (`iddetalle_pago`, `idpago`, `idtarifa`, `concepto`, `monto`, `creado_por`) 
+  (`iddetalle_pago`, `idpago`, `id_tarifa`, `concepto`, `monto`, `creado_por`) 
 VALUES
   (1, 1, 1, 'Mensualidad de Febrero 2026 - Primaria', 1000.00, 'ADMIN'),
   (2, 2, 2, 'Mensualidad de Febrero 2026 - Secundaria', 1300.00, 'ADMIN');
@@ -654,15 +579,15 @@ START TRANSACTION;
 -- 1. REGISTRO DE USUARIOS BASE (sec_usuarios)
 -- -----------------------------------------------------------------------------
 -- Usuario Administrador de Sistema (requerido para traza de auditoria)
-INSERT INTO sec_usuarios (login, password, nombre, apellido, email, estado)
-VALUES ('admin.sys', '$2a$12$E9eZ23uYpX.A.1v8s9a0e.e3m4a5r6k7e8t9a0b1c2d3e4f5g6', 'Carlos', 'Mendoza', 'admin@colegio.edu', 1)
+INSERT INTO sec_usuarios (idpersona,username, password_hash, estado)
+VALUES (1,'admin', '$2a$12$E9eZ23uYpX.A.1v8s9a0e.e3m4a5r6k7e8t9a0b1c2d3e4f5g6', 1)
 ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id);
 
 SET @admin_id = LAST_INSERT_ID();
 
 -- Usuario Docente de prueba
-INSERT INTO sec_usuarios (login, password, nombre, apellido, email, estado)
-VALUES ('prof.rodriguez', '$2a$12$X1yZ34vWqY.B.2w9t0b1f.f4n5b6s7l8f9u0b1c2d3e4f5g6', 'Roberto', 'Rodríguez', 'r.rodriguez@colegio.edu', 1)
+INSERT INTO sec_usuarios (username, password_hash, estado)
+VALUES ('prof.rodriguez', '$2a$12$X1yZ34vWqY.B.2w9t0b1f.f4n5b6s7l8f9u0b1c2d3e4f5g6', 1)
 ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id);
 
 SET @docente_usuario_id = LAST_INSERT_ID();
@@ -679,7 +604,7 @@ SET @rol_docente_id = LAST_INSERT_ID();
 -- -----------------------------------------------------------------------------
 -- 3. ASIGNACIÓN DE ROL AL USUARIO (sec_roles_usuario)
 -- -----------------------------------------------------------------------------
-INSERT INTO sec_roles_usuario (usuario_id, role_id, creado_por)
+INSERT INTO sec_roles_usuario (usuario_id, rol_id, creado_por)
 VALUES (@docente_usuario_id, @rol_docente_id, @admin_id)
 ON DUPLICATE KEY UPDATE usuario_id = usuario_id;
 
@@ -712,7 +637,7 @@ SET @modulo_actas_id = LAST_INSERT_ID();
 -- -----------------------------------------------------------------------------
 -- Permisos para "Ingreso de Notas": Buscar, Agregar, Modificar, Guardar y Exportar.
 INSERT INTO sec_permisos_rol (
-    role_id, modulo_id, puede_buscar, puede_agregar, puede_modificar, 
+    rol_id, modulo_id, puede_buscar, puede_agregar, puede_modificar, 
     puede_inactivar, puede_procesar, puede_guardar, puede_exportar, estado
 ) VALUES (
     @rol_docente_id, @modulo_notas_id, 
@@ -729,7 +654,7 @@ INSERT INTO sec_permisos_rol (
 
 -- Permisos para "Actas de Calificaciones": Solo lectura y exportación.
 INSERT INTO sec_permisos_rol (
-    role_id, modulo_id, puede_buscar, puede_agregar, puede_modificar, 
+    rol_id, modulo_id, puede_buscar, puede_agregar, puede_modificar, 
     puede_inactivar, puede_procesar, puede_guardar, puede_exportar, estado
 ) VALUES (
     @rol_docente_id, @modulo_actas_id, 
@@ -862,7 +787,7 @@ BEGIN
     -- =====================================================
     INSERT INTO `detalle_pago` (
         `idpago`, 
-        `idtarifa`,
+        `id_tarifa`,
         `concepto`, 
         `monto`,
         `creado_por`
@@ -880,7 +805,7 @@ END$$
 DELIMITER ;
 
 
-SELECT 
+/*SELECT 
     u.login,
     r.codigo AS rol,
     m.codigo AS modulo,
@@ -897,7 +822,7 @@ INNER JOIN sec_modulos m ON p.modulo_id = m.id
 WHERE u.login = 'prof.rodriguez' 
   AND m.codigo = 'MOD_NOTAS_REGISTRO'
   AND u.estado = 1 
-  AND p.estado = 1;
+  AND p.estado = 1;*/
 
 -- ==========================================
 -- VISTA DE ARQUEO DIARIO DE CAJA
@@ -926,8 +851,8 @@ SELECT
     MAX(pr.puede_guardar)   AS puede_guardar,
     MAX(pr.puede_exportar)  AS puede_exportar
 FROM sec_roles_usuario ru
-INNER JOIN sec_roles r ON ru.role_id = r.id
-INNER JOIN sec_permisos_rol pr ON r.id = pr.role_id
+INNER JOIN sec_roles r ON ru.rol_id = r.id
+INNER JOIN sec_permisos_rol pr ON r.id = pr.rol_id
 INNER JOIN sec_modulos m ON pr.modulo_id = m.id
 WHERE m.estado = 1 AND pr.estado = 1
 GROUP BY ru.usuario_id, m.codigo, m.recurso;
