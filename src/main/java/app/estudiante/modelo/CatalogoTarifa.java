@@ -1,12 +1,10 @@
 package app.estudiante.modelo;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.math.BigDecimal;
-
-import javax.validation.constraints.NotNull;
-
 
 
 @Entity
@@ -31,16 +29,13 @@ public class CatalogoTarifa extends AuditableEntity {
     @Column(name = "idtarifa")
     private Integer idTarifa;
 
-    @NotNull(message = "El grado es obligatorio")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "idnivel", nullable = false)
     private NivelEducativo idnivel;
 
-    @NotNull(message = "El año lectivo es obligatorio")
     @Column(name = "anio_lectivo", nullable = false, length = 4)
     private Integer anioLectivo;
 
-    @NotNull(message = "El concepto de la tarifa es obligatorio")
     @Column(name = "concepto", nullable = false)
     private String concepto;
 

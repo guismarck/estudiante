@@ -72,11 +72,11 @@ public class PagoControler {
     }
 
     @PostMapping("/procesar-emision")
-    public ResponseEntity<String> procesarEmisionRecibo(
+    public ResponseEntity<EmisionReciboResponseDTO> procesarEmisionRecibo(
              @RequestBody EmisionReciboRequestDTO requestDTO) {
-        
-        String respuesta = pagoServicio.emitirRecibo(requestDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(respuesta);
+
+        EmisionReciboResponseDTO response = pagoServicio.emitirRecibo(requestDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
 

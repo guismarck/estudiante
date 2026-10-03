@@ -3,9 +3,12 @@ package app.estudiante.api;
 import app.estudiante.exception.recurosNoEncontradoException;
 import app.estudiante.modelo.Matricula;
 import app.estudiante.servicio.InterfacesServicios.IMatriculaServicio;
+import app.estudiante.utils.MatriculaRequestDTO;
+import app.estudiante.utils.MatriculaResponseDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,16 +41,18 @@ public class MatriculaControler {
     }
 
     @PostMapping(path = "/matriculas/create") // agregar matriculas
-    public ResponseEntity agregarEstudiante(@RequestBody Matricula matricula){
-        logger.info("la matricula ingresada" + matricula);
-        try {
-            matriculaServicio.guardarMatricula(matricula);
-            return  ResponseEntity.ok("OK");
-        }catch (Exception e){
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-
+    public ResponseEntity<MatriculaResponseDTO> agregarEstudiante(@RequestBody MatriculaRequestDTO matricula){
+//        logger.info("la matricula ingresada" + matricula);
+//        try {
+//            matriculaServicio.guardarMatricula(matricula);
+//            return  ResponseEntity.ok("OK");
+//        }catch (Exception e){
+//            return ResponseEntity.badRequest().body(e.getMessage());
+//        }
+        MatriculaResponseDTO respuesta = matriculaServicio.registrarMatriculaSinPago(matricula);
+        return ResponseEntity.status(HttpStatus.CREATED).body(respuesta);
     }
+
 
     @PutMapping(path = "/matriculas/{id}")// actulizar matricula
     public ResponseEntity<Matricula>ActulizarId(@PathVariable Integer id,
@@ -56,7 +61,7 @@ public class MatriculaControler {
         if(matricula == null){
             throw  new recurosNoEncontradoException("No exite el a actualizar con Id"+id);
         }
-        matricula.setTurno(matriculaResivido.getTurno());
+        //matricula.setTurno(matriculaResivido.getTurno());
         matricula.setCostoMatricula(matriculaResivido.getCostoMatricula());
         matriculaServicio.guardarMatricula(matricula);
         return ResponseEntity.ok(matricula);

@@ -16,7 +16,6 @@ import app.estudiante.utils.NivelEducativoResponseDTO;
 import java.net.URI;
 import java.util.List;
 
-import javax.validation.Valid;
 
 @RestController
 @RequestMapping("nivel-educativo")
@@ -37,7 +36,7 @@ public class NivelEducativoController {
     }
 
     @PostMapping
-    public ResponseEntity<NivelEducativoResponseDTO> crear(@Valid @RequestBody NivelEducativoRequestDTO dto) {
+    public ResponseEntity<NivelEducativoResponseDTO> crear(@RequestBody NivelEducativoRequestDTO dto) {
         NivelEducativoResponseDTO creado = servicio.crear(dto);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
@@ -49,7 +48,7 @@ public class NivelEducativoController {
     @PutMapping("/{id}")
     public ResponseEntity<NivelEducativoResponseDTO> actualizar(
             @PathVariable Integer id,
-            @Valid @RequestBody NivelEducativoRequestDTO dto) {
+            @RequestBody NivelEducativoRequestDTO dto) {
         return ResponseEntity.ok(servicio.actualizar(id, dto));
     }
 

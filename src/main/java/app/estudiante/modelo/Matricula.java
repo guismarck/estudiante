@@ -2,57 +2,57 @@ package app.estudiante.modelo;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(
-    name = "matricula", 
-    uniqueConstraints = {
-        @UniqueConstraint(name = "uk_estudiante_anio", columnNames = {"idpersona", "anio_lectivo"})
-    }
+        name = "matricula",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_estudiante_anio", columnNames = {"idpersona", "anio_lectivo"})
+        }
 )
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class Matricula {
+@SuperBuilder
+@EqualsAndHashCode(callSuper = true)
+public class Matricula extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "idmatricula")
+    @Column(name = "idmatricula", columnDefinition = "INT UNSIGNED")
     private Integer idMatricula;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "idpersona", nullable = false)
+    @JoinColumn(
+            name = "idpersona",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_mat_estudiante")
+    )
     private Estudiante estudiante;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "idGrado", nullable = false)
-    private Grado grado;
+    @JoinColumn(
+            name = "idSalon",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_mat_salon")
+    )
+    private Salon salon;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "idPlan_de_estudio", referencedColumnName = "idPlan_de_estudio", nullable = false)
-    private PlandeEstudio planDeEstudio;
-
+    // Se mapea como Short o Year para soportar el tipo YEAR de MySQL
     @Column(name = "anio_lectivo", nullable = false)
     private Short anioLectivo;
 
-    @Column(name = "turno", nullable = false)
-    private String turno;
-
-    @Column(name = "seccion", nullable = false, length = 5)
-    private String seccion;
-
-    @Column(name = "costo_matricula", nullable = false, precision = 10, scale = 2)
+    @Column(name = "costo_matricula", precision = 10, scale = 2)
     private BigDecimal costoMatricula;
 
-    @Column(name = "fecha_matricula", nullable = true, updatable = false)
+    @Column(name = "fecha_matricula", nullable = false, updatable = false)
     private LocalDateTime fechaMatricula;
 
-    @Column(name = "estado_matricula", nullable = false)
+    @Column(name = "estado", nullable = false, length = 20)
     private String estadoMatricula;
 
     @PrePersist
@@ -61,10 +61,10 @@ public class Matricula {
             this.fechaMatricula = LocalDateTime.now();
         }
         if (this.estadoMatricula == null) {
-            this.estadoMatricula = "AC";
+            this.estadoMatricula = "ACTIVA";
         }
-        if (this.seccion == null || this.seccion.isBlank()) {
-            this.seccion = "A";
+        if (this.costoMatricula == null) {
+            this.costoMatricula = BigDecimal.ZERO;
         }
     }
 }

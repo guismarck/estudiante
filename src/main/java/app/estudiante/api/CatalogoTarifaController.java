@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
-import javax.validation.Valid;
 
 @RestController
 @RequestMapping("estudiante-app")
@@ -36,7 +35,7 @@ public class CatalogoTarifaController {
     }
 
     @PostMapping
-    public ResponseEntity<CatalogoTarifa> crear(@Valid @RequestBody CatalogoTarifa tarifa) {
+    public ResponseEntity<CatalogoTarifa> crear(@RequestBody CatalogoTarifa tarifa) {
         CatalogoTarifa nuevaTarifa = tarifaServicio.crear(tarifa);
         return new ResponseEntity<>(nuevaTarifa, HttpStatus.CREATED);
     }
@@ -44,7 +43,7 @@ public class CatalogoTarifaController {
     @PutMapping("/{id}")
     public ResponseEntity<CatalogoTarifa> actualizar(
             @PathVariable Integer id, 
-            @Valid @RequestBody CatalogoTarifa tarifa) {
+            @RequestBody CatalogoTarifa tarifa) {
         return ResponseEntity.ok(tarifaServicio.actualizar(id, tarifa));
     }
 

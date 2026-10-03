@@ -99,7 +99,7 @@ CREATE TABLE IF NOT EXISTS `sec_usuarios` (
     `creado_por`     VARCHAR(50)  DEFAULT NULL,
     `creado_en`      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `actualizado_en` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
+
     CONSTRAINT `pk_sec_usuarios` PRIMARY KEY (`id`),
     CONSTRAINT `uq_sec_usuarios__username` UNIQUE (`username`),
     CONSTRAINT `uq_sec_usuarios__idpersona` UNIQUE (`idpersona`),
@@ -114,7 +114,7 @@ CREATE TABLE IF NOT EXISTS `sec_roles` (
     `creado_por`      VARCHAR(50)  DEFAULT NULL,
     `actualizado_en`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `actualizado_por` VARCHAR(50)  DEFAULT NULL,
-    
+
     CONSTRAINT `pk_sec_roles` PRIMARY KEY (`id`),
     CONSTRAINT `uq_sec_roles__codigo` UNIQUE (`codigo`),
     CONSTRAINT `ck_sec_roles__actualizado_ge_creado` CHECK (`actualizado_en` >= `creado_en`)
@@ -125,7 +125,7 @@ CREATE TABLE IF NOT EXISTS `sec_roles_usuario` (
     `rol_id`     SMALLINT UNSIGNED NOT NULL,
     `creado_en`  DATETIME          NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `creado_por` VARCHAR(50)       DEFAULT NULL,
-    
+
     CONSTRAINT `pk_sec_roles_usuario` PRIMARY KEY (`usuario_id`, `rol_id`),
     CONSTRAINT `fk_sec_roles_usuario__usuario` FOREIGN KEY (`usuario_id`) REFERENCES `sec_usuarios`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT `fk_sec_roles_usuario__rol` FOREIGN KEY (`rol_id`) REFERENCES `sec_roles`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
@@ -140,7 +140,7 @@ CREATE TABLE IF NOT EXISTS `sec_modulos` (
     `modulo_padre_id` INT UNSIGNED NULL,
     `orden`           SMALLINT UNSIGNED NOT NULL DEFAULT 1,
     `estado`          BOOLEAN      NOT NULL DEFAULT TRUE,
-    
+
     CONSTRAINT `pk_sec_modulos` PRIMARY KEY (`id`),
     CONSTRAINT `uq_sec_modulos__codigo` UNIQUE (`codigo`),
     CONSTRAINT `fk_sec_modulos__modulo_padre` FOREIGN KEY (`modulo_padre_id`) REFERENCES `sec_modulos`(`id`) ON DELETE SET NULL ON UPDATE CASCADE,
@@ -159,7 +159,7 @@ CREATE TABLE IF NOT EXISTS `sec_permisos_rol` (
     `puede_exportar`  BOOLEAN           NOT NULL DEFAULT FALSE,
     `estado`          BOOLEAN           NOT NULL DEFAULT TRUE,
     `actualizado_en`  DATETIME          NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
+
     CONSTRAINT `pk_sec_permisos_rol` PRIMARY KEY (`rol_id`, `modulo_id`),
     CONSTRAINT `fk_sec_permisos_rol__rol` FOREIGN KEY (`rol_id`) REFERENCES `sec_roles`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT `fk_sec_permisos_rol__modulo` FOREIGN KEY (`modulo_id`) REFERENCES `sec_modulos`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
@@ -463,8 +463,8 @@ VALUES
   (4, 'DOC-001', 'Licenciatura en Matemáticas', 1, 'ADMIN'),
   (5, 'DOC-002', 'Licenciatura en Lengua y Literatura', 1, 'ADMIN');
 
-INSERT INTO `sec_usuarios` 
-  (`id`, `idpersona`, `username`, `password_hash`, `estado`, `creado_por`) 
+INSERT INTO `sec_usuarios`
+  (`id`, `idpersona`, `username`, `password_hash`, `estado`, `creado_por`)
 VALUES
   (1, 10, 'admin', '$2a$12$eImiTXuWVxfM37uY4JANjOL.884488448844884488448844884488', 1, 'ADMIN'),
   (2, 4, 'atorres', '$2a$12$eImiTXuWVxfM37uY4JANjOL.884488448844884488448844884488', 1, 'ADMIN');
@@ -548,7 +548,7 @@ VALUES
 -- ==========================================
 
 INSERT INTO `catalogo_tarifa` 
-  (`id_tarifa`, `id_nivel`, `anio_lectivo`, `concepto`, `monto`, `creado_por`) 
+  (`id_tarifa`, `id_nivel`, `anio_lectivo`, `concepto`, `monto`, `creado_por`)
 VALUES
   (1, 1, 2026, 'MENSUALIDAD FEBRERO', 1000.00, 'ADMIN'),
   (2, 2, 2026, 'MENSUALIDAD FEBRERO', 1300.00, 'ADMIN');
@@ -562,21 +562,19 @@ VALUES
 
 -- Ajuste Crítico: Completado el registro cortado e inyectadas relaciones correctas
 INSERT INTO `detalle_pago` 
-  (`iddetalle_pago`, `idpago`, `id_tarifa`, `concepto`, `monto`, `creado_por`) 
+  (`iddetalle_pago`, `idpago`, `id_tarifa`, `concepto`, `monto`, `creado_por`)
 VALUES
   (1, 1, 1, 'Mensualidad de Febrero 2026 - Primaria', 1000.00, 'ADMIN'),
   (2, 2, 2, 'Mensualidad de Febrero 2026 - Secundaria', 1300.00, 'ADMIN');
 
 -- =============================================================================
--- SCRIPT DE SEMBRADO (SEEDS) - MÓDULO DE SEGURIDAD (sec_*)
 -- Dominio: Usuario Docente y Permisos al Módulo de Notas
--- Dialecto: MySQL 8.0+
 -- =============================================================================
 
 START TRANSACTION;
 
 -- -----------------------------------------------------------------------------
--- 1. REGISTRO DE USUARIOS BASE (sec_usuarios)
+--  REGISTRO DE USUARIOS BASE (sec_usuarios)
 -- -----------------------------------------------------------------------------
 -- Usuario Administrador de Sistema (requerido para traza de auditoria)
 INSERT INTO sec_usuarios (idpersona,username, password_hash, estado)
@@ -593,7 +591,7 @@ ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id);
 SET @docente_usuario_id = LAST_INSERT_ID();
 
 -- -----------------------------------------------------------------------------
--- 2. REGISTRO DE ROLES (sec_roles)
+--  REGISTRO DE ROLES (sec_roles)
 -- -----------------------------------------------------------------------------
 INSERT INTO sec_roles (codigo, descripcion, creado_por, actualizado_por)
 VALUES ('DOCENTE', 'Profesor de Asignatura / Tutor de Aula', @admin_id, @admin_id)
@@ -602,14 +600,14 @@ ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id);
 SET @rol_docente_id = LAST_INSERT_ID();
 
 -- -----------------------------------------------------------------------------
--- 3. ASIGNACIÓN DE ROL AL USUARIO (sec_roles_usuario)
+--  ASIGNACIÓN DE ROL AL USUARIO (sec_roles_usuario)
 -- -----------------------------------------------------------------------------
 INSERT INTO sec_roles_usuario (usuario_id, rol_id, creado_por)
 VALUES (@docente_usuario_id, @rol_docente_id, @admin_id)
 ON DUPLICATE KEY UPDATE usuario_id = usuario_id;
 
 -- -----------------------------------------------------------------------------
--- 4. ESTRUCTURA DE MÓDULOS Y SUBMÓDULOS DE NOTAS (sec_modulos)
+--  ESTRUCTURA DE MÓDULOS Y SUBMÓDULOS DE NOTAS (sec_modulos)
 -- -----------------------------------------------------------------------------
 -- Módulo Padre: Calificaciones y Evaluación
 INSERT INTO sec_modulos (nombre, codigo, recurso, path_img, modulo_padre_id, estado)
@@ -633,11 +631,11 @@ ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id);
 SET @modulo_actas_id = LAST_INSERT_ID();
 
 -- -----------------------------------------------------------------------------
--- 5. ASIGNACIÓN DE PERMISOS AL ROL DOCENTE (sec_permisos_rol)
+--  ASIGNACIÓN DE PERMISOS AL ROL DOCENTE (sec_permisos_rol)
 -- -----------------------------------------------------------------------------
 -- Permisos para "Ingreso de Notas": Buscar, Agregar, Modificar, Guardar y Exportar.
 INSERT INTO sec_permisos_rol (
-    rol_id, modulo_id, puede_buscar, puede_agregar, puede_modificar, 
+    rol_id, modulo_id, puede_buscar, puede_agregar, puede_modificar,
     puede_inactivar, puede_procesar, puede_guardar, puede_exportar, estado
 ) VALUES (
     @rol_docente_id, @modulo_notas_id, 
@@ -654,7 +652,7 @@ INSERT INTO sec_permisos_rol (
 
 -- Permisos para "Actas de Calificaciones": Solo lectura y exportación.
 INSERT INTO sec_permisos_rol (
-    rol_id, modulo_id, puede_buscar, puede_agregar, puede_modificar, 
+    rol_id, modulo_id, puede_buscar, puede_agregar, puede_modificar,
     puede_inactivar, puede_procesar, puede_guardar, puede_exportar, estado
 ) VALUES (
     @rol_docente_id, @modulo_actas_id, 
@@ -805,7 +803,7 @@ END$$
 DELIMITER ;
 
 
-/*SELECT 
+/*SELECT
     u.login,
     r.codigo AS rol,
     m.codigo AS modulo,

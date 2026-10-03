@@ -13,8 +13,7 @@ public class CatalogoSalonServicio  implements ICatalogoSalonServicio {
     private CatalogoSalonRepositorio catalogoSalonRepositorio;
     @Override
     public List<CatalogoSalon> ListarCatalogoSalon() {
-        List<CatalogoSalon> catalogoSalons = catalogoSalonRepositorio.findAll();
-        return catalogoSalons;
+        return catalogoSalonRepositorio.findAll();
     }
 
     @Override

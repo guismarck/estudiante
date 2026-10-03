@@ -9,5 +9,5 @@ public interface ISalonServicio {
     public Salon buscarSalonPorId(Integer idSalon);
     public void guardarSalon(Salon salon);
     public  void eliminarSalon(Salon salon);
-    List<Salon> obtenerSalonesDisponiblesPorGrado(Integer idGrado);
+    List<Salon> obtenerSalonesDisponiblesPorGrado(Integer idGrado,Integer anioLectivo);
 }

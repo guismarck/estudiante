@@ -67,9 +67,9 @@ public class CatalogoSalonControler {
         iCatalogoSalonServicio.eliminarCatalogoSalon(iCatalogoSalonServicio.buscarCatalogoSalonPorId(id));
     }
 
-    @GetMapping("/disponibles/grado/{idGrado}")
-    public ResponseEntity<List<Salon>> obtenerSalonesDisponiblesPorGrado(@PathVariable Integer idGrado) {
-        List<Salon> salones = salonServicio.obtenerSalonesDisponiblesPorGrado(idGrado);
+    @GetMapping("/disponibles/salon/{idGrado}/{anioLectivo}")
+    public ResponseEntity<List<Salon>> obtenerSalonesDisponiblesPorGrado(@PathVariable Integer idGrado,@PathVariable Integer anioLectivo) {
+        List<Salon> salones = salonServicio.obtenerSalonesDisponiblesPorGrado(idGrado,anioLectivo);
         return ResponseEntity.ok(salones);
     }
 }

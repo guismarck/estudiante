@@ -19,7 +19,7 @@ import java.sql.Date;
 public class Persona {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column
+    @Column(name = "idpersona")
     private Integer idpersona;
     @Column
     private String nombre_completo;

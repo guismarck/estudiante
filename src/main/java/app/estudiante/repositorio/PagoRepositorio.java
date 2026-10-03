@@ -12,15 +12,15 @@ import java.time.LocalDateTime;
 public interface PagoRepositorio extends JpaRepository<Pago,Integer> {
 
 @Procedure(procedureName = "sp_procesar_emision_recibo")
-    String procesarEmisionRecibo(
-        @Param("p_idpersona") Integer idPersona,
-        @Param("p_idSalon") Integer idSalon,
+String procesarEmisionRecibo(
+        @Param("p_idpersona") Long idPersona,
+        @Param("p_idSalon") Long idSalon,
         @Param("p_anio_lectivo") Integer anioLectivo,
         @Param("p_concepto") String concepto,
         @Param("p_tipo_pago") String tipoPago,
         @Param("p_monto") BigDecimal monto,
-        @Param("p_idtarifa") Integer idTarifa,
+        @Param("p_idtarifa") Long idTarifa,
         @Param("p_fecha_transaccion") LocalDateTime fechaTransaccion,
         @Param("p_usuario") String usuario
-    );
+);
 }

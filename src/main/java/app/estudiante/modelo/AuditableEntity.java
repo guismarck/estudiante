@@ -1,14 +1,18 @@
 package app.estudiante.modelo;
 
 import jakarta.persistence.*;
+import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
+@Data
+@NoArgsConstructor
 @MappedSuperclass
+@SuperBuilder
 public abstract class AuditableEntity {
 
     @Column(name = "creado_por", nullable = false, length = 50, updatable = false)

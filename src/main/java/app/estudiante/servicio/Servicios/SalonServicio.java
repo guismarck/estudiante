@@ -34,9 +34,8 @@ public class SalonServicio implements ISalonServicio {
     }
 
     @Override
-    public List<Salon> obtenerSalonesDisponiblesPorGrado(Integer idGrado) {
-        List<Salon> salones = salonRepositorio.obtenerSalonesDisponiblesPorGrado(idGrado);
-
+    public List<Salon> obtenerSalonesDisponiblesPorGrado(Integer idGrado,Integer anioLectivo) {
+        List<Salon> salones = salonRepositorio.obtenerSalonesDisponiblesPorGrado(idGrado,anioLectivo);
         return salones;
     }
 }

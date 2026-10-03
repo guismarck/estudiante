@@ -11,6 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 public class Estudiante extends Persona {
 
     @Column(name = "cod_estudiante", nullable = false, unique = true, length = 45)

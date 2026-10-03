@@ -3,13 +3,13 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public record EmisionReciboRequestDTO(
-    Integer idPersona,
-    Integer idSalon,
+    Long idPersona,
+    Long idSalon,
     Integer anioLectivo,
     String concepto,
     String tipoPago,
     BigDecimal monto,
-    Integer idTarifa,
+    Long idTarifa,
     LocalDateTime fechaTransaccion,
     String usuario
 ) {}

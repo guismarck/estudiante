@@ -1,8 +1,6 @@
 package app.estudiante.api;
 
-import lombok.RequiredArgsConstructor;
 
-import javax.validation.Valid;
 
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
@@ -22,7 +20,7 @@ public class ReporteController {
      * Endpoint unificado para invocar cualquier reporte alojado en src/main/resources/reportes/
      */
     @PostMapping("/descargar")
-    public ResponseEntity<byte[]> descargarReporteGenerico(@Valid @RequestBody ReporteRequestDTO request) {
+    public ResponseEntity<byte[]> descargarReporteGenerico( @RequestBody ReporteRequestDTO request) {
         byte[] bytes = jasperReportService.generarReporteDesdePlantilla(
                 request.nombrePlantilla(),
                 request.formato(),
