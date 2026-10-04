@@ -55,12 +55,12 @@ public class EstudianteControler {
        if(estudiante == null){
            throw  new recurosNoEncontradoException("No exite el a actualizar con Id"+id);
        }
-       estudiante.setNombre_completo(estudianteResivido.getNombre_completo());
-       estudiante.setApellido_completo(estudianteResivido.getApellido_completo());
+       estudiante.setNombreCompleto(estudianteResivido.getNombreCompleto());
+       estudiante.setApellidoCompleto(estudianteResivido.getApellidoCompleto());
        estudiante.setSexo(estudianteResivido.getSexo());
        estudiante.setDireccion(estudianteResivido.getDireccion());
-       estudiante.setPartida_nacimiento(estudiante.getPartida_nacimiento());
-       estudiante.setFecha_nacimiento(estudianteResivido.getFecha_nacimiento());
+       estudiante.setPartidaNacimiento(estudiante.getPartidaNacimiento());
+       estudiante.setFechaNacimiento(estudianteResivido.getFechaNacimiento());
        estudiante.setCedula(estudianteResivido.getCedula());
        estudiante.setCodEstudiante(estudianteResivido.getCodEstudiante());
        estudiante.setCodigoMined(estudianteResivido.getCodigoMined());

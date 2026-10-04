@@ -1,4 +1,4 @@
-package app.estudiante.config;
+/*package app.estudiante.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Bean;
@@ -21,4 +21,4 @@ public class CorsConfig {
         };
     }
 
-}
+}*/

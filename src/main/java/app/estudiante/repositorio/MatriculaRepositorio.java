@@ -13,6 +13,6 @@ public interface MatriculaRepositorio extends JpaRepository<Matricula, Integer> 
     @Query(value = "select e from Matricula e where idMatricula = ?1  ")
     List<Matricula> busquedaGeneral(String search);
 
-    @Query("SELECT COUNT(m) > 0 FROM Matricula m WHERE m.estudiante.idpersona = :idPersona AND m.anioLectivo = :anioLectivo")
+    @Query("SELECT COUNT(m) > 0 FROM Matricula m")
     boolean existsByEstudianteIdAndAnioLectivo(@Param("idPersona") Long idPersona, @Param("anioLectivo") Short anioLectivo);
 }

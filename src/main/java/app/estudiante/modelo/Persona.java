@@ -1,39 +1,54 @@
 package app.estudiante.modelo;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
-import java.sql.Date;
+import java.time.LocalDate;
 
-//boilerplate
 @Entity
-@Data //get a set
-@NoArgsConstructor //vacio
-@AllArgsConstructor//lleno
-@ToString
-@Table(name = "persona")
-@Inheritance(strategy = InheritanceType.JOINED)
-public class Persona {
+@Table(
+        name = "persona",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_persona_cedula", columnNames = {"cedula"})
+        },
+        indexes = {
+                @Index(name = "idx_persona_apellidos", columnList = "apellido_completo, nombre_completo")
+        }
+)
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder(toBuilder = true)
+public class Persona extends AuditableEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "idpersona")
-    private Integer idpersona;
-    @Column
-    private String nombre_completo;
-    @Column
-    private String apellido_completo;
-    @Column
-    private  String sexo;
-    @Column
-    private String direccion;
-    @Column
-    private String partida_nacimiento;
-    @Column
-    private Date fecha_nacimiento ;
-    @Column
+    @Column(name = "idpersona", nullable = false, updatable = false)
+    private Long idPersona;
+
+    @Column(name = "nombre_completo", nullable = false, length = 150)
+    private String nombreCompleto;
+
+    @Column(name = "apellido_completo", nullable = false, length = 150)
+    private String apellidoCompleto;
+
+    @Column(name = "sexo", nullable = false, length = 20)
+    private String sexo;
+
+    @Column(name = "fecha_nacimiento", nullable = false)
+    private LocalDate fechaNacimiento;
+
+    @Column(name = "cedula", length = 20)
     private String cedula;
 
+    @Column(name = "partida_nacimiento", length = 30)
+    private String partidaNacimiento;
+
+    @Column(name = "direccion", nullable = false, length = 300)
+    private String direccion;
+
+    @Column(name = "correo" , nullable = false)
+    private String correo;
 }

@@ -50,12 +50,12 @@ public class DocenteControler {
         if(docente == null){
             throw  new recurosNoEncontradoException("No exite el a actualizar con Id"+id);
         }
-        docente.setNombre_completo(docenteResivido.getNombre_completo());
-        docente.setApellido_completo(docenteResivido.getApellido_completo());
+        docente.setNombreCompleto(docenteResivido.getNombreCompleto());
+        docente.setApellidoCompleto(docenteResivido.getApellidoCompleto());
         docente.setSexo(docenteResivido.getSexo());
         docente.setDireccion(docenteResivido.getDireccion());
         //docente.setPart(docenteResivido.getPartidad_nacimiento());
-        docente.setFecha_nacimiento(docenteResivido.getFecha_nacimiento());
+        docente.setFechaNacimiento(docenteResivido.getFechaNacimiento());
         docente.setCedula(docenteResivido.getCedula());
         docente.setEstado(docenteResivido.isEstado());
         docenteServicio.guardarDocente(docente);

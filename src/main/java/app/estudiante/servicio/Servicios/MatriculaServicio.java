@@ -112,7 +112,7 @@ public class MatriculaServicio implements IMatriculaServicio {
         //  Retorno de DTO de Respuesta
         return MatriculaResponseDTO.builder()
                 .idMatricula(Long.valueOf(guardada.getIdMatricula()))
-                .estudianteId(Long.valueOf(guardada.getEstudiante().getIdpersona()))
+                .estudianteId(guardada.getEstudiante().getIdPersona())
                 .nombreSalon(salon.getCatalogoSalon().getNombreSalon())
                 .anioLectivo(String.valueOf(guardada.getAnioLectivo()))
                 .estadoMatricula(guardada.getEstadoMatricula())

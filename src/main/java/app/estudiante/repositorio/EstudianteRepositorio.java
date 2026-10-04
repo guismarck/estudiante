@@ -9,6 +9,6 @@ import java.util.List;
 
 @Repository
 public interface EstudianteRepositorio extends JpaRepository<Estudiante,Integer> {
-    @Query(value = "select e from Estudiante e where codEstudiante = ?1 or nombre_completo = ?1 or apellido_completo = ?1")
+    @Query(value = "select e from Estudiante e")
     List<Estudiante> busquedaGeneral(String search);
 }
