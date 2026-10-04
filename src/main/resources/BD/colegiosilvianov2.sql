@@ -584,8 +584,8 @@ ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id);
 SET @admin_id = LAST_INSERT_ID();
 
 -- Usuario Docente de prueba
-INSERT INTO sec_usuarios (username, password_hash, estado)
-VALUES ('prof.rodriguez', '$2a$12$X1yZ34vWqY.B.2w9t0b1f.f4n5b6s7l8f9u0b1c2d3e4f5g6', 1)
+INSERT INTO sec_usuarios (idpersona,username, password_hash, estado)
+VALUES (2,'prof.rodriguez', '$2a$12$X1yZ34vWqY.B.2w9t0b1f.f4n5b6s7l8f9u0b1c2d3e4f5g6', 1)
 ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id);
 
 SET @docente_usuario_id = LAST_INSERT_ID();

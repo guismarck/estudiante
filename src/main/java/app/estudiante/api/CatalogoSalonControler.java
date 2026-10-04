@@ -68,8 +68,8 @@ public class CatalogoSalonControler {
     }
 
     @GetMapping("/disponibles/salon/{idGrado}/{anioLectivo}")
-    public ResponseEntity<List<Salon>> obtenerSalonesDisponiblesPorGrado(@PathVariable Integer idGrado,@PathVariable Integer anioLectivo) {
-        List<Salon> salones = salonServicio.obtenerSalonesDisponiblesPorGrado(idGrado,anioLectivo);
+    public ResponseEntity<List<Salon>> obtenerSalonesDisponiblesPorGrado(@PathVariable Integer idGrado) {
+        List<Salon> salones = salonServicio.obtenerSalonesDisponiblesPorGrado(idGrado);
         return ResponseEntity.ok(salones);
     }
 }
