@@ -1,10 +1,10 @@
-/*package app.estudiante.servicio.Servicios;
+package app.estudiante.security;
 
 import app.estudiante.modelo.Usuario;
 import app.estudiante.repositorio.UsuarioRepositorio;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -21,20 +21,18 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Usuario usuario = usuarioRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario o código MINED no encontrado: " + username));
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
 
-        // Retorna la clase concreta org.springframework.security.core.userdetails.User que implementa UserDetails
         return new User(
                 usuario.getUsername(),
-                usuario.getPasswordHash(),
-                usuario.getEstado() == 1, // enabled
-                true,                     // accountNonExpired
-                true,                     // credentialsNonExpired
-                usuario.getEstado() != 2, // accountNonLocked
+                usuario.getPassword(),
+                usuario.getEstado() == 1, // Habilitado
+                true,
+                true,
+                usuario.getEstado() != 2, // No bloqueado
                 usuario.getRoles().stream()
-                        .map(rol -> new SimpleGrantedAuthority("ROLE_" + rol.getDescripcion()))
+                        .map(rol -> new SimpleGrantedAuthority("ROLE_" + rol.getCodigo())) // CORREGIDO: getCodigo()
                         .toList()
         );
     }
 }
-*/

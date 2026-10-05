@@ -10,31 +10,30 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 @RestController
-@RequestMapping("estudiante-app")
+@RequestMapping("/api/usuarios")
 @CrossOrigin(value = "http://localhost:3000")
 @RequiredArgsConstructor
 public class UsuarioControler {
 
     private final IUsuarioServicio usuarioServicio;
 
-
-    @PostMapping("/createUsuario")
+    @PostMapping("/create")
     public ResponseEntity<UsuarioResponseDTO> crear(@RequestBody UsuarioRequestDTO request) {
         UsuarioResponseDTO nuevoUsuario = usuarioServicio.crear(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevoUsuario);
     }
 
-    @GetMapping("/{idUsuario}")
+    @GetMapping("/{id}")
     public ResponseEntity<UsuarioResponseDTO> obtenerUsuarioPorId(@PathVariable Long id) {
         return ResponseEntity.ok(usuarioServicio.obtenerUsuarioPorId(id));
     }
 
-    @GetMapping("/listarUsuario")
+    @GetMapping("/listar")
     public ResponseEntity<List<UsuarioResponseDTO>> listarTodos() {
         return ResponseEntity.ok(usuarioServicio.listarTodos());
     }
 
-    @PutMapping("/{idUsuario}")
+    @PutMapping("/{id}")
     public ResponseEntity<UsuarioResponseDTO> actualizar(
             @PathVariable Long id,
             @RequestBody UsuarioRequestDTO request) {

@@ -12,16 +12,15 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ModuloUsuarioDTO {
+public class ModuloMenuDTO {
     private Long id;
     private String nombre;
     private String codigo;
     private String recurso;
     private String componentKey;
     private String pathImg;
-    private Long moduloPadreId;
+    private Integer orden;
     private PermisoModuloDTO permisos;
-
     @Builder.Default
-    private List<ModuloUsuarioDTO> subModulos = new ArrayList<>();
+    private List<ModuloMenuDTO> submodulos = new ArrayList<>();
 }

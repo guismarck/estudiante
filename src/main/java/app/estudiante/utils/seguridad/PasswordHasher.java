@@ -1,26 +1,44 @@
 package app.estudiante.utils.seguridad;
-
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+/**
+ * Envoltorio utilitario para el manejo seguro de hashes de contraseñas.
+ * Se registra explícitamente como un @Component gestionado por el contenedor IoC de Spring.
+ */
 @Component
-public interface PasswordHasher {
-    /**
-     * Calcula el hash para una contraseña en claro.
-     *
-     * @param password contraseña en claro (no nula)
-     * @return representación del hash lista para persistencia
-     */
-    String hash(char[] password);
+public class PasswordHasher {
+
+    private final PasswordEncoder passwordEncoder;
+
+    public PasswordHasher(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
 
     /**
-     * Verifica si la contraseña en claro coincide con el hash persistido.
+     * Genera un hash BCrypt seguro a partir de una contraseña en texto plano.
      *
-     * @param password contraseña en claro (no nula)
-     * @param storedHash hash previamente generado (no nulo)
-     * @return true si coincide; false en caso contrario
+     * @param rawPassword Contraseña sin encriptar.
+     * @return Hash codificado con sal integrada.
      */
-    boolean verify(char[] password, String storedHash);
+    public String hash(String rawPassword) {
+        if (rawPassword == null || rawPassword.trim().isEmpty()) {
+            throw new IllegalArgumentException("La contraseña no puede estar vacía.");
+        }
+        return passwordEncoder.encode(rawPassword);
+    }
 
-    boolean needsRehash(String storedHash);
-
+    /**
+     * Verifica si una contraseña en texto plano coincide con el hash almacenado.
+     *
+     * @param rawPassword Contraseña enviada durante la autenticación.
+     * @param encodedHash Hash almacenado en la base de datos.
+     * @return true si la contraseña coincide; false en caso contrario.
+     */
+    public boolean verify(String rawPassword, String encodedHash) {
+        if (rawPassword == null || encodedHash == null) {
+            return false;
+        }
+        return passwordEncoder.matches(rawPassword, encodedHash);
+    }
 }

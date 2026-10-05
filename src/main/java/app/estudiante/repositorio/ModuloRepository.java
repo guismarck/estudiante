@@ -14,18 +14,12 @@ public interface ModuloRepository extends JpaRepository<Modulo, Long> {
     /**
      * Consulta los módulos asignados a un rol específico con sus permisos activos.
      */
-    @Query(value = """
-        SELECT 
-            m.id, m.nombre, m.codigo, m.recurso, m.component_key, m.path_img, m.modulo_padre_id,
-            p.puede_buscar, p.puede_agregar, p.puede_modificar, p.puede_inactivar, 
-            p.puede_procesar, p.puede_guardar, p.puede_exportar
-        FROM sec_modulos m
-        INNER JOIN sec_permisos_rol p ON m.id = p.modulo_id AND p.estado = 1
-        INNER JOIN sec_roles r ON p.rol_id = r.id AND r.estado = 1
-        WHERE r.codigo = :rolCodigo 
-          AND m.estado = 1 
-          AND p.puede_buscar = 1
-        ORDER BY m.modulo_padre_id ASC, m.id ASC
-        """, nativeQuery = true)
-    List<Object[]> findModulosYPermisosByRol(@Param("rolCodigo") String rolCodigo);
+    @Query("SELECT DISTINCT m FROM Modulo m " +
+            "JOIN PermisoRol pr ON pr.modulo.id = m.id " +
+            "JOIN pr.rol r " +
+            "JOIN Usuario u JOIN u.roles ur " +
+            "WHERE u.id = :usuarioId AND ur.id = r.id " +
+            "AND m.estado = true AND pr.estado = true AND pr.puedeBuscar = true " +
+            "ORDER BY m.orden ASC")
+    List<Modulo> findModulosAutorizadosPorUsuario(@Param("usuarioId") Long usuarioId);
 }

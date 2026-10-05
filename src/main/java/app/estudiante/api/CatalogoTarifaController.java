@@ -13,7 +13,7 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping("estudiante-app")
+@RequestMapping("/api/tarifas")
 @CrossOrigin(
     origins = "https://miniature-space-enigma-65prg5v459vh46xx-3000.app.github.dev"
 )

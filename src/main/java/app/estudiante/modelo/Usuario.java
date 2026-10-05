@@ -1,45 +1,60 @@
 package app.estudiante.modelo;
-
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
-import java.util.HashSet;
+import java.time.LocalDateTime;
 import java.util.Set;
 
-@SuperBuilder
 @Entity
+@Table(name = "sec_usuarios")
+@Builder(toBuilder = true)
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(callSuper = true, exclude = {"roles"})
-@EqualsAndHashCode(callSuper = true, exclude = {"roles"})
-@Table(name = "sec_usuarios")
-public class Usuario extends AuditableEntity{
+@ToString(exclude = "roles")
+@EqualsAndHashCode(exclude = "roles")
+public class Usuario {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "idpersona", referencedColumnName = "idpersona", nullable = false)
-    private Persona idPersona;
-
-    @Column(nullable = false, unique = true, length = 50)
+    @Column(nullable = false, unique = true)
     private String username;
 
-    @Column(name = "password_hash", nullable = false, length = 255)
-    private String passwordHash;
+    @Column(name = "password_hash", nullable = false)
+    private String password;
 
-    @Column(nullable = false)
-    private Short estado; // 1: Activo, 0: Inactivo, 2: Bloqueado
+    @Column(name = "estado")
+    private Integer estado; // 1 = ACTIVO, 0 = INACTIVO
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @Column(name = "idpersona")
+    private Long idpersona;
+
+    @Column(name = "creado_el")
+    private LocalDateTime creadoEl;
+
+    @Column(name = "creado_por")
+    private String creadoPor;
+
+    @Column(name = "actualizado_el")
+    private LocalDateTime actualizadoEl;
+
+    @Column(name = "actualizado_por")
+    private String actualizadoPor;
+
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "sec_roles_usuario",
             joinColumns = @JoinColumn(name = "usuario_id"),
             inverseJoinColumns = @JoinColumn(name = "rol_id")
     )
-    @Builder.Default
-    private Set<Rol> roles = new HashSet<>();
+    @JsonIgnoreProperties("usuarios")
+    private Set<Rol> roles;
+
+    public boolean isActivo() {
+        return this.estado != null && this.estado == 1;
+    }
 }

@@ -3,6 +3,9 @@ package app.estudiante.modelo;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "sec_modulos")
 @Getter
@@ -25,6 +28,9 @@ public class Modulo {
     @Column(nullable = false, length = 255)
     private String recurso;
 
+    @Column(name = "component_key", length = 100)
+    private String componentKey;
+
     @Column(name = "path_img", length = 255)
     private String pathImg;
 
@@ -37,4 +43,9 @@ public class Modulo {
 
     @Column(nullable = false)
     private Boolean estado;
+
+    @OneToMany(mappedBy = "moduloPadre", fetch = FetchType.LAZY)
+    @OrderBy("orden ASC")
+    @Builder.Default
+    private List<Modulo> submodulos = new ArrayList<>();
 }

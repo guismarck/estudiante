@@ -13,6 +13,7 @@ import jakarta.persistence.*;
 @NoArgsConstructor
 @ToString
 @Table (name ="catalogo_salon")
+@EqualsAndHashCode(callSuper=true)
 public class CatalogoSalon extends AuditableEntity{
    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

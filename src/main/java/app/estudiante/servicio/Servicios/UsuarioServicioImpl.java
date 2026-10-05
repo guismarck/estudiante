@@ -1,24 +1,18 @@
 package app.estudiante.servicio.Servicios;
 
-import app.estudiante.modelo.Persona;
 import app.estudiante.modelo.Rol;
 import app.estudiante.modelo.Usuario;
+import app.estudiante.repositorio.PermisoRolRepository;
 import app.estudiante.repositorio.PersonaRepository;
 import app.estudiante.repositorio.RolRepository;
 import app.estudiante.repositorio.UsuarioRepositorio;
+import app.estudiante.security.JwtTokenProvider;
 import app.estudiante.servicio.InterfacesServicios.IUsuarioServicio;
 import app.estudiante.utils.RecursoNoEncontradoException;
 import app.estudiante.utils.UsuarioRequestDTO;
 import app.estudiante.utils.UsuarioResponseDTO;
-import app.estudiante.utils.seguridad.AuthRequestDTO;
-import app.estudiante.utils.seguridad.AuthResponseDTO;
 import app.estudiante.utils.seguridad.PasswordHasher;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,19 +21,38 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class UsuarioServicioImpl implements IUsuarioServicio {
+
     private final UsuarioRepositorio usuarioRepository;
     private final RolRepository rolRepository;
+    private final PersonaRepository personaRepository;
+    private final PermisoRolRepository permisoRolRepository;
     private final PasswordHasher passwordHasher;
-    private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
-    private final PersonaRepository  personaRepository;
+    private final JwtTokenProvider tokenProvider;
+
+
+    public UsuarioServicioImpl(
+            UsuarioRepositorio usuarioRepository,
+            RolRepository rolRepository,
+            PersonaRepository personaRepository,
+            PermisoRolRepository permisoRolRepository,
+            PasswordHasher passwordHasher,
+            AuthenticationManager authenticationManager,
+            JwtTokenProvider tokenProvider) {
+        this.usuarioRepository = usuarioRepository;
+        this.rolRepository = rolRepository;
+        this.personaRepository = personaRepository;
+        this.permisoRolRepository = permisoRolRepository;
+        this.passwordHasher = passwordHasher;
+        this.authenticationManager = authenticationManager;
+        this.tokenProvider = tokenProvider;
+    }
 
     @Override
     @Transactional
     public UsuarioResponseDTO crear(UsuarioRequestDTO request) {
-        Optional<Persona> persona = personaRepository.findById(request.idPersona());
+
         if (usuarioRepository.existsByUsername(request.username())) {
             throw new IllegalArgumentException("El username '" + request.username() + "' ya se encuentra en uso.");
         }
@@ -49,16 +62,16 @@ public class UsuarioServicioImpl implements IUsuarioServicio {
             throw new RecursoNoEncontradoException("No se encontraron roles asignables para los IDs proporcionados.");
         }
 
-        // Generar hash seguro utilizando PasswordHasher (char[])
-        String hashedPassword = passwordHasher.hash(request.password().toCharArray());
+        // CORREGIDO: Se aplica el hash directamente a la cadena plana de texto de la contraseña
+        String hashedPassword = passwordHasher.hash(request.password());
 
         Usuario usuario = Usuario.builder()
-                .idPersona(persona.get())
+                .idpersona(request.idPersona())
                 .username(request.username())
-                .passwordHash(hashedPassword)
+                .password(hashedPassword)
                 .creadoPor(request.creadoPor())
                 .creadoEl(LocalDateTime.now())
-                .estado(request.estado())
+                .estado(Integer.valueOf(request.estado()))
                 .roles(roles)
                 .build();
 
@@ -86,74 +99,33 @@ public class UsuarioServicioImpl implements IUsuarioServicio {
     @Transactional
     public UsuarioResponseDTO actualizar(Long id, UsuarioRequestDTO request) {
 
-        Optional<Persona> persona = personaRepository.findById(request.idPersona());
         Usuario usuario = usuarioRepository.findById(Math.toIntExact(id))
                 .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado con ID: " + id));
 
         Set<Rol> roles = new HashSet<>(rolRepository.findAllById(request.rolesIds()));
 
-        // Actualizar contraseña si viene una nueva y re-hashizar
         if (request.password() != null && !request.password().isBlank()) {
-            String nuevoHash = passwordHasher.hash(request.password().toCharArray());
-            usuario.setPasswordHash(nuevoHash);
+            String nuevoHash = passwordHasher.hash(request.password());
+            usuario.setPassword(nuevoHash);
         }
 
-        usuario.setIdPersona(persona.get());
+        usuario.setIdpersona(request.idPersona());
         usuario.setUsername(request.username());
-        usuario.setEstado(request.estado());
+        usuario.setEstado(Integer.valueOf(request.estado()));
         usuario.setRoles(roles);
 
         return mapearAResponse(usuarioRepository.save(usuario));
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public AuthResponseDTO autenticar(AuthRequestDTO request) {
-        // 1. Delegar la autenticación de credenciales (BCrypt + Usuario)
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getUsername(),
-                        request.getPassword()
-                )
-        );
 
-        // 2. Obtener el UserDetails nativo de Spring Security
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-
-        // 3. Buscar la entidad Usuario en la BD
-        Usuario usuario = usuarioRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new RecursoNoEncontradoException(
-                        "Usuario no encontrado con username: " + userDetails.getUsername()
-                ));
-
-        // 4. Generar Token JWT
-        String jwtToken = jwtService.generarToken(usuario);
-
-        // 5. Extraer roles de forma segura
-        String rolesString = usuario.getRoles() == null ? "" : usuario.getRoles().stream()
-                .map(Rol::getCodigo)
-                .filter(Objects::nonNull)
-                .collect(Collectors.joining(","));
-
-        // 6. Retornar DTO de respuesta
-        return AuthResponseDTO.builder()
-                .token(jwtToken)
-                .bearer("Bearer")
-                .username(usuario.getUsername())
-                .rol(rolesString)
-                .build();
-    }
-
-
-        private UsuarioResponseDTO mapearAResponse(Usuario usuario) {
-
+    private UsuarioResponseDTO mapearAResponse(Usuario usuario) {
         Set<String> codigosRoles = usuario.getRoles().stream()
                 .map(Rol::getCodigo)
                 .collect(Collectors.toSet());
 
         return new UsuarioResponseDTO(
                 usuario.getId(),
-                usuario.getIdPersona().getIdPersona(),
+                usuario.getIdpersona(),
                 usuario.getUsername(),
                 usuario.getEstado(),
                 usuario.getCreadoEl(),

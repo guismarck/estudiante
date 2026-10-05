@@ -1,24 +1,30 @@
 package app.estudiante.modelo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Set;
+
 @Entity
 @Table(name = "sec_roles")
+@Builder
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class Rol extends AuditableEntity {
+public class Rol {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Short id;
+    private Long id;
 
-    @Column(nullable = false, unique = true, length = 32)
+    @Column(nullable = false, unique = true)
     private String codigo;
 
-    @Column(nullable = false, length = 60)
     private String descripcion;
+
+    @ManyToMany(mappedBy = "roles")
+    @JsonIgnore
+    private Set<Usuario> usuarios;
 }

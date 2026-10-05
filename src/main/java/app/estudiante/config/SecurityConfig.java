@@ -1,4 +1,4 @@
-package app.estudiante.config;
+/*package app.estudiante.config;
 
 
 import app.estudiante.utils.seguridad.PasswordHasher;
@@ -102,4 +102,4 @@ public class SecurityConfig {
             }
         };
     }
-}
+}*/
