@@ -26,7 +26,7 @@ public class Persona extends AuditableEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idpersona", nullable = false, updatable = false)
-    private Long idPersona;
+    private Integer idPersona;
 
     @Column(name = "nombre_completo", nullable = false, length = 150)
     private String nombreCompleto;

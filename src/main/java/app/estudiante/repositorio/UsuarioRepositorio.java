@@ -16,7 +16,7 @@ public interface UsuarioRepositorio  extends JpaRepository<Usuario,Integer> {
     boolean existsByUsername(String username);
 
 
-    @Query("SELECT u FROM Usuario u LEFT JOIN FETCH u.roles WHERE u.username = :username")
+    @Query("SELECT u FROM Usuario u LEFT JOIN FETCH u.roles WHERE LOWER(u.username) = LOWER(:username)")
     Optional<Usuario> findByUsernameWithRoles(@Param("username") String username);
 
     @Query("SELECT u FROM Usuario u LEFT JOIN FETCH u.roles WHERE u.id = :id")

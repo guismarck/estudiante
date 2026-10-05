@@ -2,7 +2,6 @@ package app.estudiante.modelo;
 
 
 import lombok.*;
-import org.hibernate.validator.constraints.NotBlank;
 
 import jakarta.persistence.*;
 
@@ -18,9 +17,8 @@ public class CatalogoSalon extends AuditableEntity{
    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idcatalogo_salon", nullable = false, updatable = false)
-    private Long idCatalogoSalon;
+    private Integer idCatalogoSalon;
 
-    @NotBlank(message = "El nombre del salón es obligatorio")
     @Column(name = "nombre_salon", nullable = false, length = 50)
     private String nombreSalon;
 

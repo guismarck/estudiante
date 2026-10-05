@@ -2,6 +2,7 @@ package app.estudiante.modelo;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
 import lombok.*;
 
@@ -10,14 +11,18 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 @Table(name = "docente")
-@EqualsAndHashCode(callSuper=true)
-public class Docente  extends Persona {
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-// private Integer idDocente;
-// private Integer idpersona;
-@Column
- private boolean estado;
+@PrimaryKeyJoinColumn(name = "idpersona", referencedColumnName = "idpersona")
+public class Docente extends Persona {
+
+    @Column(name = "cod_docente", nullable = false, length = 20, unique = true)
+    private String codDocente;
+
+    @Column(name = "especialidad", length = 100)
+    private String especialidad;
+
+    @Column(name = "estado", nullable = false)
+    private boolean estado;
 }

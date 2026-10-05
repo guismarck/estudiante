@@ -12,5 +12,5 @@ public interface CatalogoSalonRepositorio extends JpaRepository<CatalogoSalon , 
 
     @Modifying
     @Query("UPDATE CatalogoSalon s SET s.capacidad = s.capacidad - 1, s.actualizadoEl = CURRENT_TIMESTAMP WHERE s.idCatalogoSalon = :idSalon AND s.capacidad > 0")
-    int decrementarCapacidadSiDisponible(@Param("idSalon") Long idSalon);
+    int decrementarCapacidadSiDisponible(@Param("idSalon") Integer idCatalogoSalon);
 }

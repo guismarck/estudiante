@@ -16,7 +16,9 @@ CREATE TABLE IF NOT EXISTS `persona` (
   `sexo`              VARCHAR(20)  NOT NULL,
   `fecha_nacimiento`  DATE         NOT NULL,
   `cedula`            VARCHAR(20)  DEFAULT NULL,
-  `partida_nacimiento` VARCHAR(30) DEFAULT NULL,
+  `email` VARCHAR(255) NULL DEFAULT NULL,
+  `telefono_principal`  VARCHAR(15)  DEFAULT NULL,
+  `telefono_secundario` VARCHAR(15)  DEFAULT NULL,
   `direccion`         VARCHAR(300) NOT NULL,
   `creado_por`        VARCHAR(50)  DEFAULT NULL,
   `creado_el`         DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -25,15 +27,15 @@ CREATE TABLE IF NOT EXISTS `persona` (
   PRIMARY KEY (`idpersona`),
   UNIQUE KEY `uk_persona_cedula` (`cedula`),
   INDEX `idx_persona_apellidos` (`apellido_completo`, `nombre_completo`),
-  CONSTRAINT `chk_persona_sexo` CHECK (`sexo` IN ('MASCULINO', 'FEMENINO', 'OTRO'))
+  CONSTRAINT `uk_persona_identificacion` UNIQUE (`cedula`),
+  CONSTRAINT `uk_persona_email` UNIQUE (`email`),
+  CONSTRAINT `chk_persona_email_format` CHECK (`email` IS NULL OR `email` REGEXP '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$')
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `tutor` (
   `idtutor`             INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `idpersona`           INT UNSIGNED NOT NULL,
   `ocupacion`           VARCHAR(100) DEFAULT NULL,
-  `telefono_principal`  VARCHAR(15)  NOT NULL,
-  `telefono_secundario` VARCHAR(15)  DEFAULT NULL,
   `creado_por`          VARCHAR(50)  DEFAULT NULL,
   `creado_el`           DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `actualizado_por`     VARCHAR(50)  DEFAULT NULL,
@@ -89,82 +91,93 @@ CREATE TABLE `docente` (
 -- ==========================================
 -- 2. SEGURIDAD Y CONTROL DE ACCESO (RBAC)
 -- ==========================================
+-- =============================================================================
+-- ESQUEMA CORREGIDO Y OPTIMIZADO PARA SISTEMA DE SEGURIDAD (MySQL 8+)
+-- =============================================================================
 
+-- 1. Tabla de Usuarios
 CREATE TABLE IF NOT EXISTS `sec_usuarios` (
-    `id`             INT UNSIGNED AUTO_INCREMENT,
-    `idpersona`      INT UNSIGNED NULL COMMENT 'Relación opcional 1:1 con la persona asociada',
-    `username`       VARCHAR(50)  NOT NULL,
-    `password_hash`  VARCHAR(255) NOT NULL,
-    `estado`         TINYINT UNSIGNED NOT NULL DEFAULT 1 COMMENT '1: Activo, 0: Inactivo, 2: Bloqueado',
-    `creado_por`     VARCHAR(50)  DEFAULT NULL,
-    `creado_en`      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `actualizado_en` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `id`              INT UNSIGNED AUTO_INCREMENT,
+    `idpersona`       INT UNSIGNED NULL COMMENT 'Relación opcional 1:1 con persona',
+    `username`        VARCHAR(50)  NOT NULL,
+    `password_hash`   VARCHAR(255) NOT NULL,
+    `estado`          TINYINT UNSIGNED NOT NULL DEFAULT 1 COMMENT '1: Activo, 0: Inactivo, 2: Bloqueado',
+    `creado_por`      VARCHAR(50)  DEFAULT NULL,
+    `creado_el`       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `actualizado_por` VARCHAR(50)  DEFAULT NULL,
+    `actualizado_el`  DATETIME     DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
 
     CONSTRAINT `pk_sec_usuarios` PRIMARY KEY (`id`),
     CONSTRAINT `uq_sec_usuarios__username` UNIQUE (`username`),
-    CONSTRAINT `uq_sec_usuarios__idpersona` UNIQUE (`idpersona`),
-    CONSTRAINT `fk_sec_usuarios__persona` FOREIGN KEY (`idpersona`) REFERENCES `persona` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Usuarios del sistema educativo';
+    CONSTRAINT `uq_sec_usuarios__idpersona` UNIQUE (`idpersona`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- 2. Tabla de Roles
 CREATE TABLE IF NOT EXISTS `sec_roles` (
     `id`              SMALLINT UNSIGNED AUTO_INCREMENT,
-    `codigo`          VARCHAR(32)  NOT NULL COMMENT 'Ej: ROL_PROFESOR, ROL_APODERADO',
-    `descripcion`     VARCHAR(60)  NOT NULL,
-    `creado_en`       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `creado_por`      VARCHAR(50)  DEFAULT NULL,
-    `actualizado_en`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    `actualizado_por` VARCHAR(50)  DEFAULT NULL,
+    `codigo`          VARCHAR(32) NOT NULL,
+    `descripcion`     VARCHAR(60) NOT NULL,
+    `creado_por`      VARCHAR(50) DEFAULT NULL,
+    `creado_el`       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `actualizado_por` VARCHAR(50) DEFAULT NULL,
+    `actualizado_el`  DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
 
     CONSTRAINT `pk_sec_roles` PRIMARY KEY (`id`),
-    CONSTRAINT `uq_sec_roles__codigo` UNIQUE (`codigo`),
-    CONSTRAINT `ck_sec_roles__actualizado_ge_creado` CHECK (`actualizado_en` >= `creado_en`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Catalogo de roles del sistema educativo';
+    CONSTRAINT `uq_sec_roles__codigo` UNIQUE (`codigo`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- 3. Tabla Intermedia Usuarios <-> Roles
 CREATE TABLE IF NOT EXISTS `sec_roles_usuario` (
-    `usuario_id` INT UNSIGNED      NOT NULL,
+    `usuario_id` INT UNSIGNED NOT NULL,
     `rol_id`     SMALLINT UNSIGNED NOT NULL,
-    `creado_en`  DATETIME          NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `creado_por` VARCHAR(50)       DEFAULT NULL,
+    `creado_por` VARCHAR(50) DEFAULT NULL,
+    `creado_el`  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT `pk_sec_roles_usuario` PRIMARY KEY (`usuario_id`, `rol_id`),
     CONSTRAINT `fk_sec_roles_usuario__usuario` FOREIGN KEY (`usuario_id`) REFERENCES `sec_usuarios`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT `fk_sec_roles_usuario__rol` FOREIGN KEY (`rol_id`) REFERENCES `sec_roles`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Asignación de roles por usuario';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- 4. Tabla de Módulos (Estructura Jerárquica Opciones y Submenús)
 CREATE TABLE IF NOT EXISTS `sec_modulos` (
     `id`              INT UNSIGNED AUTO_INCREMENT,
     `nombre`          VARCHAR(100) NOT NULL,
     `codigo`          VARCHAR(60)  NOT NULL,
-    `recurso`         VARCHAR(255) NOT NULL,
+    `recurso`         VARCHAR(255) NULL,
+    `component_key`   VARCHAR(100) NULL,
     `path_img`        VARCHAR(255) NULL,
     `modulo_padre_id` INT UNSIGNED NULL,
     `orden`           SMALLINT UNSIGNED NOT NULL DEFAULT 1,
-    `estado`          BOOLEAN      NOT NULL DEFAULT TRUE,
+    `estado`          BOOLEAN NOT NULL DEFAULT TRUE,
+    `creado_por`      VARCHAR(50) DEFAULT NULL,
+    `creado_el`       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT `pk_sec_modulos` PRIMARY KEY (`id`),
     CONSTRAINT `uq_sec_modulos__codigo` UNIQUE (`codigo`),
     CONSTRAINT `fk_sec_modulos__modulo_padre` FOREIGN KEY (`modulo_padre_id`) REFERENCES `sec_modulos`(`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-    INDEX `ix_sec_modulos__modulo_padre` (`modulo_padre_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Módulos y opciones de menú del sistema';
+    INDEX `ix_sec_modulos__padre_orden` (`modulo_padre_id`, `orden`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- 5. Tabla Matriz de Permisos Granulares por Rol y Módulo
 CREATE TABLE IF NOT EXISTS `sec_permisos_rol` (
     `rol_id`          SMALLINT UNSIGNED NOT NULL,
-    `modulo_id`       INT UNSIGNED      NOT NULL,
-    `puede_buscar`    BOOLEAN           NOT NULL DEFAULT FALSE,
-    `puede_agregar`   BOOLEAN           NOT NULL DEFAULT FALSE,
-    `puede_modificar` BOOLEAN           NOT NULL DEFAULT FALSE,
-    `puede_inactivar` BOOLEAN           NOT NULL DEFAULT FALSE,
-    `puede_procesar`  BOOLEAN           NOT NULL DEFAULT FALSE,
-    `puede_guardar`   BOOLEAN           NOT NULL DEFAULT FALSE,
-    `puede_exportar`  BOOLEAN           NOT NULL DEFAULT FALSE,
-    `estado`          BOOLEAN           NOT NULL DEFAULT TRUE,
-    `actualizado_en`  DATETIME          NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `modulo_id`       INT UNSIGNED NOT NULL,
+    `puede_buscar`    BOOLEAN NOT NULL DEFAULT FALSE,
+    `puede_agregar`   BOOLEAN NOT NULL DEFAULT FALSE,
+    `puede_modificar` BOOLEAN NOT NULL DEFAULT FALSE,
+    `puede_inactivar` BOOLEAN NOT NULL DEFAULT FALSE,
+    `puede_procesar`  BOOLEAN NOT NULL DEFAULT FALSE,
+    `puede_guardar`   BOOLEAN NOT NULL DEFAULT FALSE,
+    `puede_exportar`  BOOLEAN NOT NULL DEFAULT FALSE,
+    `estado`          BOOLEAN NOT NULL DEFAULT TRUE,
+    `creado_por`      VARCHAR(50) DEFAULT NULL,
+    `creado_el`       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT `pk_sec_permisos_rol` PRIMARY KEY (`rol_id`, `modulo_id`),
     CONSTRAINT `fk_sec_permisos_rol__rol` FOREIGN KEY (`rol_id`) REFERENCES `sec_roles`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT `fk_sec_permisos_rol__modulo` FOREIGN KEY (`modulo_id`) REFERENCES `sec_modulos`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Matriz de permisos granulares por rol y módulo';
-
+    CONSTRAINT `fk_sec_permisos_rol__modulo` FOREIGN KEY (`modulo_id`) REFERENCES `sec_modulos`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    INDEX `ix_sec_permisos_rol__query` (`rol_id`, `modulo_id`, `estado`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 -- ==========================================
 -- 3. ESTRUCTURA ACADÉMICA BASE
 -- ==========================================
@@ -233,8 +246,7 @@ CREATE TABLE `salon` (
   UNIQUE KEY `uk_salon_catalogo_turno_anio` (`idcatalogo_salon`, `turno`, `anio_lectivo`),
   UNIQUE KEY `uk_grado_seccion_turno_anio` (`idGrado`, `seccion`, `turno`, `anio_lectivo`),
   CONSTRAINT `fk_salon_grado` FOREIGN KEY (`idGrado`) REFERENCES `grado` (`idGrado`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `fk_salon_catalogo` FOREIGN KEY (`idcatalogo_salon`) REFERENCES `catalogo_salon` (`idcatalogo_salon`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `chk_salon_turno` CHECK (`turno` IN ('MANANA', 'TARDE', 'SABATINO', 'NOCTURNO'))
+  CONSTRAINT `fk_salon_catalogo` FOREIGN KEY (`idcatalogo_salon`) REFERENCES `catalogo_salon` (`idcatalogo_salon`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ==========================================
@@ -426,24 +438,24 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- ==========================================
 
 INSERT INTO `persona` 
-  (`idpersona`, `nombre_completo`, `apellido_completo`, `sexo`, `fecha_nacimiento`, `cedula`, `partida_nacimiento`, `direccion`, `creado_por`) 
+  (`idpersona`, `nombre_completo`, `apellido_completo`, `sexo`, `fecha_nacimiento`, `cedula`, `direccion`, `creado_por`) 
 VALUES
-  (1, 'Carlos Alberto', 'Mendoza López', 'MASCULINO', '1980-05-12', '001-120580-0001U', NULL, 'Barrio Central, Managua', 'ADMIN'),
-  (2, 'María Elena', 'García Gutiérrez', 'FEMENINO', '1985-08-25', '001-250885-0002A', NULL, 'Reparto San Juan, Managua', 'ADMIN'),
-  (3, 'Roberto José', 'Martínez Silva', 'MASCULINO', '1978-11-03', '001-031178-0003B', NULL, 'Villa Fontana, Managua', 'ADMIN'),
-  (4, 'Ana Lucía', 'Torres Morales', 'FEMENINO', '1990-02-14', '001-140290-0004C', NULL, 'Ciudad Sandino, Managua', 'ADMIN'),
-  (5, 'Fernando José', 'Brennans Ruiz', 'MASCULINO', '1982-09-30', '001-300982-0005D', NULL, 'Bello Horizonte, Managua', 'ADMIN'),
-  (6, 'Sofia Beatris', 'Reyes Castillo', 'FEMENINO', '2010-04-15', NULL, 'PN-2010-00123', 'Barrio Central, Managua', 'ADMIN'),
-  (7, 'Mateo Alexander', 'Mendoza García', 'MASCULINO', '2012-07-20', NULL, 'PN-2012-00456', 'Barrio Central, Managua', 'ADMIN'),
-  (8, 'Valeria Isabella', 'Martínez Torres', 'FEMENINO', '2008-12-10', '001-101208-1001X', 'PN-2008-00789', 'Villa Fontana, Managua', 'ADMIN'),
-  (9, 'Lucas Gabriel', 'García Ruiz', 'MASCULINO', '2011-01-05', NULL, 'PN-2011-00987', 'Reparto San Juan, Managua', 'ADMIN'),
-  (10, 'Admin', 'Sistema Silviano', 'MASCULINO', '1995-06-01', '001-010695-0000A', NULL, 'Oficina Central Colegio', 'ADMIN');
+  (1, 'Carlos Alberto', 'Mendoza López', 'MASCULINO', '1980-05-12', '001-120580-0001U', 'Barrio Central, Managua', 'ADMIN'),
+  (2, 'María Elena', 'García Gutiérrez', 'FEMENINO', '1985-08-25', '001-250885-0002A', 'Reparto San Juan, Managua', 'ADMIN'),
+  (3, 'Roberto José', 'Martínez Silva', 'MASCULINO', '1978-11-03', '001-031178-0003B', 'Villa Fontana, Managua', 'ADMIN'),
+  (4, 'Ana Lucía', 'Torres Morales', 'FEMENINO', '1990-02-14', '001-140290-0004C', 'Ciudad Sandino, Managua', 'ADMIN'),
+  (5, 'Fernando José', 'Brennans Ruiz', 'MASCULINO', '1982-09-30', '001-300982-0005D', 'Bello Horizonte, Managua', 'ADMIN'),
+  (6, 'Sofia Beatris', 'Reyes Castillo', 'FEMENINO', '2010-04-15', 'PN-2010-00123', 'Barrio Central, Managua', 'ADMIN'),
+  (7, 'Mateo Alexander', 'Mendoza García', 'MASCULINO', '2012-07-20', 'PN-2012-00456', 'Barrio Central, Managua', 'ADMIN'),
+  (8, 'Valeria Isabella', 'Martínez Torres', 'FEMENINO', '2008-12-10', '001-101208-1001X', 'Villa Fontana, Managua', 'ADMIN'),
+  (9, 'Lucas Gabriel', 'García Ruiz', 'MASCULINO', '2011-01-05', 'PN-2011-00987', 'Reparto San Juan, Managua', 'ADMIN'),
+  (10, 'Admin', 'Sistema Silviano', 'MASCULINO', '1995-06-01', '001-010695-0000A', 'Oficina Central Colegio', 'ADMIN');
 
 INSERT INTO `tutor` 
-  (`idtutor`, `idpersona`, `ocupacion`, `telefono_principal`, `telefono_secundario`, `creado_por`) 
+  (`idtutor`, `idpersona`, `ocupacion`, `creado_por`) 
 VALUES
-  (1, 1, 'Ingeniero Civil', '88881111', '22221111', 'ADMIN'),
-  (2, 2, 'Contadora Pública', '88882222', NULL, 'ADMIN');
+  (1, 1, 'Ingeniero Civil', 'ADMIN'),
+  (2, 2, 'Contadora Pública', 'ADMIN');
 
 INSERT INTO `estudiante` 
   (`idpersona`, `cod_estudiante`, `codigo_MINED`, `estado`, `creado_por`) 
@@ -573,99 +585,49 @@ VALUES
 
 START TRANSACTION;
 
--- -----------------------------------------------------------------------------
---  REGISTRO DE USUARIOS BASE (sec_usuarios)
--- -----------------------------------------------------------------------------
--- Usuario Administrador de Sistema (requerido para traza de auditoria)
-INSERT INTO sec_usuarios (idpersona,username, password_hash, estado)
-VALUES (1,'admin', '$2a$12$E9eZ23uYpX.A.1v8s9a0e.e3m4a5r6k7e8t9a0b1c2d3e4f5g6', 1)
-ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id);
+SET FOREIGN_KEY_CHECKS = 0;
+TRUNCATE TABLE `sec_permisos_rol`;
+TRUNCATE TABLE `sec_modulos`;
+TRUNCATE TABLE `sec_roles_usuario`;
+TRUNCATE TABLE `sec_roles`;
+TRUNCATE TABLE `sec_usuarios`;
+SET FOREIGN_KEY_CHECKS = 1;
 
-SET @admin_id = LAST_INSERT_ID();
+-- 3. INSERCIÓN DE USUARIOS CON HASH BCrypt VÁLIDO ($2a$12)
+-- Contraseña para ambos usuarios: Admin123!
+-- Hash generado: $2a$12$E2UPv7arXym3L0.3.d812.iYw3W2J8.12g6M/622h7i3l0W1m.L1G
 
--- Usuario Docente de prueba
-INSERT INTO sec_usuarios (idpersona,username, password_hash, estado)
-VALUES (2,'prof.rodriguez', '$2a$12$X1yZ34vWqY.B.2w9t0b1f.f4n5b6s7l8f9u0b1c2d3e4f5g6', 1)
-ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id);
+INSERT INTO `sec_usuarios` (`id`, `idpersona`, `username`, `password_hash`, `estado`, `creado_por`) 
+VALUES 
+  (1, 10, 'admin', '$2a$12$E2UPv7arXym3L0.3.d812.iYw3W2J8.12g6M/622h7i3l0W1m.L1G', 1, 'SYSTEM'),   (2, 4, 'MGARCIA', '$2a$12$E2UPv7arXym3L0.3.d812.iYw3W2J8.12g6M/622h7i3l0W1m.L1G', 1, 'SYSTEM');
 
-SET @docente_usuario_id = LAST_INSERT_ID();
+-- 4. INSERCIÓN DE ROLES
+INSERT INTO `sec_roles` (`id`, `codigo`, `descripcion`, `creado_por`) 
+VALUES 
+  (1, 'ADMIN', 'Administrador General', 'SYSTEM'),
+  (2, 'DOCENTE', 'Docente de Asignatura', 'SYSTEM');
 
--- -----------------------------------------------------------------------------
---  REGISTRO DE ROLES (sec_roles)
--- -----------------------------------------------------------------------------
-INSERT INTO sec_roles (codigo, descripcion, creado_por, actualizado_por)
-VALUES ('DOCENTE', 'Profesor de Asignatura / Tutor de Aula', @admin_id, @admin_id)
-ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id);
+-- 5. ASIGNACIÓN DE ROLES A USUARIOS
+INSERT INTO `sec_roles_usuario` (`usuario_id`, `rol_id`, `creado_por`) 
+VALUES 
+  (1, 1, 'SYSTEM'), -- admin -> ADMIN
+  (2, 2, 'SYSTEM'); -- MGARCIA -> DOCENTE
 
-SET @rol_docente_id = LAST_INSERT_ID();
+-- 6. REGISTRO DE MÓDULOS DEL SISTEMA
+INSERT INTO `sec_modulos` (`id`, `nombre`, `codigo`, `recurso`, `component_key`, `modulo_padre_id`, `orden`, `estado`) 
+VALUES 
+  (1, 'Gestión Académica', 'MOD_ACADEMICO', '/academico', NULL, NULL, 1, 1),
+  (2, 'Expediente Estudiantil', 'MOD_ESTUDIANTES', '/estudiantes', 'Estudiantes', 1, 1, 1),
+  (3, 'Calificaciones', 'MOD_EVALUACIONES', '/evaluaciones', NULL, NULL, 2, 1),
+  (4, 'Ingreso de Notas', 'MOD_NOTAS_REGISTRO', '/calificaciones', 'RegistroCalificaciones', 3, 1, 1);
 
--- -----------------------------------------------------------------------------
---  ASIGNACIÓN DE ROL AL USUARIO (sec_roles_usuario)
--- -----------------------------------------------------------------------------
-INSERT INTO sec_roles_usuario (usuario_id, rol_id, creado_por)
-VALUES (@docente_usuario_id, @rol_docente_id, @admin_id)
-ON DUPLICATE KEY UPDATE usuario_id = usuario_id;
-
--- -----------------------------------------------------------------------------
---  ESTRUCTURA DE MÓDULOS Y SUBMÓDULOS DE NOTAS (sec_modulos)
--- -----------------------------------------------------------------------------
--- Módulo Padre: Calificaciones y Evaluación
-INSERT INTO sec_modulos (nombre, codigo, recurso, path_img, modulo_padre_id, estado)
-VALUES ('Calificaciones', 'MOD_EVALUACIONES', '/evaluaciones', 'assets/icons/grades.svg', NULL, 1)
-ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id);
-
-SET @modulo_padre_id = LAST_INSERT_ID();
-
--- Submódulo: Registro de Notas
-INSERT INTO sec_modulos (nombre, codigo, recurso, path_img, modulo_padre_id, estado)
-VALUES ('Ingreso de Notas', 'MOD_NOTAS_REGISTRO', '/evaluaciones/registro-notas', 'assets/icons/edit-grades.svg', @modulo_padre_id, 1)
-ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id);
-
-SET @modulo_notas_id = LAST_INSERT_ID();
-
--- Submódulo: Actas Parciales (Consulta/Exportación)
-INSERT INTO sec_modulos (nombre, codigo, recurso, path_img, modulo_padre_id, estado)
-VALUES ('Actas de Calificaciones', 'MOD_NOTAS_ACTAS', '/evaluaciones/actas', 'assets/icons/reports.svg', @modulo_padre_id, 1)
-ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id);
-
-SET @modulo_actas_id = LAST_INSERT_ID();
-
--- -----------------------------------------------------------------------------
---  ASIGNACIÓN DE PERMISOS AL ROL DOCENTE (sec_permisos_rol)
--- -----------------------------------------------------------------------------
--- Permisos para "Ingreso de Notas": Buscar, Agregar, Modificar, Guardar y Exportar.
-INSERT INTO sec_permisos_rol (
-    rol_id, modulo_id, puede_buscar, puede_agregar, puede_modificar,
-    puede_inactivar, puede_procesar, puede_guardar, puede_exportar, estado
-) VALUES (
-    @rol_docente_id, @modulo_notas_id, 
-    1, -- puede_buscar
-    1, -- puede_agregar
-    1, -- puede_modificar
-    0, -- puede_inactivar (Restringido para Docentes)
-    0, -- puede_procesar (Cierre oficial solo por Dirección)
-    1, -- puede_guardar
-    1, -- puede_exportar
-    1  -- estado
-) ON DUPLICATE KEY UPDATE 
-    puede_buscar = 1, puede_agregar = 1, puede_modificar = 1, puede_guardar = 1, puede_exportar = 1;
-
--- Permisos para "Actas de Calificaciones": Solo lectura y exportación.
-INSERT INTO sec_permisos_rol (
-    rol_id, modulo_id, puede_buscar, puede_agregar, puede_modificar,
-    puede_inactivar, puede_procesar, puede_guardar, puede_exportar, estado
-) VALUES (
-    @rol_docente_id, @modulo_actas_id, 
-    1, -- puede_buscar
-    0, -- puede_agregar
-    0, -- puede_modificar
-    0, -- puede_inactivar
-    0, -- puede_procesar
-    0, -- puede_guardar
-    1, -- puede_exportar
-    1  -- estado
-) ON DUPLICATE KEY UPDATE 
-    puede_buscar = 1, puede_exportar = 1;
+-- 7. ASIGNACIÓN DE PERMISOS GRANULARES
+-- Rol DOCENTE en MOD_NOTAS_REGISTRO
+INSERT INTO `sec_permisos_rol` 
+  (`rol_id`, `modulo_id`, `puede_buscar`, `puede_agregar`, `puede_modificar`, `puede_inactivar`, `puede_procesar`, `puede_guardar`, `puede_exportar`, `estado`) 
+VALUES 
+  (2, 4, 1, 1, 1, 0, 0, 1, 1, 1), -- DOCENTE en Notas
+  (2, 2, 1, 0, 0, 0, 0, 0, 1, 1); -- DOCENTE en Estudiantes (Solo lectura)
 
 COMMIT;
 

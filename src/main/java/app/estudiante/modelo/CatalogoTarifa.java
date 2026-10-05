@@ -26,7 +26,7 @@ public class CatalogoTarifa extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "idtarifa")
+    @Column(name = "id_tarifa")
     private Integer idTarifa;
 
     @ManyToOne(fetch = FetchType.LAZY)

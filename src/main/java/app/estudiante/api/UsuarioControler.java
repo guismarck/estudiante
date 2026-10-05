@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 @RestController
 @RequestMapping("/api/usuarios")
-@CrossOrigin(value = "http://localhost:3000")
+@CrossOrigin(value = "https://miniature-space-enigma-65prg5v459vh46xx-3000.app.github.dev")
 @RequiredArgsConstructor
 public class UsuarioControler {
 

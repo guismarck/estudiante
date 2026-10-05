@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 @Builder
 public class MatriculaResponseDTO {
     private Long idMatricula;
-    private Long estudianteId;
+    private Integer estudianteId;
     private String nombreSalon;
     private String anioLectivo;
     private String estadoMatricula;

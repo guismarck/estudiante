@@ -14,7 +14,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping(path = "/api/auth", produces = MediaType.APPLICATION_JSON_VALUE)
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "*", maxAge = 3600)
 public class AuthController {
 
     private final IAuthServicio authService;

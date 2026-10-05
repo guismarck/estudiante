@@ -1,6 +1,5 @@
 package app.estudiante.utils.seguridad;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Data;

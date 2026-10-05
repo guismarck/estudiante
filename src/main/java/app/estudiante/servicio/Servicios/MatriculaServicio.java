@@ -18,8 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 @Service
 public class MatriculaServicio implements IMatriculaServicio {
@@ -87,7 +85,7 @@ public class MatriculaServicio implements IMatriculaServicio {
                 .orElseThrow(() -> new RuntimeException("Salón no encontrado con ID: " + dto.getIdSalon()));
 
         //  Decrementar Capacidad Atómicamente
-        Long idCatalogoSalon = salon.getCatalogoSalon().getIdCatalogoSalon();
+        Integer idCatalogoSalon = salon.getCatalogoSalon().getIdCatalogoSalon();
         int filasActualizadas = catalogoSalonRepositorio.decrementarCapacidadSiDisponible(idCatalogoSalon);
 
         if (filasActualizadas == 0) {
