@@ -1,0 +1,110 @@
+package app.estudiante.api;
+
+import app.estudiante.utils.CalificacionRequestDTO;
+import app.estudiante.utils.CalificacionResponseDTO;
+import app.calificaciones.dto.CalificacionBatchRequestDTO;
+import app.calificaciones.dto.ComboItemDTO;
+import app.calificaciones.dto.NominaEstudianteResponseDTO;
+import app.calificaciones.dto.RespuestaMensajeDTO;
+import app.calificaciones.servicio.ICalificacionServicio;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("estudiante-app")
+@CrossOrigin(value = "http://localhost:3000")
+public class CalificacionController {
+    @Autowired
+    private final ICalificacionServicio calificacionServicio;
+
+    /**
+     * Carga la nómina de estudiantes matriculados para la asignatura y período especificados.
+     */
+    @GetMapping(path ="/nomina")
+    public ResponseEntity<List<NominaEstudianteResponseDTO>> obtenerNominaEstudiantes(
+            @RequestParam @NotNull(message = "El iddetalle_plan_de_estudio es requerido") Long iddetallePlanDeEstudio,
+            @RequestParam @NotNull(message = "El idperiodo_evaluativo es requerido") Long idPeriodoEvaluativo) {
+        
+        List<NominaEstudianteResponseDTO> nomina = calificacionServicio.obtenerNominaEstudiantes(
+                iddetallePlanDeEstudio, 
+                idPeriodoEvaluativo
+        );
+        return ResponseEntity.ok(nomina);
+    }
+
+    /**
+     * Guardado masivo (Bulk Upsert) de acumulados y exámenes enviados desde el frontend.
+     */
+    @PostMapping(path ="/batch")
+    public ResponseEntity<RespuestaMensajeDTO> guardarCalificacionesBatch(
+            @Valid @RequestBody CalificacionBatchRequestDTO payload) {
+        
+        // En un entorno con Spring Security el usuario se obtendría del SecurityContext
+        String usuarioActual = "SISTEMA_DOCENTE"; 
+        
+        calificacionServicio.guardarCalificacionesBatch(payload, usuarioActual);
+        
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new RespuestaMensajeDTO(true, "Calificaciones registradas correctamente en el SIGE."));
+    }
+
+    /**
+     * Carga del combo de Grados Académicos.
+     */
+    @GetMapping(path ="/grados")
+    public ResponseEntity<List<ComboItemDTO>> obtenerGradosCombo() {
+        List<ComboItemDTO> grados = calificacionServicio.obtenerGradosCombo();
+        return ResponseEntity.ok(grados);
+    }
+
+    /**
+     * Carga del combo de Asignaturas / Secciones dependientes del Grado Académico.
+     */
+    @GetMapping(path ="/asignaturas")
+    public ResponseEntity<List<ComboItemDTO>> obtenerAsignaturasSeccionesCombo(
+            @RequestParam @NotNull(message = "El idGrado es requerido") Long idGrado) {
+        
+        List<ComboItemDTO> asignaturas = calificacionServicio.obtenerAsignaturasSeccionesCombo(idGrado);
+        return ResponseEntity.ok(asignaturas);
+    }
+
+    /**
+     * Carga del combo de Períodos Evaluativos por Año Lectivo.
+     */
+    @GetMapping(path ="/periodos")
+    public ResponseEntity<List<ComboItemDTO>> obtenerPeriodosEvaluativosCombo(
+            @RequestParam(defaultValue = "2026") Integer anioLectivo) {
+        
+        List<ComboItemDTO> periodos = calificacionServicio.obtenerPeriodosEvaluativosCombo(anioLectivo);
+        return ResponseEntity.ok(periodos);
+    }
+
+    /**
+     * Descarga del reporte PDF de Acta de Calificaciones desde TIBCO Jaspersoft Reports.
+     */
+    @GetMapping(path ="/reportes/acta-pdf")
+    public ResponseEntity<byte[]> descargarActaCalificacionesPDF(
+            @RequestParam @NotNull(message = "El iddetalle_plan_de_estudio es requerido") Long iddetallePlanDeEstudio,
+            @RequestParam @NotNull(message = "El idperiodo_evaluativo es requerido") Long idPeriodoEvaluativo) {
+        
+        byte[] pdfReporte = calificacionServicio.generarActaCalificacionesPdf(iddetallePlanDeEstudio, idPeriodoEvaluativo);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData(
+                "attachment", 
+                String.format("Acta_Calificaciones_Plan_%d_P%d.pdf", iddetallePlanDeEstudio, idPeriodoEvaluativo)
+        );
+
+        return new ResponseEntity<>(pdfReporte, headers, HttpStatus.OK);
+    }
+}

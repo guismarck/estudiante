@@ -62,11 +62,8 @@ public class PlandeEstudioControler {
         if(plandeEstudio == null){
             throw  new recurosNoEncontradoException("No exite el a actualizar con Id"+id);
         }
-        plandeEstudio.setAño_electivo(plandeEstudioResivido.getAño_electivo());
-        plandeEstudio.setFecha_inicio(plandeEstudioResivido.getFecha_inicio());
-        plandeEstudio.setFecha_fin(plandeEstudioResivido.getFecha_fin());
-        plandeEstudio.setPeriodo(plandeEstudioResivido.getPeriodo());
-        plandeEstudio.setEstado(plandeEstudioResivido.isEstado());
+        plandeEstudio.setAnioLectivo(plandeEstudioResivido.getAnioLectivo());
+        plandeEstudio.setEstado(plandeEstudioResivido.getEstado());
         plandeEstudioServicio.guardarPlandeEstudio(plandeEstudio);
         return ResponseEntity.ok(plandeEstudio);
     }

@@ -1,31 +1,35 @@
 package app.estudiante.modelo;
-
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
-import java.util.Date;
+import java.time.LocalDate;
 
-//boilerplate
 @Entity
-@Data //get a set
-@NoArgsConstructor //vacio
-@AllArgsConstructor//lleno
+@Table(name = "periodo_evaluativo")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @ToString
-@Table
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class PeriodoEvaluativo {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer idperiodo_evaluativo;
-    @Column
-    private String NombrePeriodo;
-    @Column
-    private  Integer NumeroPeriodo;
-    @Column
-    private Date AñoEscolar;
-    @Column
-    private boolean estado;
+    @Column(name = "idperiodo_evaluativo")
+    @EqualsAndHashCode.Include
+    private Integer idPeriodoEvaluativo;
 
+    @Column(name = "nombre_periodo", nullable = false, length = 100)
+    private String nombrePeriodo;
+
+    @Column(name = "numero_periodo", nullable = false)
+    private Integer numeroPeriodo;
+
+    @Column(name = "anio_escolar", nullable = false)
+    private LocalDate anioEscolar;
+
+    @Column(name = "estado", nullable = false)
+    private Boolean estado = true;
 }

@@ -1,13 +1,17 @@
 package app.estudiante.servicio.InterfacesServicios;
 
-import app.estudiante.modelo.Calificaciones;
-
 import java.util.List;
 
+import app.estudiante.utils.CalificacionBatchRequestDTO;
+import app.estudiante.utils.ComboItemDTO;
+import app.estudiante.utils.NominaEstudianteResponseDTO;
+
 public interface IcalificacionesServicio {
-    public List<Calificaciones> ListarCalificaciones();
-    public Calificaciones buscarCalificacionesPorId(Integer idcalificaciones);
-    public void guardarCalificaciones(Calificaciones calificaciones);
-    public  void eliminarCalificaciones(Calificaciones calificaciones);
-    
+    List<NominaEstudianteResponseDTO> obtenerNominaEstudiantes(Integer idDetallePlanDeEstudio, Integer idPeriodoEvaluativo);
+    void guardarCalificacionesBatch(CalificacionBatchRequestDTO batchDTO, String usuario);
+    List<ComboItemDTO> obtenerGradosCombo();
+    List<ComboItemDTO> obtenerAsignaturasSeccionesCombo(Integer idGrado);
+    List<ComboItemDTO> obtenerPeriodosEvaluativosCombo(Integer anioLectivo);
+    byte[] generarActaCalificacionesPdf(Integer idDetallePlanDeEstudio, Integer anioLectivo);
+
 }

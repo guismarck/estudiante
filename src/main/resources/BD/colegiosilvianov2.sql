@@ -299,6 +299,7 @@ CREATE TABLE `detalle_plan_de_estudio` (
   `idPlan_de_estudio`         INT UNSIGNED NOT NULL,
   `idAsignatura`              INT UNSIGNED NOT NULL,
   `idDocente`                 INT UNSIGNED NOT NULL,
+  `idSalon`                   INT UNSIGNED NULL AFTER `idDocente`,
   `creado_por`                VARCHAR(50)  DEFAULT NULL,
   `creado_el`                 DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `actualizado_por`           VARCHAR(50)  DEFAULT NULL,
@@ -307,7 +308,8 @@ CREATE TABLE `detalle_plan_de_estudio` (
   UNIQUE KEY `uk_plan_asignatura` (`idPlan_de_estudio`, `idAsignatura`),
   CONSTRAINT `fk_det_plan` FOREIGN KEY (`idPlan_de_estudio`) REFERENCES `plan_de_estudio` (`idPlan_de_estudio`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_det_asig` FOREIGN KEY (`idAsignatura`) REFERENCES `asignatura` (`idAsignatura`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `fk_det_docente` FOREIGN KEY (`idDocente`) REFERENCES `docente` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE
+  CONSTRAINT `fk_det_docente` FOREIGN KEY (`idDocente`) REFERENCES `docente` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_det_salon` FOREIGN KEY (`idSalon`) REFERENCES `salon` (`idSalon`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `calificaciones` (
@@ -327,8 +329,8 @@ CREATE TABLE `calificaciones` (
   CONSTRAINT `fk_calif_matricula` FOREIGN KEY (`idmatricula`) REFERENCES `matricula` (`idmatricula`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_calif_detalle_plan` FOREIGN KEY (`iddetalle_plan_de_estudio`) REFERENCES `detalle_plan_de_estudio` (`iddetalle_plan_de_estudio`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_calif_periodo` FOREIGN KEY (`idperiodo_evaluativo`) REFERENCES `periodo_evaluativo` (`idperiodo_evaluativo`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `chk_acumulado_rango` CHECK (`acumulado` BETWEEN 0.00 AND 60.00),
-  CONSTRAINT `chk_examen_rango` CHECK (`examen` BETWEEN 0.00 AND 40.00)
+  CONSTRAINT `chk_acumulado_rango` CHECK (`acumulado` BETWEEN 0.00 AND 40.00),
+  CONSTRAINT `chk_examen_rango` CHECK (`examen` BETWEEN 0.00 AND 60.00)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ==========================================
@@ -572,100 +574,49 @@ VALUES
 -- =============================================================================
 
 START TRANSACTION;
+SET FOREIGN_KEY_CHECKS = 0;
+TRUNCATE TABLE `sec_permisos_rol`;
+TRUNCATE TABLE `sec_modulos`;
+TRUNCATE TABLE `sec_roles_usuario`;
+TRUNCATE TABLE `sec_roles`;
+TRUNCATE TABLE `sec_usuarios`;
+SET FOREIGN_KEY_CHECKS = 1;
 
--- -----------------------------------------------------------------------------
---  REGISTRO DE USUARIOS BASE (sec_usuarios)
--- -----------------------------------------------------------------------------
--- Usuario Administrador de Sistema (requerido para traza de auditoria)
-INSERT INTO sec_usuarios (idpersona,username, password_hash, estado)
-VALUES (1,'admin', '$2a$12$E9eZ23uYpX.A.1v8s9a0e.e3m4a5r6k7e8t9a0b1c2d3e4f5g6', 1)
-ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id);
+-- 3. INSERCIÓN DE USUARIOS CON HASH BCrypt VÁLIDO ($2a$12)
+-- Contraseña para ambos usuarios: Admin123!
+-- Hash generado: $2a$12$E2UPv7arXym3L0.3.d812.iYw3W2J8.12g6M/622h7i3l0W1m.L1G
 
-SET @admin_id = LAST_INSERT_ID();
+INSERT INTO `sec_usuarios` (`id`, `idpersona`, `username`, `password_hash`, `estado`, `creado_por`) 
+VALUES 
+  (1, 10, 'admin', '$2a$12$E2UPv7arXym3L0.3.d812.iYw3W2J8.12g6M/622h7i3l0W1m.L1G', 1, 'SYSTEM'),   (2, 4, 'MGARCIA', '$2a$12$E2UPv7arXym3L0.3.d812.iYw3W2J8.12g6M/622h7i3l0W1m.L1G', 1, 'SYSTEM');
 
--- Usuario Docente de prueba
-INSERT INTO sec_usuarios (idpersona,username, password_hash, estado)
-VALUES (2,'prof.rodriguez', '$2a$12$X1yZ34vWqY.B.2w9t0b1f.f4n5b6s7l8f9u0b1c2d3e4f5g6', 1)
-ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id);
+-- 4. INSERCIÓN DE ROLES
+INSERT INTO `sec_roles` (`id`, `codigo`, `descripcion`, `creado_por`) 
+VALUES 
+  (1, 'ADMIN', 'Administrador General', 'SYSTEM'),
+  (2, 'DOCENTE', 'Docente de Asignatura', 'SYSTEM');
 
-SET @docente_usuario_id = LAST_INSERT_ID();
+-- 5. ASIGNACIÓN DE ROLES A USUARIOS
+INSERT INTO `sec_roles_usuario` (`usuario_id`, `rol_id`, `creado_por`) 
+VALUES 
+  (1, 1, 'SYSTEM'), -- admin -> ADMIN
+  (2, 2, 'SYSTEM'); -- MGARCIA -> DOCENTE
 
--- -----------------------------------------------------------------------------
---  REGISTRO DE ROLES (sec_roles)
--- -----------------------------------------------------------------------------
-INSERT INTO sec_roles (codigo, descripcion, creado_por, actualizado_por)
-VALUES ('DOCENTE', 'Profesor de Asignatura / Tutor de Aula', @admin_id, @admin_id)
-ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id);
+-- 6. REGISTRO DE MÓDULOS DEL SISTEMA
+INSERT INTO `sec_modulos` (`id`, `nombre`, `codigo`, `recurso`, `component_key`, `modulo_padre_id`, `orden`, `estado`) 
+VALUES 
+  (1, 'Gestión Académica', 'MOD_ACADEMICO', '/academico', NULL, NULL, 1, 1),
+  (2, 'Expediente Estudiantil', 'MOD_ESTUDIANTES', '/estudiantes', 'Estudiantes', 1, 1, 1),
+  (3, 'Calificaciones', 'MOD_EVALUACIONES', '/evaluaciones', NULL, NULL, 2, 1),
+  (4, 'Ingreso de Notas', 'MOD_NOTAS_REGISTRO', '/calificaciones', 'RegistroCalificaciones', 3, 1, 1);
 
-SET @rol_docente_id = LAST_INSERT_ID();
-
--- -----------------------------------------------------------------------------
---  ASIGNACIÓN DE ROL AL USUARIO (sec_roles_usuario)
--- -----------------------------------------------------------------------------
-INSERT INTO sec_roles_usuario (usuario_id, rol_id, creado_por)
-VALUES (@docente_usuario_id, @rol_docente_id, @admin_id)
-ON DUPLICATE KEY UPDATE usuario_id = usuario_id;
-
--- -----------------------------------------------------------------------------
---  ESTRUCTURA DE MÓDULOS Y SUBMÓDULOS DE NOTAS (sec_modulos)
--- -----------------------------------------------------------------------------
--- Módulo Padre: Calificaciones y Evaluación
-INSERT INTO sec_modulos (nombre, codigo, recurso, path_img, modulo_padre_id, estado)
-VALUES ('Calificaciones', 'MOD_EVALUACIONES', '/evaluaciones', 'assets/icons/grades.svg', NULL, 1)
-ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id);
-
-SET @modulo_padre_id = LAST_INSERT_ID();
-
--- Submódulo: Registro de Notas
-INSERT INTO sec_modulos (nombre, codigo, recurso, path_img, modulo_padre_id, estado)
-VALUES ('Ingreso de Notas', 'MOD_NOTAS_REGISTRO', '/evaluaciones/registro-notas', 'assets/icons/edit-grades.svg', @modulo_padre_id, 1)
-ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id);
-
-SET @modulo_notas_id = LAST_INSERT_ID();
-
--- Submódulo: Actas Parciales (Consulta/Exportación)
-INSERT INTO sec_modulos (nombre, codigo, recurso, path_img, modulo_padre_id, estado)
-VALUES ('Actas de Calificaciones', 'MOD_NOTAS_ACTAS', '/evaluaciones/actas', 'assets/icons/reports.svg', @modulo_padre_id, 1)
-ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id);
-
-SET @modulo_actas_id = LAST_INSERT_ID();
-
--- -----------------------------------------------------------------------------
---  ASIGNACIÓN DE PERMISOS AL ROL DOCENTE (sec_permisos_rol)
--- -----------------------------------------------------------------------------
--- Permisos para "Ingreso de Notas": Buscar, Agregar, Modificar, Guardar y Exportar.
-INSERT INTO sec_permisos_rol (
-    rol_id, modulo_id, puede_buscar, puede_agregar, puede_modificar,
-    puede_inactivar, puede_procesar, puede_guardar, puede_exportar, estado
-) VALUES (
-    @rol_docente_id, @modulo_notas_id, 
-    1, -- puede_buscar
-    1, -- puede_agregar
-    1, -- puede_modificar
-    0, -- puede_inactivar (Restringido para Docentes)
-    0, -- puede_procesar (Cierre oficial solo por Dirección)
-    1, -- puede_guardar
-    1, -- puede_exportar
-    1  -- estado
-) ON DUPLICATE KEY UPDATE 
-    puede_buscar = 1, puede_agregar = 1, puede_modificar = 1, puede_guardar = 1, puede_exportar = 1;
-
--- Permisos para "Actas de Calificaciones": Solo lectura y exportación.
-INSERT INTO sec_permisos_rol (
-    rol_id, modulo_id, puede_buscar, puede_agregar, puede_modificar,
-    puede_inactivar, puede_procesar, puede_guardar, puede_exportar, estado
-) VALUES (
-    @rol_docente_id, @modulo_actas_id, 
-    1, -- puede_buscar
-    0, -- puede_agregar
-    0, -- puede_modificar
-    0, -- puede_inactivar
-    0, -- puede_procesar
-    0, -- puede_guardar
-    1, -- puede_exportar
-    1  -- estado
-) ON DUPLICATE KEY UPDATE 
-    puede_buscar = 1, puede_exportar = 1;
+-- 7. ASIGNACIÓN DE PERMISOS GRANULARES
+-- Rol DOCENTE en MOD_NOTAS_REGISTRO
+INSERT INTO `sec_permisos_rol` 
+  (`rol_id`, `modulo_id`, `puede_buscar`, `puede_agregar`, `puede_modificar`, `puede_inactivar`, `puede_procesar`, `puede_guardar`, `puede_exportar`, `estado`) 
+VALUES 
+  (2, 4, 1, 1, 1, 0, 0, 1, 1, 1), -- DOCENTE en Notas
+  (2, 2, 1, 0, 0, 0, 0, 0, 1, 1); -- DOCENTE en Estudiantes (Solo lectura)
 
 COMMIT;
 
