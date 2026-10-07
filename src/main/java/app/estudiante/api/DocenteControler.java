@@ -23,10 +23,10 @@ public class DocenteControler {
 
     //http://localhost:8080/estudiante-app/docentes
     @GetMapping(path = "/docentes")
-    public List<Docente> obternerDocentes(){
-        var docentes = docenteServicio.ListarDocent();
-        docentes.forEach((docente -> logger.info(docente.toString())));
-        return docentes;
+    public List<Docente> obternerDocentes(@RequestParam(value = "search",required = false) String search){
+        if (search == null || search.trim().isEmpty())
+            return  docenteServicio.ListarDocente();
+        return docenteServicio.busquedaGeneral(search);
     }
 
     @PostMapping(path = "/docentes/create") // agregar docente
@@ -54,11 +54,13 @@ public class DocenteControler {
         docente.setApellido_completo(docenteResivido.getApellido_completo());
         docente.setSexo(docenteResivido.getSexo());
         docente.setDireccion(docenteResivido.getDireccion());
-        //docente.setPart(docenteResivido.getPartidad_nacimiento());
-        docente.setFecha_nacimiento(docenteResivido.getFecha_nacimiento());
         docente.setCedula(docenteResivido.getCedula());
-        docente.setEstado(docenteResivido.isEstado());
+        docente.setEspecialidad(docenteResivido.getEspecialidad());
+        docente.setEstado(docenteResivido.getEstado());
+        docente.setCodDocente(docenteResivido.getCodDocente());
         docenteServicio.guardarDocente(docente);
+        //docente.setPart(docenteResivido.getPartidad_nacimiento());
+        //docente.setFecha_nacimiento(docenteResivido.getFecha_nacimiento());
         return ResponseEntity.ok(docente);
     }
 

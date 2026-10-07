@@ -14,6 +14,7 @@ import lombok.*;
 @EqualsAndHashCode(callSuper = true)
 public class Estudiante extends Persona {
 
+
     @Column(name = "cod_estudiante", nullable = false, unique = true, length = 45)
     private String codEstudiante;
 
