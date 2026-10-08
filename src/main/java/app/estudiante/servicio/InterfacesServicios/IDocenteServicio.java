@@ -2,11 +2,13 @@ package app.estudiante.servicio.InterfacesServicios;
 
 import app.estudiante.modelo.Docente;
 
+
 import java.util.List;
 
 public interface IDocenteServicio {
-    public List<Docente>ListarDocent();
-    public Docente buscarDocentePorId(Integer idDocente);
-    public void guardarDocente (Docente docente);
-    public  void eliminarDocente(Docente docente);
+      List<Docente>ListarDocente();
+    List<Docente> busquedaGeneral(String search);
+     Docente buscarDocentePorId(Integer idDocente);
+     void guardarDocente (Docente docente);
+      void eliminarDocente(Docente docente);
 }

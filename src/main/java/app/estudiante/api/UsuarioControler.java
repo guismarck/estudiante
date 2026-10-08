@@ -69,7 +69,7 @@ public class UsuarioControler {
        // docente.setPartidad_nacimiento(usuarioResivido.getDocente().getPartidad_nacimiento());
         docente.setFecha_nacimiento(usuarioResivido.getDocente().getFecha_nacimiento());
         docente.setCedula(usuarioResivido.getDocente().getCedula());
-        docente.setEstado(usuarioResivido.getDocente().isEstado());
+        docente.setEstado(usuarioResivido.getDocente().getEstado());
         usuarioServicio.guardarUsuario(usuario);
         return ResponseEntity.ok(usuario);
     }
