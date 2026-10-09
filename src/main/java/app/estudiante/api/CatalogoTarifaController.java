@@ -21,7 +21,7 @@ public class CatalogoTarifaController {
     @Autowired
     private final ICatalogoTarifaServicio tarifaServicio = null;
 
-    @GetMapping
+    @GetMapping(path = "/catalogo/tarifa")
     public ResponseEntity<List<CatalogoTarifa>> listarTodas(@RequestParam(required = false) Integer anioLectivo) {
         List<CatalogoTarifa> tarifas = (anioLectivo != null)
                 ? tarifaServicio.obtenerPorAnio(anioLectivo)
@@ -29,7 +29,7 @@ public class CatalogoTarifaController {
         return ResponseEntity.ok(tarifas);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping(path = "/catalogo/tarifa/{id}")
     public ResponseEntity<CatalogoTarifa> obtenerPorId(@PathVariable Integer id) {
         return ResponseEntity.ok(tarifaServicio.obtenerPorId(id));
     }
@@ -64,7 +64,7 @@ public class CatalogoTarifaController {
         return new ResponseEntity<>(pdfContent, headers, HttpStatus.OK);
     }
 
-    @GetMapping("/buscar")
+    @GetMapping("catalogo/tarifa/buscar")
     public ResponseEntity<CatalogoTarifa> obtenerTarifaPorGradoYConcepto(
             @RequestParam(name = "idGrado") Integer idGrado,
             @RequestParam(name = "anioLectivo") Integer anioLectivo,

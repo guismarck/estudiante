@@ -5,87 +5,134 @@ CREATE DATABASE IF NOT EXISTS `colegiosilviano_dev`
 
 USE `colegiosilviano_dev`;
 
--- ==========================================
--- 1. ENTIDADES BASE Y PERSONAS
--- ==========================================
-
-CREATE TABLE IF NOT EXISTS `persona` (
-  `idpersona`         INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `nombre_completo`   VARCHAR(150) NOT NULL,
-  `apellido_completo` VARCHAR(150) NOT NULL,
-  `sexo`              VARCHAR(20)  NOT NULL,
-  `fecha_nacimiento`  DATE         NOT NULL,
-  `cedula`            VARCHAR(20)  DEFAULT NULL,
-  `partida_nacimiento` VARCHAR(30) DEFAULT NULL,
-  `direccion`         VARCHAR(300) NOT NULL,
-  `creado_por`        VARCHAR(50)  DEFAULT NULL,
-  `creado_el`         DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `actualizado_por`   VARCHAR(50)  DEFAULT NULL,
-  `actualizado_el`    DATETIME     DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+DROP TABLE IF EXISTS `persona`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `persona` (
+  `idpersona` int unsigned NOT NULL AUTO_INCREMENT,
+  `nombre_completo` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `apellido_completo` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `sexo` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `fecha_nacimiento` date NOT NULL,
+  `cedula` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `partida_nacimiento` varchar(30) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `direccion` varchar(300) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `creado_por` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `creado_el` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `actualizado_por` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `actualizado_el` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`idpersona`),
   UNIQUE KEY `uk_persona_cedula` (`cedula`),
-  INDEX `idx_persona_apellidos` (`apellido_completo`, `nombre_completo`),
-  CONSTRAINT `chk_persona_sexo` CHECK (`sexo` IN ('MASCULINO', 'FEMENINO', 'OTRO'))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  KEY `idx_persona_apellidos` (`apellido_completo`,`nombre_completo`)
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
-CREATE TABLE `tutor` (
-  `idtutor`             INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `idpersona`           INT UNSIGNED NOT NULL,
-  `ocupacion`           VARCHAR(100) DEFAULT NULL,
-  `telefono_principal`  VARCHAR(15)  NOT NULL,
-  `telefono_secundario` VARCHAR(15)  DEFAULT NULL,
-  `creado_por`          VARCHAR(50)  DEFAULT NULL,
-  `creado_el`           DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `actualizado_por`     VARCHAR(50)  DEFAULT NULL,
-  `actualizado_el`      DATETIME     DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`idtutor`),
-  UNIQUE KEY `uk_tutor_persona` (`idpersona`),
-  CONSTRAINT `fk_tutor_persona` FOREIGN KEY (`idpersona`) REFERENCES `persona` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+--
+-- Table structure for table `docente`
+--
 
+DROP TABLE IF EXISTS `docente`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `docente` (
+  `idpersona` int unsigned NOT NULL,
+  `cod_docente` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `especialidad` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `estado` tinyint(1) NOT NULL DEFAULT '1',
+  `creado_por` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `creado_el` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `actualizado_por` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `actualizado_el` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`idpersona`),
+  UNIQUE KEY `uk_docente_codigo` (`cod_docente`),
+  CONSTRAINT `fk_docente_persona` FOREIGN KEY (`idpersona`) REFERENCES `persona` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+DROP TABLE IF EXISTS `estudiante`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `estudiante` (
-  `idpersona`      INT UNSIGNED NOT NULL,
-  `cod_estudiante` VARCHAR(20)  NOT NULL,
-  `codigo_MINED`   VARCHAR(30)  DEFAULT NULL,
-  `estado`         TINYINT(1)   NOT NULL DEFAULT 1 COMMENT '1 = Activo, 0 = Inactivo',
-  `creado_por`     VARCHAR(50)  DEFAULT NULL,
-  `creado_el`      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `actualizado_por` VARCHAR(50) DEFAULT NULL,
-  `actualizado_el` DATETIME     DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `idpersona` int unsigned NOT NULL,
+  `cod_estudiante` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `codigo_MINED` varchar(30) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `estado` tinyint(1) NOT NULL DEFAULT '1' COMMENT '1 = Activo, 0 = Inactivo',
+  `creado_por` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `creado_el` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `actualizado_por` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `actualizado_el` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`idpersona`),
   UNIQUE KEY `uk_estudiante_codigo` (`cod_estudiante`),
   UNIQUE KEY `uk_estudiante_mined` (`codigo_MINED`),
   CONSTRAINT `fk_estudiante_persona` FOREIGN KEY (`idpersona`) REFERENCES `persona` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
+
+
+DROP TABLE IF EXISTS `tutor`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tutor` (
+  `idtutor` int unsigned NOT NULL AUTO_INCREMENT,
+  `idpersona` int unsigned NOT NULL,
+  `ocupacion` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `telefono_principal` varchar(15) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `telefono_secundario` varchar(15) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `creado_por` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `creado_el` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `actualizado_por` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `actualizado_el` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`idtutor`),
+  UNIQUE KEY `uk_tutor_persona` (`idpersona`),
+  CONSTRAINT `fk_tutor_persona` FOREIGN KEY (`idpersona`) REFERENCES `persona` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+
+--
+-- Table structure for table `estudiante_tutor`
+--
+
+DROP TABLE IF EXISTS `estudiante_tutor`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `estudiante_tutor` (
-  `idpersona_estudiante`   INT UNSIGNED NOT NULL,
-  `idtutor`                INT UNSIGNED NOT NULL,
-  `parentesco`             VARCHAR(30)  NOT NULL,
-  `es_representante_legal` TINYINT(1)   NOT NULL DEFAULT 0,
-  `creado_por`             VARCHAR(50)  DEFAULT NULL,
-  `creado_el`              DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `actualizado_por`        VARCHAR(50)  DEFAULT NULL,
-  `actualizado_el`         DATETIME     DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`idpersona_estudiante`, `idtutor`),
+  `idpersona_estudiante` int unsigned NOT NULL,
+  `idtutor` int unsigned NOT NULL,
+  `parentesco` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `es_representante_legal` tinyint(1) NOT NULL DEFAULT '0',
+  `creado_por` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `creado_el` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `actualizado_por` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `actualizado_el` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`idpersona_estudiante`,`idtutor`),
+  KEY `fk_et_tutor` (`idtutor`),
   CONSTRAINT `fk_et_estudiante` FOREIGN KEY (`idpersona_estudiante`) REFERENCES `estudiante` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_et_tutor` FOREIGN KEY (`idtutor`) REFERENCES `tutor` (`idtutor`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
-CREATE TABLE `docente` (
-  `idpersona`      INT UNSIGNED NOT NULL,
-  `cod_docente`    VARCHAR(20)  NOT NULL,
-  `especialidad`   VARCHAR(100) DEFAULT NULL,
-  `estado`         TINYINT(1)   NOT NULL DEFAULT 1,
-  `creado_por`     VARCHAR(50)  DEFAULT NULL,
-  `creado_el`      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `actualizado_por` VARCHAR(50)  DEFAULT NULL,
-  `actualizado_el` DATETIME     DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`idpersona`),
-  UNIQUE KEY `uk_docente_codigo` (`cod_docente`),
-  CONSTRAINT `fk_docente_persona` FOREIGN KEY (`idpersona`) REFERENCES `persona` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `persona`
+--
+
+LOCK TABLES `persona` WRITE;
+/*!40000 ALTER TABLE `persona` DISABLE KEYS */;
+INSERT INTO `persona` VALUES (1,'Carlos Alberto','Mendoza López','MASCULINO','1980-05-12','001-120580-0001U',NULL,'Barrio Central, Managua','ADMIN','2026-10-06 18:34:34',NULL,NULL),(2,'María Elena','García Gutiérrez','FEMENINO','1985-08-25','001-250885-0002A',NULL,'Reparto San Juan, Managua','ADMIN','2026-10-06 18:34:34',NULL,NULL),(3,'Roberto José','Martínez Silva','MASCULINO','1978-11-03','001-031178-0003B',NULL,'Villa Fontana, Managua','ADMIN','2026-10-06 18:34:34',NULL,NULL),(4,'Ana Lucía','Torres Morales','FEMENINO','1990-02-14','001-140290-0004C',NULL,'Ciudad Sandino, Managua','ADMIN','2026-10-06 18:34:34',NULL,NULL),(5,'Fernando José','Brennans Ruiz','MASCULINO','1982-09-30','001-300982-0005D',NULL,'Bello Horizonte, Managua','ADMIN','2026-10-06 18:34:34',NULL,NULL),(6,'Sofia Beatris','Reyes Castillo','FEMENINO','2010-04-15',NULL,'PN-2010-00123','Barrio Central, Managua','ADMIN','2026-10-06 18:34:34',NULL,NULL),(7,'Mateo Alexander','Mendoza García','MASCULINO','2012-07-20',NULL,'PN-2012-00456','Barrio Central, Managua','ADMIN','2026-10-06 18:34:34',NULL,NULL),(8,'Valeria Isabella','Martínez Torres','FEMENINO','2008-12-10','001-101208-1001X','PN-2008-00789','Villa Fontana, Managua','ADMIN','2026-10-06 18:34:34',NULL,NULL),(9,'Lucas Gabriel','García Ruiz','MASCULINO','2011-01-05',NULL,'PN-2011-00987','Reparto San Juan, Managua','ADMIN','2026-10-06 18:34:34',NULL,NULL),(10,'Admin','Sistema Silviano','MASCULINO','1995-06-01','001-010695-0000A',NULL,'Oficina Central Colegio','ADMIN','2026-10-06 18:34:34',NULL,NULL),(13,'Guismarck Josue','Nuñez Gonzalez','M','2026-10-07','401-010497-0002c',NULL,'Bo.Israel Galeano Centro de Salud Laureles Sur 6c al Norte 3c al este,Managua',NULL,'2026-10-07 20:32:51',NULL,'2026-10-07 20:59:30'),(14,'Josue David ','Reyes','M','2026-10-07','402-01013-43434',NULL,'de Siudad sandino ',NULL,'2026-10-07 20:45:54',NULL,NULL),(16,'Dayana Valeska ','Vaskes dias','F','2026-10-07','401-23232-000H','si','De ciudad sandino',NULL,'2026-10-07 22:01:22',NULL,'2026-10-08 00:57:44');
+/*!40000 ALTER TABLE `persona` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Dumping data for table `tutor`
+--
+
+LOCK TABLES `tutor` WRITE;
+/*!40000 ALTER TABLE `tutor` DISABLE KEYS */;
+INSERT INTO `tutor` VALUES (1,1,'Ingeniero Civil','88881111','22221111','ADMIN','2026-10-06 18:34:34',NULL,NULL),(2,2,'Contadora Pública','88882222',NULL,'ADMIN','2026-10-06 18:34:34',NULL,NULL);
+/*!40000 ALTER TABLE `tutor` ENABLE KEYS */;
+UNLOCK TABLES;
 -- ==========================================
 -- 2. SEGURIDAD Y CONTROL DE ACCESO (RBAC)
 -- ==========================================
@@ -136,6 +183,7 @@ CREATE TABLE IF NOT EXISTS `sec_modulos` (
     `nombre`          VARCHAR(100) NOT NULL,
     `codigo`          VARCHAR(60)  NOT NULL,
     `recurso`         VARCHAR(255) NOT NULL,
+    `component_key`   varchar(50),
     `path_img`        VARCHAR(255) NULL,
     `modulo_padre_id` INT UNSIGNED NULL,
     `orden`           SMALLINT UNSIGNED NOT NULL DEFAULT 1,
@@ -299,7 +347,7 @@ CREATE TABLE `detalle_plan_de_estudio` (
   `idPlan_de_estudio`         INT UNSIGNED NOT NULL,
   `idAsignatura`              INT UNSIGNED NOT NULL,
   `idDocente`                 INT UNSIGNED NOT NULL,
-  `idSalon`                   INT UNSIGNED NULL AFTER `idDocente`,
+  `idSalon`                   INT UNSIGNED NULL ,
   `creado_por`                VARCHAR(50)  DEFAULT NULL,
   `creado_el`                 DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `actualizado_por`           VARCHAR(50)  DEFAULT NULL,
@@ -309,7 +357,7 @@ CREATE TABLE `detalle_plan_de_estudio` (
   CONSTRAINT `fk_det_plan` FOREIGN KEY (`idPlan_de_estudio`) REFERENCES `plan_de_estudio` (`idPlan_de_estudio`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_det_asig` FOREIGN KEY (`idAsignatura`) REFERENCES `asignatura` (`idAsignatura`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_det_docente` FOREIGN KEY (`idDocente`) REFERENCES `docente` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_det_salon` FOREIGN KEY (`idSalon`) REFERENCES `salon` (`idSalon`) ON DELETE RESTRICT ON UPDATE CASCADE
+  CONSTRAINT `fk_det_salon` FOREIGN KEY (`idSalon`) REFERENCES `salon` (`idSalon`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `calificaciones` (
@@ -542,8 +590,8 @@ VALUES
 INSERT INTO `calificaciones` 
   (`idcalificacion`, `idmatricula`, `iddetalle_plan_de_estudio`, `idperiodo_evaluativo`, `acumulado`, `examen`, `creado_por`) 
 VALUES
-  (1, 1, 1, 1, 55.00, 38.00, 'ADMIN'),
-  (2, 2, 2, 1, 48.00, 32.00, 'ADMIN');
+  (1, 1, 1, 1, 40.00, 38.00, 'ADMIN'),
+  (2, 2, 2, 1, 28.00, 32.00, 'ADMIN');
 
 -- ==========================================
 -- 5. MÓDULO FINANCIERO Y COBROS

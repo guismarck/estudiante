@@ -26,12 +26,16 @@ public class CatalogoTarifa extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "idtarifa")
+    @Column(name = "id_tarifa")
     private Integer idTarifa;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "idnivel", nullable = false)
+    @JoinColumn(name = "id_nivel", nullable = false)
     private NivelEducativo idnivel;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_grado", nullable = false)
+    private Grado idGrado;
 
     @Column(name = "anio_lectivo", nullable = false, length = 4)
     private Integer anioLectivo;
@@ -42,4 +46,11 @@ public class CatalogoTarifa extends AuditableEntity {
     @NotNull(message = "El monto es obligatorio")
     @Column(name = "monto", nullable = false, precision = 10, scale = 2)
     private BigDecimal monto;
+
+    @Column(name = "es_obligatorio", nullable = false)
+    private Boolean esObligatorio = true;
+
+    @Column(name = "mes_aplicacion", nullable = true)
+    private Integer mesAplicacion;
+
 }
