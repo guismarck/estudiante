@@ -16,11 +16,6 @@ import lombok.*;
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class Docente  extends Persona {
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-// private Integer idDocente;
-// private Integer idpersona;
-
 
  @Column(name = "cod_docente", nullable = false, unique = true, length = 45)
  private String codDocente;

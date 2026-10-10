@@ -31,7 +31,7 @@ public class DocenteControler {
 
     @PostMapping(path = "/docentes/create") // agregar docente
     public void agregarDocente(@RequestBody Docente  docente){
-        logger.info("el empledo a agregar " + docente);
+       // logger.info("el empledo a agregar " + docente);
         docenteServicio.guardarDocente(docente);
     }
 
@@ -44,8 +44,8 @@ public class DocenteControler {
     }
 
     @PutMapping(path = "/docentes/{id}")// actulizar estudiante
-    public ResponseEntity<Docente>ActulizarId(@PathVariable Integer id,
-                                              @RequestBody Docente docenteResivido){
+    public ResponseEntity<Docente>ActulizarId(@PathVariable Integer id,  @RequestBody Docente docenteResivido){
+
         Docente docente = docenteServicio.buscarDocentePorId(id);
         if(docente == null){
             throw  new recurosNoEncontradoException("No exite el a actualizar con Id"+id);
@@ -58,9 +58,10 @@ public class DocenteControler {
         docente.setEspecialidad(docenteResivido.getEspecialidad());
         docente.setEstado(docenteResivido.getEstado());
         docente.setCodDocente(docenteResivido.getCodDocente());
+        docente.setFecha_nacimiento(docenteResivido.getFecha_nacimiento());
         docenteServicio.guardarDocente(docente);
         //docente.setPart(docenteResivido.getPartidad_nacimiento());
-        //docente.setFecha_nacimiento(docenteResivido.getFecha_nacimiento());
+        //
         return ResponseEntity.ok(docente);
     }
 
