@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("periodo-evaluativo")
+@RequestMapping("estudiante-app")
 @CrossOrigin(value = "http://localhost:3000")
 @RequiredArgsConstructor
 public class PeriodoEvaluativoController {
@@ -19,7 +19,7 @@ public class PeriodoEvaluativoController {
     private final IPeridoEvaluativoServicio periodoEvaluativoServicio;
     private final IcalificacionesServicio calificacionServicio;
 
-    @GetMapping
+    @GetMapping(path = "/periodos-evaluativos")
     public ResponseEntity<List<PeriodoEvaluativo>> listar() {
         return ResponseEntity.ok(periodoEvaluativoServicio.ListarPeriodoEvaluativo());
     }
