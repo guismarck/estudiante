@@ -13,8 +13,11 @@ import app.estudiante.utils.ReporteRequestDTO;
 @RestController
 @RequestMapping("/reportes")
 public class ReporteController {
+    private final IJasperReportService jasperReportService;
 
-    private final IJasperReportService jasperReportService = null;
+    public ReporteController(IJasperReportService jasperReportService) {
+        this.jasperReportService = jasperReportService;
+    }
 
     /**
      * Endpoint unificado para invocar cualquier reporte alojado en src/main/resources/reportes/

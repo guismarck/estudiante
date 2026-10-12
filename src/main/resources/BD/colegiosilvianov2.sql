@@ -387,7 +387,7 @@ CREATE TABLE `calificaciones` (
 
 CREATE TABLE `catalogo_tarifa` (
   `id_tarifa`       INT UNSIGNED  NOT NULL AUTO_INCREMENT,
-  `id_nivel`        INT UNSIGNED  DEFAULT NULL,
+  `idnivel`         INT UNSIGNED  DEFAULT NULL,
   `id_grado`        INT UNSIGNED  DEFAULT NULL,
   `anio_lectivo`    YEAR          NOT NULL,
   `concepto`        VARCHAR(100)  NOT NULL,
@@ -399,7 +399,7 @@ CREATE TABLE `catalogo_tarifa` (
   `actualizado_por` VARCHAR(50)   DEFAULT NULL,
   `actualizado_el`  DATETIME      DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_tarifa`),
-  CONSTRAINT `fk_tarifa__nivel` FOREIGN KEY (`id_nivel`) REFERENCES `nivel_educativo` (`idnivel`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_tarifa__nivel` FOREIGN KEY (`idnivel`) REFERENCES `nivel_educativo` (`idnivel`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_tarifa__grado` FOREIGN KEY (`id_grado`) REFERENCES `grado` (`idGrado`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `chk_tarifa__monto` CHECK (`monto` >= 0.00),
   CONSTRAINT `chk_tarifa__mes_aplicacion` CHECK (`mes_aplicacion` IS NULL OR `mes_aplicacion` BETWEEN 1 AND 12)
@@ -407,10 +407,13 @@ CREATE TABLE `catalogo_tarifa` (
 
 CREATE TABLE `pago` (
   `idpago`          INT UNSIGNED  NOT NULL AUTO_INCREMENT,
-  `idmatricula`     INT UNSIGNED  NOT NULL,
+  `idpersona`       INT UNSIGNED  NOT NULL,
+  `idmatricula`     INT UNSIGNED  DEFAULT NULL,
   `num_recibo`      VARCHAR(30)   NOT NULL,
   `fecha_pago`      DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `tipo_pago`       VARCHAR(30)   NOT NULL,
+  `concepto`        VARCHAR(100)  DEFAULT NULL,
+  `monto`           DECIMAL(10,2) NOT NULL DEFAULT 0.00,
   `monto_total`     DECIMAL(10,2) NOT NULL,
   `creado_por`      VARCHAR(50)   DEFAULT NULL,
   `creado_el`       DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -419,6 +422,7 @@ CREATE TABLE `pago` (
   PRIMARY KEY (`idpago`),
   UNIQUE KEY `uk_pago_num_recibo` (`num_recibo`),
   INDEX `idx_pago_fecha` (`fecha_pago`),
+  CONSTRAINT `fk_pago_estudiante` FOREIGN KEY (`idpersona`) REFERENCES `estudiante` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_pago_matricula` FOREIGN KEY (`idmatricula`) REFERENCES `matricula` (`idmatricula`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `chk_monto_pago` CHECK (`monto_total` >= 0.00),
   CONSTRAINT `chk_pago_tipo` CHECK (`tipo_pago` IN ('EFECTIVO', 'TRANSFERENCIA', 'TARJETA', 'DEPOSITO'))
@@ -598,17 +602,17 @@ VALUES
 -- ==========================================
 
 INSERT INTO `catalogo_tarifa` 
-  (`id_tarifa`, `id_nivel`, `anio_lectivo`, `concepto`, `monto`, `creado_por`)
+  (`id_tarifa`, `idnivel`, `anio_lectivo`, `concepto`, `monto`, `creado_por`)
 VALUES
   (1, 1, 2026, 'MENSUALIDAD FEBRERO', 1000.00, 'ADMIN'),
   (2, 2, 2026, 'MENSUALIDAD FEBRERO', 1300.00, 'ADMIN');
 
 -- Ajuste Crítico: Fechas de pago coherentes con el ciclo escolar 2026
 INSERT INTO `pago` 
-  (`idpago`, `idmatricula`, `num_recibo`, `fecha_pago`, `tipo_pago`, `monto_total`, `creado_por`) 
+  (`idpago`, `idpersona`, `idmatricula`, `num_recibo`, `fecha_pago`, `tipo_pago`, `concepto`, `monto`, `monto_total`, `creado_por`)
 VALUES
-  (1, 1, 'REC-2026-0001', '2026-02-05 10:00:00', 'EFECTIVO', 1000.00, 'ADMIN'),
-  (2, 2, 'REC-2026-0002', '2026-02-06 11:30:00', 'TRANSFERENCIA', 1300.00, 'ADMIN');
+  (1, 6, 1, 'REC-2026-0001', '2026-02-05 10:00:00', 'EFECTIVO', 'Mensualidad de Febrero 2026 - Primaria', 1000.00, 1000.00, 'ADMIN'),
+  (2, 7, 2, 'REC-2026-0002', '2026-02-06 11:30:00', 'TRANSFERENCIA', 'Mensualidad de Febrero 2026 - Secundaria', 1300.00, 1300.00, 'ADMIN');
 
 -- Ajuste Crítico: Completado el registro cortado e inyectadas relaciones correctas
 INSERT INTO `detalle_pago` 
@@ -685,23 +689,24 @@ DELIMITER $$
 DROP PROCEDURE IF EXISTS `sp_procesar_emision_recibo`$$
 
 CREATE PROCEDURE `sp_procesar_emision_recibo`(
-    IN `p_idpersona` INT,              -- ID del Estudiante
-    IN `p_idSalon` INT,                -- Salón asignado para el año lectivo
+    IN `p_idpersona` INT UNSIGNED,
     IN `p_anio_lectivo` YEAR,
-    IN `p_concepto` VARCHAR(100),       -- Ej: 'MATRICULA', 'MENSUALIDAD'
-    IN `p_tipo_pago` VARCHAR(20),       -- Ej: 'EFECTIVO', 'TRANSFERENCIA', 'TARJETA'
+    IN `p_concepto` VARCHAR(100),
+    IN `p_tipo_pago` VARCHAR(30),
     IN `p_monto` DECIMAL(10,2),
-    IN `p_idtarifa` INT,               -- ID opcional del catálogo tarifario
-    IN `p_fecha_transaccion` DATETIME,
-    IN `p_usuario` VARCHAR(50),        -- Usuario del sistema que emite el recibo
-    OUT `p_recibo_generado` VARCHAR(30)
+    IN `p_idtarifa` INT UNSIGNED,
+    IN `p_usuario` VARCHAR(50),
+    OUT `p_recibo_generado` VARCHAR(30),
+    OUT `p_saldo_restante` DECIMAL(10,2)
 )
 BEGIN
-    DECLARE v_idmatricula INT;
     DECLARE v_siguiente_numero INT DEFAULT 1;
     DECLARE v_num_recibo_nuevo VARCHAR(30);
+    DECLARE v_costo_tarifa DECIMAL(10,2) DEFAULT 0.00;
+    DECLARE v_monto_pagado_previo DECIMAL(10,2) DEFAULT 0.00;
+    DECLARE v_saldo_pendiente DECIMAL(10,2) DEFAULT 0.00;
+    DECLARE v_idpago_nuevo INT UNSIGNED;
 
-    -- Manejo de excepciones: Deshace la transacción en caso de falla
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         ROLLBACK;
@@ -710,47 +715,32 @@ BEGIN
 
     START TRANSACTION;
 
-    -- =====================================================
-    -- PASO 1: OBTENER O REGISTRAR LA MATRÍCULA ACADÉMICA
-    -- =====================================================
-    -- Busca si el estudiante ya tiene una matrícula activa para el año lectivo
-    SELECT `idmatricula` INTO v_idmatricula
-    FROM `matricula`
-    WHERE `idpersona` = p_idpersona AND `anio_lectivo` = p_anio_lectivo
-    LIMIT 1;
+    SELECT MAX(`monto`) INTO v_costo_tarifa
+    FROM `catalogo_tarifa`
+    WHERE `id_tarifa` = p_idtarifa
+      AND `anio_lectivo` = p_anio_lectivo;
 
-    -- Si no existe matrícula previa y el concepto es MATRICULA, se crea automáticamente
-    IF v_idmatricula IS NULL THEN
-        IF UPPER(p_concepto) LIKE '%MATRI%' THEN
-            INSERT INTO `matricula` (
-                `idpersona`, 
-                `idSalon`, 
-                `anio_lectivo`, 
-                `costo_matricula`, 
-                `fecha_matricula`,
-                `estado`,
-                `creado_por`
-            ) VALUES (
-                p_idpersona, 
-                p_idSalon, 
-                p_anio_lectivo, 
-                p_monto, 
-                COALESCE(p_fecha_transaccion, CURRENT_TIMESTAMP),
-                'ACTIVA',
-                p_usuario
-            );
-            
-            SET v_idmatricula = LAST_INSERT_ID();
-        ELSE
-            SIGNAL SQLSTATE '45000' 
-            SET MESSAGE_TEXT = 'Error: El estudiante no cuenta con una matrícula activa para este año lectivo.';
-        END IF;
+    IF v_costo_tarifa IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Error de Negocio: La tarifa especificada no existe en el catálogo para el año lectivo indicado.';
     END IF;
 
-    -- =====================================================
-    -- : GENERACIÓN DEL CORRELATIVO BLOQUEADO (FOR UPDATE)
-    -- Format: REC-2026-000001
-    -- =====================================================
+    SELECT IFNULL(SUM(dp.`monto`), 0.00) INTO v_monto_pagado_previo
+    FROM `detalle_pago` dp
+    INNER JOIN `pago` p ON dp.`idpago` = p.`idpago`
+    WHERE p.`idpersona` = p_idpersona
+      AND dp.`id_tarifa` = p_idtarifa;
+
+    SET v_saldo_pendiente = v_costo_tarifa - v_monto_pagado_previo;
+
+    IF v_saldo_pendiente <= 0.00 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Error de Negocio: La tarifa/arancel seleccionada ya se encuentra totalmente cancelada.';
+    ELSEIF p_monto > v_saldo_pendiente THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Error de Negocio: El monto ingresado excede el saldo pendiente de la tarifa.';
+    END IF;
+
     SELECT IFNULL(MAX(CAST(SUBSTRING(num_recibo, 10) AS UNSIGNED)), 0) + 1 
     INTO v_siguiente_numero
     FROM `pago`
@@ -760,28 +750,28 @@ BEGIN
     SET v_num_recibo_nuevo = CONCAT('REC-', p_anio_lectivo, '-', LPAD(v_siguiente_numero, 6, '0'));
     SET p_recibo_generado = v_num_recibo_nuevo;
 
-    -- =====================================================
-    -- PASO 3: REGISTRO EN CABECERA DE PAGO
-    -- =====================================================
     INSERT INTO `pago` (
-        `idmatricula`, 
+        `idpersona`,
         `num_recibo`, 
         `fecha_pago`, 
         `tipo_pago`,
+        `concepto`,
+        `monto`,
         `monto_total`,
         `creado_por`
     ) VALUES (
-        v_idmatricula, 
-        v_num_recibo_nuevo, 
-        COALESCE(p_fecha_transaccion, CURRENT_TIMESTAMP), 
-        UPPER(p_tipo_pago),
+        p_idpersona,
+        v_num_recibo_nuevo,
+        NOW(),
+        UPPER(TRIM(p_tipo_pago)),
+        TRIM(p_concepto),
+        p_monto,
         p_monto,
         p_usuario
     );
 
-    -- =====================================================
-    -- PASO 4: REGISTRO EN DETALLE DE PAGO
-    -- =====================================================
+    SET v_idpago_nuevo = LAST_INSERT_ID();
+
     INSERT INTO `detalle_pago` (
         `idpago`, 
         `id_tarifa`,
@@ -789,12 +779,15 @@ BEGIN
         `monto`,
         `creado_por`
     ) VALUES (
-        LAST_INSERT_ID(), 
+        v_idpago_nuevo,
         p_idtarifa,
-        p_concepto, 
+        TRIM(p_concepto),
         p_monto,
         p_usuario
     );
+
+    SET p_recibo_generado = v_num_recibo_nuevo;
+    SET p_saldo_restante = v_saldo_pendiente - p_monto;
 
     COMMIT;
 END$$
