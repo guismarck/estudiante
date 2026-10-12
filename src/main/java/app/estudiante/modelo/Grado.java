@@ -22,7 +22,7 @@ public class Grado extends AuditableEntity {
     @Column(name = "idGrado")
     private Integer idGrado;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "idnivel", nullable = false, foreignKey = @ForeignKey(name = "fk_grado_nivel"))
     private NivelEducativo nivelEducativo;
 
