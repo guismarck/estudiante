@@ -15,17 +15,15 @@ import java.util.List;
 @RestController
 @RequestMapping("estudiante-app")
 @CrossOrigin(
-    origins = "https://miniature-space-enigma-65prg5v459vh46xx-3000.app.github.dev"
+    origins = "http://localhost:3000"
 )
 public class CatalogoTarifaController {
     @Autowired
-    private final ICatalogoTarifaServicio tarifaServicio = null;
+    private  ICatalogoTarifaServicio tarifaServicio;
 
     @GetMapping(path = "/catalogo/tarifa")
-    public ResponseEntity<List<CatalogoTarifa>> listarTodas(@RequestParam(required = false) Integer anioLectivo) {
-        List<CatalogoTarifa> tarifas = (anioLectivo != null)
-                ? tarifaServicio.obtenerPorAnio(anioLectivo)
-                : tarifaServicio.obtenerTodas();
+    public ResponseEntity<List<CatalogoTarifa>> listarTodas(@RequestParam Integer anioLectivo) {
+        List<CatalogoTarifa> tarifas = tarifaServicio.obtenerPorAnio(anioLectivo);
         return ResponseEntity.ok(tarifas);
     }
 

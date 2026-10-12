@@ -88,7 +88,7 @@ public class NivelEducativoServicioImpl implements INivelEducativoServicio{
 
     private NivelEducativoResponseDTO mapToDTO(NivelEducativo entidad) {
         return NivelEducativoResponseDTO.builder()
-                .idnivel(entidad.getIdnivel())
+                .idnivel(entidad.getIdNivel())
                 .nombre(entidad.getNombre())
                 .descripcion(entidad.getDescripcion())
                 .creadoPor(entidad.getCreadoPor())

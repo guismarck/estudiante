@@ -5,6 +5,7 @@ import java.util.List;
 
 public interface IEstudianteServicio {
     Estudiante buscarEstudinatePorId(Integer idEstudiante);
+    Estudiante buscarEstudiantePorCodigo(String codEstudiante);
     List<Estudiante> busquedaGeneral(String search);
     Estudiante guardarEstudiante (Estudiante estudiante);
     Estudiante registrarEstudianteConTutores (EstudianteRequestDTO solicitud);

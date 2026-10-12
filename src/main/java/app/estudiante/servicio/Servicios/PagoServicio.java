@@ -1,27 +1,34 @@
 package app.estudiante.servicio.Servicios;
 
 import app.estudiante.modelo.Pago;
+import app.estudiante.exception.recurosNoEncontradoException;
 import app.estudiante.repositorio.PagoRepositorio;
 import app.estudiante.servicio.InterfacesServicios.IPagoServicio;
 import app.estudiante.utils.EmisionReciboResponseDTO;
-import lombok.extern.slf4j.Slf4j;
+import app.estudiante.utils.PagoSaldoResponseDTO;
+import app.estudiante.utils.SolvenciaMatriculaResponseDTO;
 import jakarta.persistence.EntityManager;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.persistence.ParameterMode;
+import jakarta.persistence.StoredProcedureQuery;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 import app.estudiante.utils.EmisionReciboRequestDTO;
-import java.time.LocalDateTime;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class PagoServicio implements IPagoServicio {
-    @Autowired
+    private final PagoRepositorio pagoRepositorio;
     private final EntityManager entityManager;
-    @Autowired
-    private PagoRepositorio pagoRepositorio;
+
+    public PagoServicio(PagoRepositorio pagoRepositorio, EntityManager entityManager) {
+        this.pagoRepositorio = pagoRepositorio;
+        this.entityManager = entityManager;
+    }
+
     @Override
     public List<Pago> ListarPago() {
         List<Pago> pagos = pagoRepositorio.findAll();
@@ -44,79 +51,72 @@ public class PagoServicio implements IPagoServicio {
       pagoRepositorio.delete(pago);
     }
 
-//    @Override
-//    @Transactional
-//    public EmisionReciboResponseDTO emitirRecibo(EmisionReciboRequestDTO requestDTO) {
-//
-//        try {
-//            StoredProcedureQuery query = entityManager.createStoredProcedureQuery("sp_procesar_emision_recibo");
-//
-//            // Registro de Parámetros de Entrada (IN)
-//            query.registerStoredProcedureParameter("p_idpersona", Integer.class, ParameterMode.IN);
-//            query.registerStoredProcedureParameter("p_idSalon", Integer.class, ParameterMode.IN);
-//            query.registerStoredProcedureParameter("p_anio_lectivo", Integer.class, ParameterMode.IN);
-//            query.registerStoredProcedureParameter("p_concepto", String.class, ParameterMode.IN);
-//            query.registerStoredProcedureParameter("p_tipo_pago", String.class, ParameterMode.IN);
-//            query.registerStoredProcedureParameter("p_monto", java.math.BigDecimal.class, ParameterMode.IN);
-//            query.registerStoredProcedureParameter("p_idtarifa", Integer.class, ParameterMode.IN);
-//            query.registerStoredProcedureParameter("p_fecha_transaccion", LocalDateTime.class, ParameterMode.IN);
-//            query.registerStoredProcedureParameter("p_usuario", String.class, ParameterMode.IN);
-//
-//            // Registro de Parámetro de Salida (OUT)
-//            query.registerStoredProcedureParameter("p_recibo_generado", String.class, ParameterMode.OUT);
-//
-//            // Setear Valores
-//            query.setParameter("p_idpersona", requestDTO.idPersona());
-//            query.setParameter("p_idSalon", requestDTO.idSalon());
-//            query.setParameter("p_anio_lectivo", requestDTO.anioLectivo());
-//            query.setParameter("p_concepto", requestDTO.concepto());
-//            query.setParameter("p_tipo_pago", requestDTO.tipoPago());
-//            query.setParameter("p_monto", requestDTO.monto());
-//            query.setParameter("p_idtarifa", requestDTO.idTarifa());
-//            query.setParameter("p_fecha_transaccion", requestDTO.fechaTransaccion() != null ? requestDTO.fechaTransaccion() : LocalDateTime.now());
-//            query.setParameter("p_usuario", requestDTO.usuario());
-//
-//            query.execute();
-//
-//            // Recuperar número de recibo generado
-//            String numReciboGenerado = (String) query.getOutputParameterValue("p_recibo_generado");
-//
-//           // log.info("Recibo generado exitosamente: {} para estudiante ID: {}", numReciboGenerado, requestDTO.idPersona());
-//
-//            return new EmisionReciboResponseDTO(
-//                    numReciboGenerado,
-//                    requestDTO.idPersona(),
-//                    requestDTO.monto(),
-//                    requestDTO.concepto(),
-//                    LocalDateTime.now(),
-//                    "Emisión de recibo procesada correctamente."
-//            );
-//
-//        } catch (Exception e) {
-//            //log.error("Error al procesar el Stored Procedure sp_procesar_emision_recibo: {}", e.getMessage());
-//            throw new RuntimeException("Error en la transacción: " + e.getMessage());
-//        }
-//    }
+    @Override
+    public PagoSaldoResponseDTO buscarSaldoPorPersonaYTarifa(Integer idPersona, Integer idTarifa) {
+        return pagoRepositorio.buscarSaldoPorPersonaYTarifa(idPersona, idTarifa)
+                .map(saldo -> new PagoSaldoResponseDTO(
+                        saldo.getIdTarifa(),
+                        saldo.getConcepto(),
+                        saldo.getAnioLectivo(),
+                        saldo.getMontoTarifa(),
+                        saldo.getMontoPagado(),
+                        saldo.getSaldoRestante()
+                ))
+                .orElseThrow(() -> new recurosNoEncontradoException(
+                        "No se encontró la tarifa con ID " + idTarifa));
+    }
+
+    @Override
+    public List<SolvenciaMatriculaResponseDTO> buscarSolvenciaMatricula(
+            Integer idPersona, Integer anioLectivo) {
+        List<SolvenciaMatriculaResponseDTO> solvencias = pagoRepositorio
+                .buscarSolvenciaMatricula(idPersona, anioLectivo).stream()
+                .map(solvencia -> new SolvenciaMatriculaResponseDTO(
+                        solvencia.getIdPersona(),
+                        solvencia.getIdTarifa(),
+                        solvencia.getArancel(),
+                        solvencia.getAnioLectivo(),
+                        solvencia.getMontoOficial(),
+                        solvencia.getTotalPagado(),
+                        solvencia.getSaldoPendiente(),
+                        solvencia.getEstado()
+                ))
+                .toList();
+        if (solvencias.isEmpty()) {
+            throw new recurosNoEncontradoException(
+                    "El estudiante con ID " + idPersona
+                            + " no ha realizado pagos de matrícula para el año lectivo " + anioLectivo);
+        }
+        return solvencias;
+    }
+
 @Override
 @Transactional
 public EmisionReciboResponseDTO emitirRecibo(EmisionReciboRequestDTO requestDTO) {
     log.info("Iniciando emisión de recibo para la persona: {}", requestDTO);
 
-    LocalDateTime fechaTransaccion = requestDTO.fechaTransaccion() != null
-            ? requestDTO.fechaTransaccion()
-            : LocalDateTime.now();
+    StoredProcedureQuery query = entityManager.createStoredProcedureQuery("sp_procesar_emision_recibo");
+    query.registerStoredProcedureParameter(1, Integer.class, ParameterMode.IN);
+    query.registerStoredProcedureParameter(2, Integer.class, ParameterMode.IN);
+    query.registerStoredProcedureParameter(3, String.class, ParameterMode.IN);
+    query.registerStoredProcedureParameter(4, String.class, ParameterMode.IN);
+    query.registerStoredProcedureParameter(5, BigDecimal.class, ParameterMode.IN);
+    query.registerStoredProcedureParameter(6, Integer.class, ParameterMode.IN);
+    query.registerStoredProcedureParameter(7, String.class, ParameterMode.IN);
+    query.registerStoredProcedureParameter(8, String.class, ParameterMode.OUT);
+    query.registerStoredProcedureParameter(9, BigDecimal.class, ParameterMode.OUT);
 
-    String numReciboGenerado = pagoRepositorio.procesarEmisionRecibo(
-            requestDTO.idPersona(),
-            requestDTO.idSalon(),
-            requestDTO.anioLectivo(),
-            requestDTO.concepto(),
-            requestDTO.tipoPago(),
-            requestDTO.monto(),
-            requestDTO.idTarifa(),
-            fechaTransaccion,
-            requestDTO.usuario()
-    );
+    query.setParameter(1, Math.toIntExact(requestDTO.idPersona()));
+    query.setParameter(2, requestDTO.anioLectivo());
+    query.setParameter(3, requestDTO.concepto());
+    query.setParameter(4, requestDTO.tipoPago());
+    query.setParameter(5, requestDTO.monto());
+    query.setParameter(6, Math.toIntExact(requestDTO.idTarifa()));
+    query.setParameter(7, requestDTO.usuario());
+    query.execute();
+
+    String numReciboGenerado = (String) query.getOutputParameterValue(8);
+    BigDecimal saldoRestante = (BigDecimal) query.getOutputParameterValue(9);
 
     log.info("Recibo generado exitosamente: {} para estudiante ID: {}", numReciboGenerado, requestDTO.idPersona());
 
@@ -124,6 +124,7 @@ public EmisionReciboResponseDTO emitirRecibo(EmisionReciboRequestDTO requestDTO)
             numReciboGenerado,
             requestDTO.idPersona().intValue(),
             requestDTO.monto(),
+            saldoRestante,
             requestDTO.concepto(),
             LocalDateTime.now(),
             "Emisión de recibo procesada correctamente."
