@@ -11,17 +11,18 @@ import java.util.Optional;
 
 @Repository
 public interface CatalogoTarifaRepositorio extends JpaRepository<CatalogoTarifa, Integer> {
-    List<CatalogoTarifa> findByAnioLectivo(Integer anioLectivo);
+ 
+    List<CatalogoTarifa> findByAnioLectivo(@Param("anioLectivo") Integer anioLectivo);
+
     @Query("""
-           SELECT t 
-        FROM CatalogoTarifa t 
-        JOIN t.idnivel n 
-        WHERE n.idnivel = :idNivel 
-          AND t.anioLectivo = :anioLectivo 
-          AND LOWER(t.concepto) = LOWER(:concepto)
+            SELECT t
+            FROM CatalogoTarifa t
+            WHERE t.nivel.idNivel = :idNivel
+              AND t.anioLectivo = :anioLectivo
+              AND LOWER(t.concepto) = LOWER(:concepto)
     """)
     Optional<CatalogoTarifa> buscarPorGradoAnioYConcepto(
-        @Param("idNivel") Integer idNivel, 
+        @Param("idNivel") Integer idNivel,
         @Param("anioLectivo") Integer anioLectivo, 
         @Param("concepto") String concepto
     );

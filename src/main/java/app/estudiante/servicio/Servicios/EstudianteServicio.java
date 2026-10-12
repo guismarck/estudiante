@@ -2,11 +2,13 @@ package app.estudiante.servicio.Servicios;
 
 
 import app.estudiante.modelo.Estudiante;
+import app.estudiante.exception.recurosNoEncontradoException;
 import app.estudiante.repositorio.EstudianteRepositorio;
 import app.estudiante.servicio.InterfacesServicios.IEstudianteServicio;
 import app.estudiante.utils.NumerUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -26,10 +28,25 @@ public class EstudianteServicio implements IEstudianteServicio {
         return estudiante;
     }
 
+    @Override
+    public Estudiante buscarEstudiantePorCodigo(String codEstudiante) {
+        return estudianteRepositorio.findByCodEstudiante(codEstudiante)
+                .orElseThrow(() -> new recurosNoEncontradoException(
+                        "No se encontró un estudiante con código " + codEstudiante));
+    }
+
     public List<Estudiante> busquedaGeneral(String search){
-        var isInt = NumerUtils.isInt(search);
-        if (isInt) return List.of(buscarEstudinatePorId(Integer.parseInt(search)));
-        return estudianteRepositorio.busquedaGeneral(search);
+        List<Estudiante> estudiantes = new ArrayList<>(estudianteRepositorio.busquedaGeneral(search));
+        if (NumerUtils.isInt(search)) {
+            estudianteRepositorio.findById(Integer.parseInt(search)).ifPresent(estudiante -> {
+                boolean yaIncluido = estudiantes.stream()
+                        .anyMatch(resultado -> resultado.getIdpersona().equals(estudiante.getIdpersona()));
+                if (!yaIncluido) {
+                    estudiantes.add(0, estudiante);
+                }
+            });
+        }
+        return estudiantes;
     }
 
     @Override
