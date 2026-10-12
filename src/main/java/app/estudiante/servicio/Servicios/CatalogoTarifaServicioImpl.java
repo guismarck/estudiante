@@ -1,24 +1,23 @@
 package app.estudiante.servicio.Servicios;
 
 import app.estudiante.modelo.CatalogoTarifa;
-import app.estudiante.modelo.Grado;
 import app.estudiante.modelo.NivelEducativo;
 import app.estudiante.repositorio.CatalogoTarifaRepositorio;
-import app.estudiante.repositorio.GradoRepositorio;
 import app.estudiante.repositorio.NivelEducativoRepositorio;
 import app.estudiante.servicio.InterfacesServicios.ICatalogoTarifaServicio;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class CatalogoTarifaServicioImpl implements ICatalogoTarifaServicio {
-
-    private final CatalogoTarifaRepositorio tarifaRepository;
-    private final GradoRepositorio gradoRepository;
-    private final NivelEducativoRepositorio nivelEducativoRepository;
+    @Autowired
+    private  CatalogoTarifaRepositorio tarifaRepository;
+    @Autowired
+    private  NivelEducativoRepositorio nivelEducativoRepository;
 
     @Override
     public List<CatalogoTarifa> obtenerTodas() {
@@ -38,10 +37,10 @@ public class CatalogoTarifaServicioImpl implements ICatalogoTarifaServicio {
     @Override
     public CatalogoTarifa crear(CatalogoTarifa tarifa) {
         // Verificar existencia del Grado antes de guardar
-        Integer idNivel = tarifa.getIdnivel().getIdnivel();
+        Integer idNivel = tarifa.getNivel().getIdNivel();
         NivelEducativo nivel = nivelEducativoRepository.findById(idNivel).orElse(null);
         
-        tarifa.setIdnivel(nivel);
+        tarifa.setNivel(nivel);
         return tarifaRepository.save(tarifa);
     }
 
@@ -49,10 +48,10 @@ public class CatalogoTarifaServicioImpl implements ICatalogoTarifaServicio {
     public CatalogoTarifa actualizar(Integer id, CatalogoTarifa tarifaActualizada) {
         CatalogoTarifa tarifaExistente = obtenerPorId(id);
 
-        Integer idGrado = tarifaActualizada.getIdnivel().getIdnivel();
+        Integer idGrado = tarifaActualizada.getNivel().getIdNivel();
         NivelEducativo nivel = nivelEducativoRepository.findById(idGrado).orElse(null);
 
-        tarifaExistente.setIdnivel(nivel);
+        tarifaExistente.setNivel(nivel);
         tarifaExistente.setAnioLectivo(tarifaActualizada.getAnioLectivo());
         tarifaExistente.setConcepto(tarifaActualizada.getConcepto());
         tarifaExistente.setMonto(tarifaActualizada.getMonto());

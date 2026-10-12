@@ -7,6 +7,7 @@ public record EmisionReciboResponseDTO(
         String numeroRecibo,
         Integer idPersona,
         BigDecimal monto,
+        BigDecimal saldoRestante,
         String concepto,
         LocalDateTime fechaEmision,
         String mensaje

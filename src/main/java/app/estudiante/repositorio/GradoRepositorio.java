@@ -9,5 +9,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface GradoRepositorio extends JpaRepository<Grado , Integer> {
-    List<Grado> findByNivelEducativoIdnivel(Integer idNivel);
+    List<Grado> findByNivelEducativoIdNivel(Integer idNivel);
 }
