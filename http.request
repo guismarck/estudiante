@@ -1,0 +1,4 @@
+
+# Request para nivel academico
+
+GET http://localhost:8080/estudiante-app/grados
