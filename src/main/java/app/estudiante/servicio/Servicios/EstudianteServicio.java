@@ -29,7 +29,7 @@ public class EstudianteServicio implements IEstudianteServicio {
         Estudiante estudiante = estudianteRepositorio.findById(idEstudiante).orElse(null);
         return estudiante;
     }
-
+    @Override
     public List<Estudiante> busquedaGeneral(String search){
         var isInt = NumerUtils.isInt(search);
         if (isInt) return List.of(buscarEstudinatePorId(Integer.parseInt(search)));
