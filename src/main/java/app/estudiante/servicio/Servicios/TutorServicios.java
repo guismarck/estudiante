@@ -26,6 +26,11 @@ public class TutorServicios implements ITutorServicio {
         return tutores;
     }
 
+    @Override
+    public Tutor guardarTutor(Tutor tutor) {
+        return tutorRepositorio.save(tutor);
+    }
+
 
     @Override
     public List<Tutor> busquedaGeneral(String search) {
@@ -35,10 +40,6 @@ public class TutorServicios implements ITutorServicio {
     }
 
 
-    @Override
-    public void guardarTutor(Tutor tutor) {
-        tutorRepositorio.save(tutor);
-    }
 
     @Override
     public void eliminarTutor(Tutor tutor) {
