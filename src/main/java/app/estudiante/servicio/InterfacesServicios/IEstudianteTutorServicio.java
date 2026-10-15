@@ -10,7 +10,7 @@ public interface IEstudianteTutorServicio {
 
     List<EstudianteTutor> listarEstudianteTutor();
     EstudianteTutor buscarEstudianteTutorPorId(EstudianteTutorId id);
-    void guardarEstudianteTutor (EstudianteTutor estudianteTutor);
+    EstudianteTutor guardarEstudianteTutor (EstudianteTutor estudianteTutor);
     void eliminarEstudianteTutor(EstudianteTutor estudianteTutor);
     List<EstudianteTutor> busquedaGeneral(  String search);
 

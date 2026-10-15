@@ -49,7 +49,7 @@ public class EstudianteTutorServicios  implements IEstudianteTutorServicio {
     }
 
     @Override
-    public void guardarEstudianteTutor(EstudianteTutor estudianteTutor) {
+    public EstudianteTutor guardarEstudianteTutor(EstudianteTutor estudianteTutor) {
         if (estudianteTutor == null || estudianteTutor.getId() == null) {
             throw new IllegalArgumentException(
                     "Los datos del estudiante y tutor son obligatorios");
@@ -61,7 +61,7 @@ public class EstudianteTutorServicios  implements IEstudianteTutorServicio {
                     "Debe especificar el tutor y el estudiante");
         }
 
-        estudianteTutorRepositorio.save(estudianteTutor);
+        return  estudianteTutorRepositorio.save(estudianteTutor);
     }
 
     @Override

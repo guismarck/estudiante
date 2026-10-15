@@ -67,7 +67,7 @@ public class TutorControler {
         tutor.setCedula(tutorResivido.getCedula());
         tutor.setOcupacion(tutorResivido.getOcupacion());
         tutor.setTelefonoPrincipal(tutorResivido.getTelefonoPrincipal());
-        tutor.setTelefonoSegundario(tutorResivido.getTelefonoSegundario());
+        tutor.setTelefonoSecundario(tutorResivido.getTelefonoSecundario());
         tutorServicio.guardarTutor(tutor);
         return ResponseEntity.ok(tutor);
     }

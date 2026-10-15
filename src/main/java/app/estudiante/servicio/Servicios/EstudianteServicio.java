@@ -37,9 +37,9 @@ public class EstudianteServicio implements IEstudianteServicio {
     }
 
     @Override
-    public void guardarEstudiante(Estudiante estudiante) {
+    public Estudiante guardarEstudiante(Estudiante estudiante) {
 
-        /*if (estudiante.getCedula() != null && !estudiante.getCedula().trim().isEmpty()) {
+         /*if (estudiante.getCedula() != null && !estudiante.getCedula().trim().isEmpty()) {
             LocalDate fechaCalculada = ValidacionCedula.extraerFechaNacimiento(estudiante.getCedula());
             if (fechaCalculada != null) {
                 // Sobrescribir/asegurar la fecha derivada de la cédula
@@ -66,8 +66,10 @@ public class EstudianteServicio implements IEstudianteServicio {
 
         Estudiante guardado = estudianteRepositorio.save(entidad);//agregar o modificar
         estudiante.setIdpersona(guardado.getIdpersona());*/
-        estudianteRepositorio.save(estudiante);
+        return  estudianteRepositorio.save(estudiante);
     }
+
+
 
     @Override
     public void eliminarEstudinate(Estudiante estudiante) {

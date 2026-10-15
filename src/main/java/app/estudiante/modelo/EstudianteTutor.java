@@ -18,7 +18,7 @@ public class EstudianteTutor {
     @EmbeddedId
     private   EstudianteTutorId id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("idtutor")
     @JoinColumn(
             name = "idtutor",
@@ -27,7 +27,7 @@ public class EstudianteTutor {
     )
     private Tutor tutor;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("idpersonaEstudiante")
     @JoinColumn(
             name = "idpersona_estudiante",

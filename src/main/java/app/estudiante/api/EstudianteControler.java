@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import app.estudiante.modelo.Estudiante;
+import org.springframework.http.HttpStatus;
 import java.util.List;
 
 @RestController
@@ -28,7 +29,7 @@ public class EstudianteControler {
         return estudianteServicio.busquedaGeneral(search);
     }
 
-   @PostMapping(path = "/estudiantes/create") // agregar estudiante
+  /* @PostMapping(path = "/estudiantes/create") // agregar estudiante
    public ResponseEntity agregarEstudiante(@RequestBody Estudiante estudiante){
        logger.info("el estudiante a agregar " + estudiante);
        try {
@@ -38,7 +39,30 @@ public class EstudianteControler {
            return ResponseEntity.badRequest().body(e.getMessage());
        }
 
-   }
+   }*/
+
+    @PostMapping("/estudiantes/create")
+    public ResponseEntity<?> agregarEstudiante(
+            @RequestBody Estudiante estudiante) {
+
+        logger.info("Estudiante a registrar: {}", estudiante);
+
+        try {
+            Estudiante estudianteGuardado =
+                    estudianteServicio.guardarEstudiante(estudiante);
+
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(estudianteGuardado);
+
+        } catch (Exception e) {
+            logger.error("Error al registrar estudiante", e);
+
+            return ResponseEntity
+                    .badRequest()
+                    .body(e.getMessage());
+        }
+    }
 
    @GetMapping(path = "/estudiantes/{id}")// buscar por ID
    public ResponseEntity<Estudiante>getEstudianteId(@PathVariable Integer id){

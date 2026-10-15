@@ -28,7 +28,7 @@ public class Tutor  extends Persona{
     private String telefonoPrincipal;
 
     @Column(name = "telefono_secundario",  nullable = false, unique = true, length = 45)
-    private String telefonoSegundario;
+    private String telefonoSecundario;
 
 
 }
