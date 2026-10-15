@@ -53,6 +53,13 @@ public class MatriculaControler {
         return ResponseEntity.status(HttpStatus.CREATED).body(respuesta);
     }
 
+    @PostMapping(path = "/matriculas/completa")
+    public ResponseEntity<MatriculaResponseDTO> agregarMatriculaCompleta(
+            @RequestBody MatriculaRequestDTO matricula) {
+        MatriculaResponseDTO respuesta = matriculaServicio.registrarMatriculaCompleta(matricula);
+        return ResponseEntity.status(HttpStatus.CREATED).body(respuesta);
+    }
+
 
     @PutMapping(path = "/matriculas/{id}")// actulizar matricula
     public ResponseEntity<Matricula>ActulizarId(@PathVariable Integer id,

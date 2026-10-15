@@ -12,10 +12,16 @@ import app.estudiante.utils.MatriculaDuplicadaException;
 import app.estudiante.utils.MatriculaRequestDTO;
 import app.estudiante.utils.MatriculaResponseDTO;
 import app.estudiante.utils.NumerUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.ParameterMode;
+import jakarta.persistence.StoredProcedureQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -31,6 +37,10 @@ public class MatriculaServicio implements IMatriculaServicio {
     private CatalogoSalonRepositorio catalogoSalonRepositorio;
     @Autowired
     private EstudianteRepositorio estudianteRepositorio;
+    @Autowired
+    private EntityManager entityManager;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Override
     public List<Matricula> ListarMatricula() {
@@ -154,5 +164,85 @@ public class MatriculaServicio implements IMatriculaServicio {
 //                .estadoMatricula(guardada.getEstadoMatricula())
 //                .fechaRegistro(guardada.getFechaMatricula())
 //                .build();
+    }
+
+    @Override
+    @Transactional
+    public MatriculaResponseDTO registrarMatriculaCompleta(MatriculaRequestDTO dto) {
+        Long idPersonaEstudiante = dto.getIdPersonaEstudiante() != null
+                ? dto.getIdPersonaEstudiante()
+                : dto.getIdPersona();
+
+        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("sp_guardar_matricula_completa");
+        query.registerStoredProcedureParameter(1, Integer.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter(2, String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter(3, String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter(4, String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter(5, Integer.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter(6, String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter(7, String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter(8, String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter(9, String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter(10, String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter(11, Integer.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter(12, Integer.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter(13, Integer.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter(14, String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter(15, BigDecimal.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter(16, String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter(17, String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter(18, String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter(19, Integer.class, ParameterMode.OUT);
+
+        query.setParameter(1, toInteger(idPersonaEstudiante));
+        query.setParameter(2, dto.getNombresEstudiante());
+        query.setParameter(3, dto.getApellidosEstudiante());
+        query.setParameter(4, dto.getCodigoMined());
+        query.setParameter(5, toInteger(dto.getIdPersonaTutor()));
+        query.setParameter(6, dto.getNombreCompletoTutor());
+        query.setParameter(7, dto.getCedulaTutor());
+        query.setParameter(8, dto.getTelefonoTutor());
+        query.setParameter(9, dto.getCorreoTutor());
+        query.setParameter(10, dto.getParentesco());
+        query.setParameter(11, dto.getRepresentanteLegalFinanciero());
+        query.setParameter(12, toInteger(dto.getIdSalon()));
+        query.setParameter(13, Integer.valueOf(dto.getAnioLectivo()));
+        query.setParameter(14, dto.getTipoIngreso());
+        query.setParameter(15, dto.getCostoMatricula());
+        query.setParameter(16, dto.getEstado());
+        query.setParameter(17, serializarRequisitos(dto.getRequisitosPresentados()));
+        query.setParameter(18, dto.getUsuario());
+
+        query.execute();
+
+        Integer idMatricula = (Integer) query.getOutputParameterValue(19);
+        if (idMatricula == null) {
+            throw new IllegalStateException(
+                    "El procedimiento sp_guardar_matricula_completa no devolvió el ID de la matrícula."
+            );
+        }
+
+        return MatriculaResponseDTO.builder()
+                .idMatricula(idMatricula.longValue())
+                .estudianteId(idPersonaEstudiante)
+                .anioLectivo(dto.getAnioLectivo())
+                .estadoMatricula(dto.getEstado())
+                .fechaRegistro(LocalDateTime.now())
+                .build();
+    }
+
+    private Integer toInteger(Long value) {
+        return value == null ? null : Math.toIntExact(value);
+    }
+
+    private String serializarRequisitos(List<Integer> requisitos) {
+        if (requisitos == null) {
+            return null;
+        }
+        try {
+            return objectMapper.writeValueAsString(requisitos);
+        } catch (JsonProcessingException exception) {
+            throw new IllegalArgumentException("No se pudieron serializar los requisitos de matrícula.", exception);
+        }
     }
 }

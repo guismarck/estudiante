@@ -13,4 +13,5 @@ public interface IMatriculaServicio {
     public  void guardarMatricula(Matricula matricula);
     public void eliminarMatricula(Matricula matricula);
     public MatriculaResponseDTO registrarMatriculaSinPago(MatriculaRequestDTO dto);
+    public MatriculaResponseDTO registrarMatriculaCompleta(MatriculaRequestDTO dto);
 }
