@@ -19,7 +19,7 @@ public class DetallePlandeEstudioServicio implements IDetallePlandeEstudioServic
 
     @Override
     public DetallePlanDeEstudio buscarDetallePlandeEstudioPorId(Integer iddetalle_plan_de_estudio) {
-        DetallePlanDeEstudio detallePlandeEstudio = detallePlandeEstudioRepositorio.findById(iddetalle_plan_de_estudio).orElse(null);
+        DetallePlanDeEstudio detallePlandeEstudio = detallePlandeEstudioRepositorio.findById(iddetalle_plan_de_estudio.longValue()).orElse(null);
         return detallePlandeEstudio; 
     }
 

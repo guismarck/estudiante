@@ -14,20 +14,24 @@ import app.estudiante.repositorio.CalificacionesRepositorio;
 import app.estudiante.repositorio.DetallePlandeEstudioRepositorio;
 import app.estudiante.repositorio.GradoRepositorio;
 import app.estudiante.repositorio.MatriculaRepositorio;
+import app.estudiante.repositorio.NivelEducativoRepositorio;
 import app.estudiante.repositorio.PeriodoEvaluativoRepositorio;
+import app.estudiante.repositorio.SalonRepositorio;
 import app.estudiante.servicio.InterfacesServicios.IcalificacionesServicio;
 import app.estudiante.utils.CalificacionBatchRequestDTO;
 import app.estudiante.utils.CalificacionItemDTO;
 import app.estudiante.utils.ComboItemDTO;
+import app.estudiante.utils.EstadoPeriodoEvaluativoResponseDTO;
 import app.estudiante.utils.NominaEstudianteResponseDTO;
-
 import javax.sql.DataSource;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.time.Year;
 
 @Slf4j
 @Service
@@ -39,20 +43,58 @@ public class CalificacionServicioImpl implements IcalificacionesServicio {
     private final PeriodoEvaluativoRepositorio periodoEvaluativoRepository;
     private final MatriculaRepositorio matriculaRepository;
     private final GradoRepositorio gradoRepository;
+    private final NivelEducativoRepositorio nivelEducativoRepository;
+    private final SalonRepositorio salonRepository;
     private final DataSource dataSource;
 
     @Transactional(readOnly = true)
-    public List<NominaEstudianteResponseDTO> obtenerNominaEstudiantes(Integer idDetallePlanDeEstudio, Integer idPeriodoEvaluativo) {
-        log.info("Obteniendo nómina desde la BD para DetallePlan: {} y Periodo: {}", idDetallePlanDeEstudio, idPeriodoEvaluativo);
-
-        if (!detallePlanDeEstudioRepository.existsById(idDetallePlanDeEstudio)) {
-            throw new RuntimeException("No existe el detalle de plan de estudio con ID: " + idDetallePlanDeEstudio);
+    @Override
+    public List<NominaEstudianteResponseDTO> obtenerNominaPorGradoYSalon(
+            Integer idGrado, Integer idSalon, Long idDetallePlanDeEstudio,
+            Integer idPeriodoEvaluativo, Integer idDocente) {
+        log.info("Obteniendo nómina para grado {} y salón {}", idGrado, idSalon);
+        var salon = salonRepository.findById(idSalon)
+                .orElseThrow(() -> new RuntimeException("No existe el salón con ID: " + idSalon));
+        Integer idGradoSalon = salon.getGrado().getIdGrado();
+        if (idGrado != null && !idGrado.equals(idGradoSalon)) {
+            throw new IllegalArgumentException("El salón seleccionado no corresponde al grado indicado.");
         }
-        if (!periodoEvaluativoRepository.existsById(idPeriodoEvaluativo)) {
-            throw new RuntimeException("No existe el período evaluativo con ID: " + idPeriodoEvaluativo);
+
+        boolean tieneDetalle = idDetallePlanDeEstudio != null;
+        boolean tienePeriodo = idPeriodoEvaluativo != null;
+        boolean tieneDocente = idDocente != null;
+        if (tieneDetalle != tienePeriodo || tieneDetalle != tieneDocente) {
+            throw new IllegalArgumentException(
+                    "Para cargar calificaciones, envíe juntos el detalle del plan, el período y el docente.");
         }
 
-        return calificacionRepository.obtenerNominaEstudiantes(idDetallePlanDeEstudio, idPeriodoEvaluativo);
+        if (tieneDetalle) {
+            DetallePlanDeEstudio detalle = detallePlanDeEstudioRepository.findById(idDetallePlanDeEstudio)
+                    .orElseThrow(() -> new RuntimeException(
+                            "No existe el detalle de plan de estudio con ID: " + idDetallePlanDeEstudio));
+            validarDocenteAsignado(detalle, idDocente);
+            if (detalle.getSalon() == null || !idSalon.equals(detalle.getSalon().getIdSalon())) {
+                throw new IllegalArgumentException(
+                        "La asignatura seleccionada no corresponde al salón indicado.");
+            }
+            if (!periodoEvaluativoRepository.existsById(idPeriodoEvaluativo)) {
+                throw new RuntimeException("No existe el período evaluativo con ID: " + idPeriodoEvaluativo);
+            }
+        }
+
+        return calificacionRepository.obtenerNominaActivaPorSalon(
+                        idGradoSalon, idSalon, idDetallePlanDeEstudio, idPeriodoEvaluativo)
+                .stream()
+                .map(estudiante -> new NominaEstudianteResponseDTO(
+                        estudiante.getIdMatricula(),
+                        estudiante.getCodEstudiante(),
+                        estudiante.getCodigoMined(),
+                        estudiante.getNombreCompletoEstudiante(),
+                        estudiante.getAcumulado(),
+                        estudiante.getExamen(),
+                        estudiante.getNotaFinal(),
+                        estudiante.getConducta()))
+                .toList();
     }
 
     @Override
@@ -62,20 +104,33 @@ public class CalificacionServicioImpl implements IcalificacionesServicio {
 
         DetallePlanDeEstudio detallePlan = detallePlanDeEstudioRepository.findById(batchDTO.idDetallePlanDeEstudio())
                 .orElseThrow(() -> new RuntimeException("Detalle de plan de estudio no encontrado ID: " + batchDTO.idDetallePlanDeEstudio()));
+        validarDocenteAsignado(detallePlan, batchDTO.idDocente());
 
         PeriodoEvaluativo periodoEvaluativo = periodoEvaluativoRepository.findById(batchDTO.idPeriodoEvaluativo())
                 .orElseThrow(() -> new RuntimeException("Período evaluativo no encontrado ID: " + batchDTO.idPeriodoEvaluativo()));
+
+        EstadoPeriodoEvaluativoResponseDTO estadoEdicion = obtenerEstadoEdicion(
+                batchDTO.idPeriodoEvaluativo(), detallePlan.getIdDetallePlanDeEstudio());
+        if (!estadoEdicion.permiteEdicion()) {
+            throw new IllegalStateException(estadoEdicion.mensajePantalla());
+        }
 
         List<Calificacion> calificacionesAGuardar = new ArrayList<>();
 
         for (CalificacionItemDTO item : batchDTO.calificaciones()) {
             Matricula matricula = matriculaRepository.findById(item.idMatricula())
                     .orElseThrow(() -> new RuntimeException("Matrícula no encontrada ID: " + item.idMatricula()));
+            if (!"ACTIVA".equalsIgnoreCase(matricula.getEstadoMatricula())
+                    || detallePlan.getSalon() == null
+                    || !detallePlan.getSalon().getIdSalon().equals(matricula.getSalon().getIdSalon())) {
+                throw new IllegalArgumentException(
+                        "La matrícula " + item.idMatricula() + " no está activa en el salón del detalle seleccionado.");
+            }
 
             Calificacion calificacion = calificacionRepository
                     .findByMatricula_IdMatriculaAndDetallePlanDeEstudio_IdDetallePlanDeEstudioAndPeriodoEvaluativo_IdPeriodoEvaluativo(
                             item.idMatricula(),
-                            batchDTO.idDetallePlanDeEstudio(),
+                            detallePlan.getIdDetallePlanDeEstudio(),
                             batchDTO.idPeriodoEvaluativo()
                     )
                     .orElseGet(() -> {
@@ -89,6 +144,11 @@ public class CalificacionServicioImpl implements IcalificacionesServicio {
 
             calificacion.setAcumulado(item.acumulado());
             calificacion.setExamen(item.examen());
+            if (item.conducta() != null) {
+                calificacion.setConducta(item.conducta().isBlank()
+                        ? "E"
+                        : item.conducta().trim().toUpperCase(Locale.ROOT));
+            }
             calificacion.setActualizadoPor(usuario);
 
             calificacionesAGuardar.add(calificacion);
@@ -100,28 +160,64 @@ public class CalificacionServicioImpl implements IcalificacionesServicio {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ComboItemDTO> obtenerGradosCombo() {
-        log.info("Cargando catálogo de Grados Académicos desde la BD");
-        return gradoRepository.findAll()
-                .stream()
-                .map(g -> new ComboItemDTO(g.getIdGrado(), g.getNombre()))
+    public List<ComboItemDTO> obtenerNivelesCombo() {
+        return nivelEducativoRepository.findAll().stream()
+                .map(nivel -> new ComboItemDTO(nivel.getIdNivel(), nivel.getNombre()))
                 .toList();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<ComboItemDTO> obtenerAsignaturasSeccionesCombo(Integer idGrado) {
-        log.info("Cargando catálogo de Asignaturas y Secciones para el Grado ID: {}", idGrado);
-        return detallePlanDeEstudioRepository.findAsignaturasConSalonPorGrado(idGrado)
-                .stream()
+    public List<ComboItemDTO> obtenerGradosCombo(Integer idNivel) {
+        var grados = idNivel == null
+                ? gradoRepository.findAll()
+                : gradoRepository.findByNivelEducativoIdNivel(idNivel);
+        return grados.stream()
+                .map(grado -> new ComboItemDTO(grado.getIdGrado(), grado.getNombre()))
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ComboItemDTO> obtenerSalonesCombo(Integer idGrado, Integer anioLectivo) {
+        int anio = anioLectivo == null ? Year.now().getValue() : anioLectivo;
+        if (anio < 1901 || anio > 2155) {
+            throw new IllegalArgumentException("El año lectivo debe estar entre 1901 y 2155.");
+        }
+        return salonRepository.obtenerSalonesPorGradoYAnio(idGrado, (short) anio).stream()
+                .map(salon -> new ComboItemDTO(
+                        salon.getIdSalon(),
+                        String.format("%s - Sección %s (%s)",
+                                salon.getCatalogoSalon().getNombreSalon(),
+                                salon.getSeccion(),
+                                salon.getTurno())))
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ComboItemDTO> obtenerAsignaturasSeccionesCombo(
+            Integer idGrado, Integer idSalon, Integer idDocente) {
+        log.info("Cargando asignaturas para grado {}, salón {} y docente {}", idGrado, idSalon, idDocente);
+        var detalles = idSalon == null
+                ? detallePlanDeEstudioRepository.findAsignaturasConSalonPorGrado(idGrado, idDocente)
+                : detallePlanDeEstudioRepository.findAsignaturasConSalonPorGrado(idGrado, idSalon, idDocente);
+        return detalles.stream()
                 .map(det -> new ComboItemDTO(
                         det.getIdDetallePlanDeEstudio(),
-                        String.format("%s - Sec \"%s\" (%s)",
+                        String.format("%s - Sec. \"%s\" (%s)",
                                 det.getAsignatura().getNombre(),
                                 det.getSalon().getSeccion(),
-                                det.getSalon().getTurno())
-                ))
+                                det.getSalon().getTurno())))
                 .toList();
+    }
+
+    private void validarDocenteAsignado(DetallePlanDeEstudio detalle, Integer idDocente) {
+        if (idDocente == null || detalle.getDocente() == null
+                || !idDocente.equals(detalle.getDocente().getIdpersona())) {
+            throw new IllegalArgumentException(
+                    "La asignatura no está asignada al docente indicado.");
+        }
     }
 
     @Override
@@ -134,9 +230,35 @@ public class CalificacionServicioImpl implements IcalificacionesServicio {
                 .toList();
     }
 
+    @Override
     @Transactional(readOnly = true)
-    public byte[] generarActaCalificacionesPdf(Long idDetallePlanDeEstudio, Long idPeriodoEvaluativo) {
-        log.info("Generando Acta de Calificaciones en PDF vía Jaspersoft para Plan: {} y Periodo: {}", idDetallePlanDeEstudio, idPeriodoEvaluativo);
+    public EstadoPeriodoEvaluativoResponseDTO obtenerEstadoEdicion(
+            Integer idPeriodoEvaluativo, Long idDetallePlanDeEstudio) {
+        var estadoBase = periodoEvaluativoRepository.obtenerEstadoEdicion(idPeriodoEvaluativo)
+                .orElseThrow(() -> new RuntimeException(
+                        "No se encontró el estado del período evaluativo con ID: " + idPeriodoEvaluativo));
+        boolean permiteEdicion = estadoBase.getPermiteEdicion() != null
+                && estadoBase.getPermiteEdicion() != 0L;
+        String mensaje = estadoBase.getMensajePantalla() == null
+                ? "El período evaluativo no permite edición."
+                : estadoBase.getMensajePantalla();
+
+        if (!permiteEdicion && idDetallePlanDeEstudio != null
+                && periodoEvaluativoRepository.existeAutorizacionExtemporanea(
+                        idDetallePlanDeEstudio, idPeriodoEvaluativo)) {
+            permiteEdicion = true;
+            mensaje = "Edición autorizada de forma extemporánea.";
+        }
+
+        return new EstadoPeriodoEvaluativoResponseDTO(
+                idPeriodoEvaluativo, permiteEdicion, mensaje, estadoBase.getFechaCierreDocente());
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public byte[] generarActaCalificacionesPdf(Long idDetallePlanDeEstudio, Integer idPeriodoEvaluativo) {
+        log.info("Generando Acta de Calificaciones en PDF vía Jaspersoft para Plan: {} y Periodo: {}",
+                idDetallePlanDeEstudio, idPeriodoEvaluativo);
 
         try (Connection connection = dataSource.getConnection()) {
             InputStream reportInputStream = getClass().getResourceAsStream("/reportes/acta_calificaciones.jasper");
@@ -156,9 +278,4 @@ public class CalificacionServicioImpl implements IcalificacionesServicio {
         }
     }
 
-    @Override
-    public byte[] generarActaCalificacionesPdf(Integer idDetallePlanDeEstudio, Integer anioLectivo) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'generarActaCalificacionesPdf'");
-    }
 }

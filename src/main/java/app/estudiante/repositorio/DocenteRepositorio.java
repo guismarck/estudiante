@@ -6,10 +6,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface DocenteRepositorio extends JpaRepository<Docente,Integer> {
     @Query(value = "select e from Docente e where e.codDocente = ?1 or e.nombre_completo = ?1 or e.apellido_completo = ?1")
     List<Docente> busquedaGeneral(String search);
+
+    Optional<Docente> findByCodDocente(String codDocente);
 
 }

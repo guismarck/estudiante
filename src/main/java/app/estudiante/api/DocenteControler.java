@@ -3,11 +3,14 @@ package app.estudiante.api;
 import app.estudiante.exception.recurosNoEncontradoException;
 import app.estudiante.modelo.Docente;
 import app.estudiante.servicio.InterfacesServicios.IDocenteServicio;
+import app.estudiante.utils.DocenteAsignacionResponseDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -27,6 +30,21 @@ public class DocenteControler {
         if (search == null || search.trim().isEmpty())
             return  docenteServicio.ListarDocente();
         return docenteServicio.busquedaGeneral(search);
+    }
+
+    @GetMapping(path = "/docentes/mis-asignaciones")
+    public ResponseEntity<List<DocenteAsignacionResponseDTO>> obtenerMisAsignaciones(
+            @RequestParam(required = false) Integer idDocente,
+            @RequestParam(required = false) String codigoDocente) {
+        boolean tieneId = idDocente != null;
+        boolean tieneCodigo = codigoDocente != null && !codigoDocente.isBlank();
+        if (tieneId == tieneCodigo) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Envía exactamente uno de estos parámetros: idDocente o codigoDocente.");
+        }
+        return ResponseEntity.ok(
+                docenteServicio.obtenerMisAsignaciones(idDocente, codigoDocente));
     }
 
     @PostMapping(path = "/docentes/create") // agregar docente
