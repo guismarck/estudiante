@@ -3,24 +3,26 @@ package app.estudiante.servicio.Servicios;
 import app.estudiante.modelo.Salon;
 import app.estudiante.repositorio.SalonRepositorio;
 import app.estudiante.servicio.InterfacesServicios.ISalonServicio;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 @Service
 public class SalonServicio implements ISalonServicio {
-   @Autowired
-   private SalonRepositorio salonRepositorio;
+
+    private final SalonRepositorio salonRepositorio;
+
+    public SalonServicio(SalonRepositorio salonRepositorio) {
+        this.salonRepositorio = salonRepositorio;
+    }
+
     @Override
     public List<Salon> ListarSalon() {
-        List<Salon> salons = salonRepositorio.findAll();
-        return salons;
+        return salonRepositorio.findAll();
     }
 
     @Override
     public Salon buscarSalonPorId(Integer idSalon) {
-        Salon salon = salonRepositorio.findById(idSalon).orElse(null);
-        return salon;
+        return salonRepositorio.findById(idSalon).orElse(null);
     }
 
     @Override
@@ -34,8 +36,9 @@ public class SalonServicio implements ISalonServicio {
     }
 
     @Override
-    public List<Salon> obtenerSalonesDisponiblesPorGrado(Integer idGrado) {
-        List<Salon> salones = salonRepositorio.obtenerSalonesDisponiblesPorGrado(idGrado);
-        return salones;
+    public List<Salon> obtenerSalonesDisponiblesPorGrado(
+            Integer idGrado) {
+        return salonRepositorio
+                .obtenerSalonesDisponiblesPorGrado(idGrado);
     }
 }
