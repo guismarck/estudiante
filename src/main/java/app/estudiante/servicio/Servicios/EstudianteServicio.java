@@ -1,26 +1,31 @@
 package app.estudiante.servicio.Servicios;
 
 
+import app.estudiante.api.GradoControlador;
 import app.estudiante.modelo.Estudiante;
 import app.estudiante.modelo.EstudianteTutor;
+import app.estudiante.modelo.EstudianteTutorId;
 import app.estudiante.modelo.Tutor;
 import app.estudiante.repositorio.EstudianteRepositorio;
 import app.estudiante.repositorio.EstudianteTutorRepositorio;
 import app.estudiante.repositorio.TutorRepositorio;
 import app.estudiante.servicio.InterfacesServicios.IEstudianteServicio;
+import app.estudiante.utils.EstudianteRequestDTO;
+import app.estudiante.utils.EstudianteTutorDTO;
 import app.estudiante.utils.NumerUtils;
-import app.estudiante.utils.ValidacionCedula;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Date;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 @Service
 public class EstudianteServicio implements IEstudianteServicio {
+
+   final Logger logger = LoggerFactory.getLogger(EstudianteServicio.class);
 
  @Autowired
  private EstudianteRepositorio estudianteRepositorio;
@@ -80,21 +85,68 @@ public class EstudianteServicio implements IEstudianteServicio {
         return  estudianteRepositorio.save(estudiante);
     }
 
+
     @Override
-    public Estudiante guardarEstudianteTutor(Estudiante estudiante, List<Tutor> tutores) {
-        for(Tutor tutor: tutores) {
-            if(Objects.isNull(tutor.getIdpersona())){
-                tutorRepositorio.save(tutor);
+    @Transactional(rollbackFor = Exception.class)
+    public Estudiante registrarEstudianteConTutores(EstudianteRequestDTO solicitud) {
+
+        if (Objects.isNull(solicitud) || Objects.isNull(solicitud.getEstudiante())) {
+            throw new IllegalArgumentException("Los datos del estudiante son obligatorios.");
+        }
+
+        if (Objects.isNull(solicitud.getTutores()) || solicitud.getTutores().isEmpty()) {
+            throw new IllegalArgumentException("Debe asignar al menos un tutor.");
+        }
+
+        // 1. Obtener la referencia del estudiante del DTO
+        Estudiante estudiante = solicitud.getEstudiante();
+
+        // Aseguramos que la lista de tutores de la entidad esté limpia
+        estudiante.getTutores().clear();
+
+        // 2. Procesar la lista de tutores del DTO
+        for (EstudianteTutorDTO dto : solicitud.getTutores()) {
+            if (Objects.isNull(dto.tutor())) {
+                throw new IllegalArgumentException("La información de cada tutor es obligatoria.");
             }
 
-            EstudianteTutor et = new EstudianteTutor();
-            et.setTutor(tutor);
-            et.setPersona(estudiante);
-            et.setEstado(true);
-            estudianteTutorRepositorio.save(et);
+            Tutor tutorEntity;
+            if (Objects.isNull(dto.tutor().getIdpersona())) {
+                // Guardamos el tutor si es nuevo para asegurarnos de que herede de Persona correctamente
+                tutorEntity = tutorRepositorio.saveAndFlush(dto.tutor());
+            } else {
+                tutorEntity = tutorRepositorio.findById(dto.tutor().getIdpersona())
+                        .orElseThrow(() -> new IllegalArgumentException("El tutor no existe."));
+            }
+
+            // 3. Crear el objeto intermedio pivote
+            EstudianteTutor relacion = new EstudianteTutor();
+            relacion.setId(new EstudianteTutorId(estudiante.getIdpersona(), tutorEntity.getIdpersona()));
+            relacion.setTutor(tutorEntity);
+            relacion.setPersona(estudiante); // Enlace bidireccional obligatorio
+            relacion.setParentesco(dto.parentesco());
+            relacion.setEstado(Objects.nonNull(dto.activo()) ? dto.activo() : true);
+            relacion.setCreadoPor("SISTEMA_API");
+            relacion.setActualizadoPor("SISTEMA_API");
+
+            // 4. Configurar la llave compuesta intermedia implícitamente si es necesario
+            // Nota: Si usas @MapsId en EstudianteTutor, Hibernate llenará estos IDs automáticamente al guardar el padre,
+            // pero asignarlos manualmente evita problemas con algunas versiones de MariaDB/MySQL:
+            if (Objects.nonNull(estudiante.getIdpersona())) {
+                relacion.setId(new EstudianteTutorId(estudiante.getIdpersona(), tutorEntity.getIdpersona()));
+            }
+
+            // 5. ¡ESTA ES LA CLAVE! Añadimos la relación directamente a la lista del estudiante
+            estudiante.getTutores().add(relacion);
         }
-        return estudianteRepositorio.findById(estudiante.getIdpersona()).orElse(null);
+
+        // 6. GUARDAR ÚNICAMENTE AL ESTUDIANTE
+        // Gracias a cascade = CascadeType.ALL, Hibernate guardará primero el Estudiante,
+        // resolverá su ID, y luego guardará automáticamente cada elemento de la lista 'tutores' en la tabla puente.
+        return estudianteRepositorio.saveAndFlush(estudiante);
     }
+
+
 
 
     @Override
