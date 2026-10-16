@@ -34,7 +34,7 @@ public class EstudianteTutor {
             referencedColumnName = "idpersona",
             nullable = false
     )
-    private Persona persona;
+    private Estudiante persona;
 
     @Column(name = "parentesco", nullable = false, length = 30)
     private String parentesco;

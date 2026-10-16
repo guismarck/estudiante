@@ -1,7 +1,11 @@
 package app.estudiante.modelo;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "estudiante")
@@ -23,4 +27,9 @@ public class Estudiante extends Persona {
 
     @Column(name = "estado", nullable = false)
     private Boolean estado = true;
+
+    @OneToMany(mappedBy = "persona", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties("persona")
+    private List<EstudianteTutor> tutores = new ArrayList<>();
+
 }

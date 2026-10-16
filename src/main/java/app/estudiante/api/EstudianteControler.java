@@ -1,7 +1,9 @@
 package app.estudiante.api;
 
 import app.estudiante.exception.recurosNoEncontradoException;
+import app.estudiante.modelo.EstudianteTutor;
 import app.estudiante.servicio.InterfacesServicios.IEstudianteServicio;
+import app.estudiante.utils.EstudianteRequestDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,17 +45,18 @@ public class EstudianteControler {
 
     @PostMapping("/estudiantes/create")
     public ResponseEntity<?> agregarEstudiante(
-            @RequestBody Estudiante estudiante) {
+            @RequestBody EstudianteRequestDTO estudiante) {
 
         logger.info("Estudiante a registrar: {}", estudiante);
 
         try {
             Estudiante estudianteGuardado =
-                    estudianteServicio.guardarEstudiante(estudiante);
+                    estudianteServicio.guardarEstudiante(estudiante.getEstudiante());
 
+            Estudiante et = estudianteServicio.guardarEstudianteTutor(estudiante.getEstudiante(), estudiante.getTutores());
             return ResponseEntity
                     .status(HttpStatus.CREATED)
-                    .body(estudianteGuardado);
+                    .body(et);
 
         } catch (Exception e) {
             logger.error("Error al registrar estudiante", e);
