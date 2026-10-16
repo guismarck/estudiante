@@ -9,7 +9,8 @@ public record NominaEstudianteResponseDTO(
     String nombreCompletoEstudiante,
     BigDecimal acumulado,
     BigDecimal examen,
-    BigDecimal notaFinal
+    BigDecimal notaFinal,
+    String conducta
 ) {
     // Constructor de conveniencia si HQL retorna Double desde COALESCE
     public NominaEstudianteResponseDTO(
@@ -19,7 +20,8 @@ public record NominaEstudianteResponseDTO(
             String nombreCompletoEstudiante,
             Double acumulado,
             Double examen,
-            Double notaFinal) {
+            Double notaFinal,
+            String conducta) {
         this(
             idMatricula,
             codEstudiante,
@@ -27,7 +29,8 @@ public record NominaEstudianteResponseDTO(
             nombreCompletoEstudiante,
             BigDecimal.valueOf(acumulado != null ? acumulado : 0.0),
             BigDecimal.valueOf(examen != null ? examen : 0.0),
-            BigDecimal.valueOf(notaFinal != null ? notaFinal : 0.0)
+            BigDecimal.valueOf(notaFinal != null ? notaFinal : 0.0),
+            conducta != null ? conducta : "E"
         );
     }
 }

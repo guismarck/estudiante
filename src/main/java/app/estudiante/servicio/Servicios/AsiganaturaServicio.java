@@ -10,7 +10,6 @@ import java.util.List;
 @Service
 public class AsiganaturaServicio implements IAsignaturaServicio {
     @Autowired
-
     private AsignaturaRepositorio asignaturaRepositorio;
     @Override
     public List<Asignatura> ListarAsignatura() {

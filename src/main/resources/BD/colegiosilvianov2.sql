@@ -353,7 +353,7 @@ CREATE TABLE `detalle_plan_de_estudio` (
   `actualizado_por`           VARCHAR(50)  DEFAULT NULL,
   `actualizado_el`            DATETIME     DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`iddetalle_plan_de_estudio`),
-  UNIQUE KEY `uk_plan_asignatura` (`idPlan_de_estudio`, `idAsignatura`),
+  UNIQUE KEY `uk_plan_asignatura_salon` (`idPlan_de_estudio`, `idAsignatura`, `idSalon`),
   CONSTRAINT `fk_det_plan` FOREIGN KEY (`idPlan_de_estudio`) REFERENCES `plan_de_estudio` (`idPlan_de_estudio`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_det_asig` FOREIGN KEY (`idAsignatura`) REFERENCES `asignatura` (`idAsignatura`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_det_docente` FOREIGN KEY (`idDocente`) REFERENCES `docente` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE,

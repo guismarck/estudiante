@@ -1,9 +1,12 @@
 package app.estudiante.servicio.Servicios;
 
 import app.estudiante.modelo.Docente;
+import app.estudiante.exception.recurosNoEncontradoException;
+import app.estudiante.repositorio.DetallePlandeEstudioRepositorio;
 import app.estudiante.repositorio.DocenteRepositorio;
 import app.estudiante.servicio.InterfacesServicios.IDocenteServicio;
 import app.estudiante.utils.NumerUtils;
+import app.estudiante.utils.DocenteAsignacionResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +16,9 @@ public class DocenteServicio implements IDocenteServicio {
 
     @Autowired
     private DocenteRepositorio docenteRepositorio;
+
+    @Autowired
+    private DetallePlandeEstudioRepositorio detallePlanDeEstudioRepositorio;
 
     @Override
     public List<Docente> ListarDocente() {
@@ -42,4 +48,19 @@ public class DocenteServicio implements IDocenteServicio {
     public void eliminarDocente(Docente docente) {
         docenteRepositorio.delete(docente);
     }
+
+        @Override
+        public List<DocenteAsignacionResponseDTO> obtenerMisAsignaciones(
+                Integer idDocente, String codigoDocente) {
+            Docente docente = idDocente != null
+                    ? docenteRepositorio.findById(idDocente).orElse(null)
+                    : docenteRepositorio.findByCodDocente(codigoDocente).orElse(null);
+
+            if (docente == null) {
+                throw new recurosNoEncontradoException("No se encontró el docente solicitado.");
+            }
+
+            return detallePlanDeEstudioRepositorio.findAsignacionesActivasPorDocente(
+                    docente.getIdpersona());
+        }
 }
