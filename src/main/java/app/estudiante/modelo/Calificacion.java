@@ -2,9 +2,6 @@ package app.estudiante.modelo;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -24,7 +21,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EntityListeners(AuditingEntityListener.class)
 public class Calificacion {
 
     @Id
@@ -56,14 +52,12 @@ public class Calificacion {
     @Column(name = "creado_por", length = 50)
     private String creadoPor;
 
-    @CreatedDate
-    @Column(name = "creado_el", nullable = false, updatable = false)
+    @Column(name = "creado_el", nullable = false, insertable = false, updatable = false)
     private LocalDateTime creadoEl;
 
     @Column(name = "actualizado_por", length = 50)
     private String actualizadoPor;
 
-    @LastModifiedDate
-    @Column(name = "actualizado_el")
+    @Column(name = "actualizado_el", insertable = false, updatable = false)
     private LocalDateTime actualizadoEl;
 }

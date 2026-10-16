@@ -24,4 +24,16 @@ public interface SalonRepositorio extends JpaRepository<Salon, Integer> {
         GROUP BY s
     """)
     List<Salon> obtenerSalonesDisponiblesPorGrado(@Param("idGrado") Integer idGrado);
+
+    @Query("""
+        SELECT s FROM Salon s
+        JOIN FETCH s.catalogoSalon cs
+        JOIN FETCH s.grado g
+        WHERE g.idGrado = :idGrado
+          AND s.anioLectivo = :anioLectivo
+        ORDER BY s.seccion, s.turno
+        """)
+    List<Salon> obtenerSalonesPorGradoYAnio(
+            @Param("idGrado") Integer idGrado,
+            @Param("anioLectivo") Short anioLectivo);
 }

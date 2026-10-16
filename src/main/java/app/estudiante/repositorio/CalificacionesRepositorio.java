@@ -12,7 +12,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface CalificacionesRepositorio extends JpaRepository<Calificacion, Integer> {
+public interface CalificacionesRepositorio extends JpaRepository<Calificacion, Long> {
 
 @Query(value = """
         SELECT 
@@ -28,19 +28,49 @@ public interface CalificacionesRepositorio extends JpaRepository<Calificacion, I
         INNER JOIN persona p ON e.idpersona = p.idpersona
         INNER JOIN salon s ON m.idSalon = s.idSalon
         INNER JOIN detalle_plan_de_estudio dpe ON dpe.idSalon = s.idSalon
-        LEFT JOIN calificacion c ON c.idmatricula = m.idmatricula
+        LEFT JOIN calificaciones c ON c.idmatricula = m.idmatricula
             AND c.iddetalle_plan_de_estudio = :idDetallePlan
             AND c.idperiodo_evaluativo = :idPeriodo
         WHERE dpe.iddetalle_plan_de_estudio = :idDetallePlan
+          AND dpe.idSalon = m.idSalon
+          AND (:idSalon IS NULL OR dpe.idSalon = :idSalon)
           AND m.estado = 'ACTIVA'
         ORDER BY p.primer_apellido ASC, p.primer_nombre ASC
     """, nativeQuery = true)
     List<NominaEstudianteResponseDTO> obtenerNominaEstudiantes(
-        @Param("idDetallePlan") Integer idDetallePlan,
-        @Param("idPeriodo") Integer idPeriodo
+        @Param("idDetallePlan") Long idDetallePlan,
+        @Param("idPeriodo") Integer idPeriodo,
+        @Param("idSalon") Integer idSalon
     );
 
+    @Query(value = """
+        SELECT
+            m.idmatricula AS idMatricula,
+            e.cod_estudiante AS codEstudiante,
+            e.codigo_MINED AS codigoMined,
+            CONCAT(p.primer_apellido, ' ', p.primer_nombre) AS nombreCompletoEstudiante,
+            COALESCE(c.acumulado, 0.00) AS acumulado,
+            COALESCE(c.examen, 0.00) AS examen,
+            COALESCE(c.nota_final, 0.00) AS notaFinal
+        FROM matricula m
+        INNER JOIN estudiante e ON e.idpersona = m.idpersona
+        INNER JOIN persona p ON p.idpersona = e.idpersona
+        LEFT JOIN calificaciones c
+            ON c.idmatricula = m.idmatricula
+            AND :idDetallePlan IS NOT NULL
+            AND :idPeriodo IS NOT NULL
+            AND c.iddetalle_plan_de_estudio = :idDetallePlan
+            AND c.idperiodo_evaluativo = :idPeriodo
+        WHERE m.idSalon = :idSalon
+          AND m.estado = 'ACTIVA'
+        ORDER BY p.primer_apellido ASC, p.primer_nombre ASC
+        """, nativeQuery = true)
+    List<NominaEstudianteResponseDTO> obtenerNominaActivaPorSalon(
+            @Param("idSalon") Integer idSalon,
+            @Param("idDetallePlan") Long idDetallePlan,
+            @Param("idPeriodo") Integer idPeriodo);
+
   Optional<Calificacion> findByMatricula_IdMatriculaAndDetallePlanDeEstudio_IdDetallePlanDeEstudioAndPeriodoEvaluativo_IdPeriodoEvaluativo(
-    Integer idMatricula, Integer idDetallePlan, Integer idPeriodo
+    Integer idMatricula, Long idDetallePlan, Integer idPeriodo
 );
 }

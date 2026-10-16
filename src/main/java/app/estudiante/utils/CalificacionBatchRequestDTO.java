@@ -7,7 +7,10 @@ import java.util.List;
 
 public record CalificacionBatchRequestDTO(
     @NotNull(message = "El ID del detalle del plan de estudio es obligatorio")
-    Integer idDetallePlanDeEstudio,
+    Long idDetallePlanDeEstudio,
+
+    @NotNull(message = "El ID del docente es obligatorio")
+    Integer idDocente,
 
     @NotNull(message = "El ID del período evaluativo es obligatorio")
     Integer idPeriodoEvaluativo,
