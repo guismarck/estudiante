@@ -2,7 +2,11 @@ package app.estudiante.servicio.Servicios;
 
 
 import app.estudiante.modelo.Estudiante;
+import app.estudiante.modelo.EstudianteTutor;
+import app.estudiante.modelo.Tutor;
 import app.estudiante.repositorio.EstudianteRepositorio;
+import app.estudiante.repositorio.EstudianteTutorRepositorio;
+import app.estudiante.repositorio.TutorRepositorio;
 import app.estudiante.servicio.InterfacesServicios.IEstudianteServicio;
 import app.estudiante.utils.NumerUtils;
 import app.estudiante.utils.ValidacionCedula;
@@ -12,12 +16,19 @@ import org.springframework.stereotype.Service;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class EstudianteServicio implements IEstudianteServicio {
 
  @Autowired
  private EstudianteRepositorio estudianteRepositorio;
+    @Autowired
+    private EstudianteTutorRepositorio estudianteTutorRepositorio;
+    @Autowired
+    private TutorRepositorio tutorRepositorio;
+
     @Override
     public List<Estudiante> ListarEstudiantes() {
         List<Estudiante> estudiantes = estudianteRepositorio.findAll();
@@ -69,6 +80,21 @@ public class EstudianteServicio implements IEstudianteServicio {
         return  estudianteRepositorio.save(estudiante);
     }
 
+    @Override
+    public Estudiante guardarEstudianteTutor(Estudiante estudiante, List<Tutor> tutores) {
+        for(Tutor tutor: tutores) {
+            if(Objects.isNull(tutor.getIdpersona())){
+                tutorRepositorio.save(tutor);
+            }
+
+            EstudianteTutor et = new EstudianteTutor();
+            et.setTutor(tutor);
+            et.setPersona(estudiante);
+            et.setEstado(true);
+            estudianteTutorRepositorio.save(et);
+        }
+        return estudianteRepositorio.findById(estudiante.getIdpersona()).orElse(null);
+    }
 
 
     @Override
