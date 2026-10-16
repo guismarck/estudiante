@@ -12,5 +12,5 @@ import java.util.List;
 public class EstudianteRequestDTO implements Serializable {
     private static final long serialVersionUID = 1L;
     private Estudiante estudiante;
-    private List<Tutor> tutores;
+    private List<EstudianteTutorDTO> tutores;
 }

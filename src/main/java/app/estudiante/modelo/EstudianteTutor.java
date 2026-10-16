@@ -28,7 +28,7 @@ public class EstudianteTutor {
     private Tutor tutor;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @MapsId("idpersonaEstudiante")
+    @MapsId("idperson_estudiante")
     @JoinColumn(
             name = "idpersona_estudiante",
             referencedColumnName = "idpersona",

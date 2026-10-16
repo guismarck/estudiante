@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import app.estudiante.modelo.Estudiante;
 import org.springframework.http.HttpStatus;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("estudiante-app")
@@ -44,30 +45,33 @@ public class EstudianteControler {
    }*/
 
     @PostMapping("/estudiantes/create")
-    public ResponseEntity<?> agregarEstudiante(
-            @RequestBody EstudianteRequestDTO estudiante) {
-
-        logger.info("Estudiante a registrar: {}", estudiante);
+    public ResponseEntity<?> agregarEstudiante(@RequestBody EstudianteRequestDTO estudianteRequest) {
+        logger.info("Iniciando registro completo de estudiante y tutores: {}", estudianteRequest);
 
         try {
-            Estudiante estudianteGuardado =
-                    estudianteServicio.guardarEstudiante(estudiante.getEstudiante());
+            // Una sola llamada al servicio maneja todo el flujo de negocio de forma segura
+            Estudiante estudianteRegistrado = estudianteServicio.registrarEstudianteConTutores(estudianteRequest);
 
-            Estudiante et = estudianteServicio.guardarEstudianteTutor(estudiante.getEstudiante(), estudiante.getTutores());
             return ResponseEntity
                     .status(HttpStatus.CREATED)
-                    .body(et);
+                    .body(estudianteRegistrado);
 
-        } catch (Exception e) {
-            logger.error("Error al registrar estudiante", e);
-
+        } catch (IllegalArgumentException e) {
+            logger.error("Error de validación en la solicitud", e);
             return ResponseEntity
-                    .badRequest()
-                    .body(e.getMessage());
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("mensaje", e.getMessage()));
+        } catch (Exception e) {
+            logger.error("Error crítico al registrar estudiante y tutores", e);
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("mensaje", "Ocurrió un error interno en el servidor: " + e.getMessage()));
         }
     }
 
-   @GetMapping(path = "/estudiantes/{id}")// buscar por ID
+
+
+    @GetMapping(path = "/estudiantes/{id}")// buscar por ID
    public ResponseEntity<Estudiante>getEstudianteId(@PathVariable Integer id){
        if(id == null){
            throw  new recurosNoEncontradoException("No se encontro el grado con Id"+id);
