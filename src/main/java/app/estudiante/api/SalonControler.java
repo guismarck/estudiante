@@ -8,6 +8,7 @@ import app.estudiante.servicio.InterfacesServicios.ISalonServicio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -52,12 +53,24 @@ public class SalonControler {
 
     // Registrar un salón
     @PostMapping("/salones/create")
-    public ResponseEntity<Void> agregarSalon(
+    public ResponseEntity<?> agregarSalon(
             @RequestBody Salon salon) {
 
         logger.info("Registrando salón: {}", salon);
 
-        salonServicio.guardarSalon(salon);
+        try {
+
+            salonServicio.guardarSalon(salon);
+        }catch(Exception e){
+            ProblemDetail errorBody = ProblemDetail.forStatusAndDetail(
+                    HttpStatus.BAD_REQUEST,
+                    e.getMessage()
+            );
+
+            // Opcional: Puedes agregar un título o propiedades extra si quieres
+            errorBody.setTitle("Error al registrar el salon");
+           return ResponseEntity.badRequest().body(errorBody);
+        }
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }

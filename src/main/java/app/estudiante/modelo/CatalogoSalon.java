@@ -16,7 +16,7 @@ import jakarta.persistence.*;
 public class CatalogoSalon extends AuditableEntity{
    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "idcatalogo_salon", nullable = false, updatable = false)
+    @Column(name = "idcatalogo_salon",  updatable = false)
     private Long idCatalogoSalon;
 
     @NotBlank(message = "El nombre del salón es obligatorio")
