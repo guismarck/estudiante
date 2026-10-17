@@ -1,10 +1,13 @@
 package app.estudiante.modelo;
 
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import lombok.*;
+import app.estudiante.modelo.Estudiante;
+import app.estudiante.modelo.EstudianteTutorId;
+import app.estudiante.modelo.Tutor;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Table(name = "estudiante_tutor")
@@ -12,28 +15,19 @@ import jakarta.persistence.*;
 @Setter
 @NoArgsConstructor
 @ToString(exclude = {"tutor", "persona"})
-
 public class EstudianteTutor {
 
     @EmbeddedId
-    private   EstudianteTutorId id;
+    private EstudianteTutorId id = new EstudianteTutorId();
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @MapsId("idtutor")
-    @JoinColumn(
-            name = "idtutor",
-            referencedColumnName = "idpersona",
-            nullable = false
-    )
+    @JoinColumn(name = "idtutor", referencedColumnName = "idpersona", nullable = false)
     private Tutor tutor;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @MapsId("idperson_estudiante")
-    @JoinColumn(
-            name = "idpersona_estudiante",
-            referencedColumnName = "idpersona",
-            nullable = false
-    )
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @MapsId("idpersonaEstudiante")
+    @JoinColumn(name = "idpersona_estudiante", referencedColumnName = "idpersona", nullable = false)
     private Estudiante persona;
 
     @Column(name = "parentesco", nullable = false, length = 30)

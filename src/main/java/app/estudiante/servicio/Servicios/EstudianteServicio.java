@@ -88,66 +88,65 @@ public class EstudianteServicio implements IEstudianteServicio {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Estudiante registrarEstudianteConTutores(EstudianteRequestDTO solicitud) {
+    public Estudiante registrarEstudianteConTutores(
+            EstudianteRequestDTO solicitud) {
 
-        if (Objects.isNull(solicitud) || Objects.isNull(solicitud.getEstudiante())) {
-            throw new IllegalArgumentException("Los datos del estudiante son obligatorios.");
+        if (solicitud == null || solicitud.getEstudiante() == null) {
+            throw new IllegalArgumentException(
+                    "Los datos del estudiante son obligatorios."
+            );
         }
 
-        if (Objects.isNull(solicitud.getTutores()) || solicitud.getTutores().isEmpty()) {
-            throw new IllegalArgumentException("Debe asignar al menos un tutor.");
+        if (solicitud.getTutores() == null
+                || solicitud.getTutores().isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Debe asignar al menos un tutor."
+            );
         }
 
-        // 1. Obtener la referencia del estudiante del DTO
         Estudiante estudiante = solicitud.getEstudiante();
 
-        // Aseguramos que la lista de tutores de la entidad esté limpia
+        // Evitar conservar relaciones anteriores del objeto recibido.
         estudiante.getTutores().clear();
 
-        // 2. Procesar la lista de tutores del DTO
         for (EstudianteTutorDTO dto : solicitud.getTutores()) {
-            if (Objects.isNull(dto.tutor())) {
-                throw new IllegalArgumentException("La información de cada tutor es obligatoria.");
+
+            if (dto == null || dto.tutor() == null) {
+                throw new IllegalArgumentException(
+                        "La información de cada tutor es obligatoria."
+                );
             }
 
             Tutor tutorEntity;
-            if (Objects.isNull(dto.tutor().getIdpersona())) {
-                // Guardamos el tutor si es nuevo para asegurarnos de que herede de Persona correctamente
-                tutorEntity = tutorRepositorio.saveAndFlush(dto.tutor());
+
+            if (dto.tutor().getIdpersona() == null) {
+                tutorEntity = tutorRepositorio.save(dto.tutor());
             } else {
-                tutorEntity = tutorRepositorio.findById(dto.tutor().getIdpersona())
-                        .orElseThrow(() -> new IllegalArgumentException("El tutor no existe."));
+                tutorEntity = tutorRepositorio
+                        .findById(dto.tutor().getIdpersona())
+                        .orElseThrow(() ->
+                                new IllegalArgumentException(
+                                        "El tutor no existe."
+                                )
+                        );
             }
 
-            // 3. Crear el objeto intermedio pivote
             EstudianteTutor relacion = new EstudianteTutor();
-            relacion.setId(new EstudianteTutorId(estudiante.getIdpersona(), tutorEntity.getIdpersona()));
+
             relacion.setTutor(tutorEntity);
-            relacion.setPersona(estudiante); // Enlace bidireccional obligatorio
+            relacion.setPersona(estudiante);
             relacion.setParentesco(dto.parentesco());
-            relacion.setEstado(Objects.nonNull(dto.activo()) ? dto.activo() : true);
+            relacion.setEstado(
+                    dto.activo() != null ? dto.activo() : true
+            );
             relacion.setCreadoPor("SISTEMA_API");
             relacion.setActualizadoPor("SISTEMA_API");
 
-            // 4. Configurar la llave compuesta intermedia implícitamente si es necesario
-            // Nota: Si usas @MapsId en EstudianteTutor, Hibernate llenará estos IDs automáticamente al guardar el padre,
-            // pero asignarlos manualmente evita problemas con algunas versiones de MariaDB/MySQL:
-            if (Objects.nonNull(estudiante.getIdpersona())) {
-                relacion.setId(new EstudianteTutorId(estudiante.getIdpersona(), tutorEntity.getIdpersona()));
-            }
-
-            // 5. ¡ESTA ES LA CLAVE! Añadimos la relación directamente a la lista del estudiante
             estudiante.getTutores().add(relacion);
         }
 
-        // 6. GUARDAR ÚNICAMENTE AL ESTUDIANTE
-        // Gracias a cascade = CascadeType.ALL, Hibernate guardará primero el Estudiante,
-        // resolverá su ID, y luego guardará automáticamente cada elemento de la lista 'tutores' en la tabla puente.
         return estudianteRepositorio.saveAndFlush(estudiante);
     }
-
-
-
 
     @Override
     public void eliminarEstudinate(Estudiante estudiante) {
