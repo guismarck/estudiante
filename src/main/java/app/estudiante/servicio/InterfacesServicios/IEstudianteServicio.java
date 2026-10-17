@@ -1,11 +1,6 @@
 package app.estudiante.servicio.InterfacesServicios;
-
 import app.estudiante.modelo.Estudiante;
-import app.estudiante.modelo.EstudianteTutor;
-import app.estudiante.modelo.Tutor;
 import app.estudiante.utils.EstudianteRequestDTO;
-import app.estudiante.utils.EstudianteTutorDTO;
-
 import java.util.List;
 
 public interface IEstudianteServicio {

@@ -1,8 +1,6 @@
 package app.estudiante.modelo;
 
-import app.estudiante.modelo.Estudiante;
-import app.estudiante.modelo.EstudianteTutorId;
-import app.estudiante.modelo.Tutor;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
