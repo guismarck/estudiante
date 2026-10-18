@@ -1,8 +1,7 @@
 package app.estudiante.api;
 
-import app.estudiante.exception.recurosNoEncontradoException;
+import app.estudiante.exception.recursosNoEncontradoException;
 import app.estudiante.modelo.Usuario;
-import app.estudiante.servicio.InterfacesServicios.IDocenteServicio;
 import app.estudiante.servicio.InterfacesServicios.IUsuarioServicio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +21,6 @@ public class UsuarioControler {
 
     @Autowired
     private IUsuarioServicio usuarioServicio;
-    private IDocenteServicio docenteServicio;
 
     //http://localhost:8080/estudiante-app/usuarios
     @GetMapping(path = "/usuarios")
@@ -41,41 +39,31 @@ public class UsuarioControler {
     }
 
     @GetMapping(path = "/usuarios/{id}")// buscar por ID
-    public ResponseEntity<Usuario> getUsuarioId(@PathVariable Integer id){
+    public ResponseEntity<Usuario> getUsuarioId(@PathVariable Long id){
         if(id == null){
-            throw  new recurosNoEncontradoException("No se encontro el Usuario con Id"+id);
+            throw  new recursosNoEncontradoException("No se encontro el Usuario con Id"+id);
         }
         return  ResponseEntity.ok(usuarioServicio.buscarUsuarioPorId(id));
     }
 
     @PutMapping(path = "/usuarios/{id}")// actulizar estudiante
-    public ResponseEntity<Usuario>ActulizarId(@PathVariable Integer id,
+    public ResponseEntity<Usuario>ActulizarId(@PathVariable Long id,
                                               @RequestBody Usuario usuarioResivido){
         Usuario usuario = usuarioServicio.buscarUsuarioPorId(id);
         if(usuario == null){
-            throw  new recurosNoEncontradoException("No exite el a actualizar con Id"+id);
+            throw  new recursosNoEncontradoException("No exite el a actualizar con Id"+id);
         }
-        usuario.setNombre(usuarioResivido.getNombre());
-        usuario.setContraseña(usuarioResivido.getContraseña());
-        usuario.setTipo_usuario(usuarioResivido.getTipo_usuario());
-        usuario.setCorreo(usuarioResivido.getCorreo());
-        usuario.setEstado(usuarioResivido.isEstado());
-        var docente = usuario.getDocente();
-
-        docente.setNombre_completo(usuarioResivido.getDocente().getNombre_completo());
-        docente.setApellido_completo(usuarioResivido.getDocente().getApellido_completo());
-        docente.setSexo(usuarioResivido.getDocente().getSexo());
-        docente.setDireccion(usuarioResivido.getDocente().getDireccion());
-       // docente.setPartidad_nacimiento(usuarioResivido.getDocente().getPartidad_nacimiento());
-        docente.setFecha_nacimiento(usuarioResivido.getDocente().getFecha_nacimiento());
-        docente.setCedula(usuarioResivido.getDocente().getCedula());
-        docente.setEstado(usuarioResivido.getDocente().getEstado());
+        usuario.setUsername(usuarioResivido.getUsername());
+        usuario.setPasswordHash(usuarioResivido.getPasswordHash());
+        usuario.setEstado(usuarioResivido.getEstado());
+        usuario.setPersona(usuarioResivido.getPersona());
+        usuario.setRoles(usuarioResivido.getRoles());
         usuarioServicio.guardarUsuario(usuario);
         return ResponseEntity.ok(usuario);
     }
 
    @DeleteMapping(path = "/usuarios/{id}")// eliminar docente
-    public  void eliminarDocenteID(@PathVariable Integer id){
+    public  void eliminarDocenteID(@PathVariable Long id){
         usuarioServicio.eliminarUsuario(usuarioServicio.buscarUsuarioPorId(id));
     }
 

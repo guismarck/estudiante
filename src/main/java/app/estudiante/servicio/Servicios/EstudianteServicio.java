@@ -2,7 +2,7 @@ package app.estudiante.servicio.Servicios;
 
 
 import app.estudiante.modelo.Estudiante;
-import app.estudiante.exception.recurosNoEncontradoException;
+import app.estudiante.exception.recursosNoEncontradoException;
 import app.estudiante.repositorio.EstudianteRepositorio;
 import app.estudiante.servicio.InterfacesServicios.IEstudianteServicio;
 import app.estudiante.utils.NumerUtils;
@@ -31,7 +31,7 @@ public class EstudianteServicio implements IEstudianteServicio {
     @Override
     public Estudiante buscarEstudiantePorCodigo(String codEstudiante) {
         return estudianteRepositorio.findByCodEstudiante(codEstudiante)
-                .orElseThrow(() -> new recurosNoEncontradoException(
+                .orElseThrow(() -> new recursosNoEncontradoException(
                         "No se encontró un estudiante con código " + codEstudiante));
     }
 

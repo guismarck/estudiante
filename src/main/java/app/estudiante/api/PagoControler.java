@@ -1,6 +1,6 @@
 package app.estudiante.api;
 
-import app.estudiante.exception.recurosNoEncontradoException;
+import app.estudiante.exception.recursosNoEncontradoException;
 import app.estudiante.modelo.Pago;
 import app.estudiante.servicio.InterfacesServicios.IPagoServicio;
 import org.slf4j.Logger;
@@ -34,7 +34,7 @@ public class PagoControler {
     @GetMapping(path = "/pago/{id:\\d+}")// buscar por ID
     public ResponseEntity<Pago> getPagoId(@PathVariable Integer id){
         if(id == null){
-            throw  new recurosNoEncontradoException("No se encontro el grado con Id"+id);
+            throw  new recursosNoEncontradoException("No se encontro el grado con Id"+id);
         }
         return  ResponseEntity.ok(pagoServicio.buscarPagoPorId(id));
     }
@@ -56,7 +56,7 @@ public class PagoControler {
                                                     @RequestBody Pago pagoResivido){
         Pago pago = pagoServicio.buscarPagoPorId(id);
         if(pago == null){
-            throw  new recurosNoEncontradoException("No exite el a actualizar con Id"+id);
+            throw  new recursosNoEncontradoException("No exite el a actualizar con Id"+id);
         }
         pago.setConcepto(pagoResivido.getConcepto());
         pago.setFecha_pago(pagoResivido.getFecha_pago());

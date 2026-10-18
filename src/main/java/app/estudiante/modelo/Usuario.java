@@ -6,6 +6,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -14,22 +17,29 @@ import lombok.ToString;
 @Table(name = "usuario")
 @PrimaryKeyJoinColumn(name = "idpersona")
 public class Usuario {
-    @Id
+ @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column
-     private  Integer idusuario;
-//     private Integer idDocente;
-    @Column
-     private String nombre;
-    @Column
-     private String contraseña;
-    @Column
-     private String tipo_usuario;
-    @Column
-     private String correo;
-     @Column
-     private boolean estado;
-     @OneToOne
-     @JoinColumn(name="idpersona",referencedColumnName = "idpersona")
-     private Docente docente;
+    private Long id;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idpersona", referencedColumnName = "idpersona", unique = true)
+    private Persona persona;
+
+    @Column(nullable = false, length = 50, unique = true)
+    private String username;
+
+    @Column(name = "password_hash", nullable = false, length = 255)
+    private String passwordHash;
+
+    @Column(nullable = false)
+    private Integer estado; // 1: Activo, 0: Inactivo, 2: Bloqueado
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "roles_usuario",
+        joinColumns = @JoinColumn(name = "usuario_id"),
+        inverseJoinColumns = @JoinColumn(name = "rol_id")
+    )
+    private Set<RolEntity> roles = new HashSet<>();
+
 }

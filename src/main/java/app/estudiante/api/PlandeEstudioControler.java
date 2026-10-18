@@ -1,6 +1,6 @@
 package app.estudiante.api;
 
-import app.estudiante.exception.recurosNoEncontradoException;
+import app.estudiante.exception.recursosNoEncontradoException;
 import app.estudiante.modelo.PlandeEstudio;
 import app.estudiante.servicio.InterfacesServicios.IPlandeEstudioServicio;
 import org.slf4j.Logger;
@@ -38,7 +38,7 @@ public class PlandeEstudioControler {
     @GetMapping(path = "/plandeEstudio/{id}")// buscar por ID
     public ResponseEntity<PlandeEstudio> getPlandeEstudioId(@PathVariable Integer id){
         if(id == null){
-            throw  new recurosNoEncontradoException("No se encontro el grado con Id"+id);
+            throw  new recursosNoEncontradoException("No se encontro el grado con Id"+id);
         }
         return  ResponseEntity.ok(plandeEstudioServicio.buscarPlandeEstudioPorId(id));
     }
@@ -60,7 +60,7 @@ public class PlandeEstudioControler {
                                                  @RequestBody PlandeEstudio plandeEstudioResivido){
         PlandeEstudio plandeEstudio = plandeEstudioServicio.buscarPlandeEstudioPorId(id);
         if(plandeEstudio == null){
-            throw  new recurosNoEncontradoException("No exite el a actualizar con Id"+id);
+            throw  new recursosNoEncontradoException("No exite el a actualizar con Id"+id);
         }
         plandeEstudio.setAnioLectivo(plandeEstudioResivido.getAnioLectivo());
         plandeEstudio.setEstado(plandeEstudioResivido.getEstado());

@@ -1,6 +1,6 @@
 package app.estudiante.api;
 
-import app.estudiante.exception.recurosNoEncontradoException;
+import app.estudiante.exception.recursosNoEncontradoException;
 import app.estudiante.modelo.Asignatura;
 import app.estudiante.servicio.InterfacesServicios.IAsignaturaServicio;
 import org.slf4j.Logger;
@@ -32,7 +32,7 @@ public class AsignaturaControler { private static final
                                                          @RequestBody Asignatura asignaturaRecibido){
         Asignatura asignatura = asignaturaServicio.buscarAsignaturaPorId(id);
         if(asignatura == null){
-            throw  new recurosNoEncontradoException("No existe el salon a actualizar con Id"+id);
+            throw  new recursosNoEncontradoException("No existe el salon a actualizar con Id"+id);
         }
         // cat_salon.setIdcatalogo_Salon(gradoResivido.getIdGrado());
         asignatura.setNombre(asignaturaRecibido.getNombre());
@@ -43,7 +43,7 @@ public class AsignaturaControler { private static final
     @GetMapping(path = "/asignatura/{id}") //listar por ID
     public ResponseEntity<Asignatura> getPorSalonId(@PathVariable Integer id){
         if(id == null){
-            throw  new recurosNoEncontradoException("No se encontro el salon con Id"+id);
+            throw  new recursosNoEncontradoException("No se encontro el salon con Id"+id);
         }
         return ResponseEntity.ok(asignaturaServicio.buscarAsignaturaPorId(id));
     }

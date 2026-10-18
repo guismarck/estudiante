@@ -1,6 +1,6 @@
 package app.estudiante.api;
 
-import app.estudiante.exception.recurosNoEncontradoException;
+import app.estudiante.exception.recursosNoEncontradoException;
 import app.estudiante.modelo.Matricula;
 import app.estudiante.servicio.InterfacesServicios.IMatriculaServicio;
 import app.estudiante.utils.MatriculaRequestDTO;
@@ -35,7 +35,7 @@ public class MatriculaControler {
     @GetMapping(path = "/matriculas/{id}")// buscar por ID
     public ResponseEntity<Matricula> getMatriculaId(@PathVariable Integer id){
         if(id == null){
-            throw  new recurosNoEncontradoException("No se encontro el grado con Id"+id);
+            throw  new recursosNoEncontradoException("No se encontro el grado con Id"+id);
         }
         return  ResponseEntity.ok(matriculaServicio.buscarMatriculaPorId(id));
     }
@@ -66,7 +66,7 @@ public class MatriculaControler {
                                                  @RequestBody Matricula matriculaResivido){
         Matricula matricula = matriculaServicio.buscarMatriculaPorId(id);
         if(matricula == null){
-            throw  new recurosNoEncontradoException("No exite el a actualizar con Id"+id);
+            throw  new recursosNoEncontradoException("No exite el a actualizar con Id"+id);
         }
         //matricula.setTurno(matriculaResivido.getTurno());
         matricula.setCostoMatricula(matriculaResivido.getCostoMatricula());

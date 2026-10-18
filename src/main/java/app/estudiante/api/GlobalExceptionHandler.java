@@ -3,7 +3,8 @@ package app.estudiante.api;
 
 import app.estudiante.utils.ApiErrorResponse;
 import app.estudiante.utils.MatriculaDuplicadaException;
-import app.estudiante.exception.recurosNoEncontradoException;
+import app.estudiante.exception.recursosNoEncontradoException;
+import app.estudiante.utils.CredencialesInvalidasException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,9 +23,9 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    @ExceptionHandler(recurosNoEncontradoException.class)
+    @ExceptionHandler(recursosNoEncontradoException.class)
     public ResponseEntity<ApiErrorResponse> handleRecursoNoEncontrado(
-            recurosNoEncontradoException ex, HttpServletRequest request) {
+            recursosNoEncontradoException ex, HttpServletRequest request) {
 
         ApiErrorResponse response = new ApiErrorResponse(
                 HttpStatus.NOT_FOUND.value(),
@@ -102,5 +103,18 @@ public class GlobalExceptionHandler {
             }
         }
         return null;
+    }
+
+    @ExceptionHandler(CredencialesInvalidasException.class)
+    public ResponseEntity<ApiErrorResponse> handleCredencialesInvalidas(
+            CredencialesInvalidasException ex, HttpServletRequest request) {
+        ApiErrorResponse error = new ApiErrorResponse(
+                HttpStatus.UNAUTHORIZED.value(),
+                HttpStatus.UNAUTHORIZED.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
     }
 }

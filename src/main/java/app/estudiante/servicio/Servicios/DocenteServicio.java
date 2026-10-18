@@ -1,7 +1,7 @@
 package app.estudiante.servicio.Servicios;
 
 import app.estudiante.modelo.Docente;
-import app.estudiante.exception.recurosNoEncontradoException;
+import app.estudiante.exception.recursosNoEncontradoException;
 import app.estudiante.repositorio.DetallePlandeEstudioRepositorio;
 import app.estudiante.repositorio.DocenteRepositorio;
 import app.estudiante.servicio.InterfacesServicios.IDocenteServicio;
@@ -57,7 +57,7 @@ public class DocenteServicio implements IDocenteServicio {
                     : docenteRepositorio.findByCodDocente(codigoDocente).orElse(null);
 
             if (docente == null) {
-                throw new recurosNoEncontradoException("No se encontró el docente solicitado.");
+                throw new recursosNoEncontradoException("No se encontró el docente solicitado.");
             }
 
             return detallePlanDeEstudioRepositorio.findAsignacionesActivasPorDocente(

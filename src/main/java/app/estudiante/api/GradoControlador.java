@@ -1,6 +1,6 @@
 package app.estudiante.api;
 
-import app.estudiante.exception.recurosNoEncontradoException;
+import app.estudiante.exception.recursosNoEncontradoException;
 import app.estudiante.modelo.Grado;
 import app.estudiante.servicio.InterfacesServicios.IGradoServicio;
 import org.slf4j.Logger;
@@ -35,7 +35,7 @@ public class GradoControlador {
 
         Grado grado = gradoServicio.buscarGradoPorId(id);
         if(grado == null){
-            throw  new recurosNoEncontradoException("No exite el a actualizar con Id"+id);
+            throw  new recursosNoEncontradoException("No exite el a actualizar con Id"+id);
         }
        // grado.setIdGrado(gradoResivido.getIdGrado());
         grado.setNombre(gradoResivido.getNombre());
@@ -47,7 +47,7 @@ public class GradoControlador {
     @GetMapping(path = "/grados/{id}") //listar por ID
     public ResponseEntity<Grado> getPorGradoId(@PathVariable Integer id){
         if(id == null){
-            throw  new recurosNoEncontradoException("No se encontro el grado con Id"+id);
+            throw  new recursosNoEncontradoException("No se encontro el grado con Id"+id);
         }
         return ResponseEntity.ok(gradoServicio.buscarGradoPorId(id));
 
@@ -73,4 +73,3 @@ public class GradoControlador {
     }
 
 }
-

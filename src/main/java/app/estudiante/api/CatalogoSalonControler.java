@@ -1,6 +1,6 @@
 package app.estudiante.api;
 
-import app.estudiante.exception.recurosNoEncontradoException;
+import app.estudiante.exception.recursosNoEncontradoException;
 import app.estudiante.modelo.CatalogoSalon;
 import app.estudiante.modelo.Salon;
 import app.estudiante.servicio.InterfacesServicios.ICatalogoSalonServicio;
@@ -39,7 +39,7 @@ public class CatalogoSalonControler {
                                                 @RequestBody CatalogoSalon CatSalonRecibido){
         CatalogoSalon cat_salon = iCatalogoSalonServicio.buscarCatalogoSalonPorId(id);
         if(cat_salon == null){
-            throw  new recurosNoEncontradoException("No existe el salon a actualizar con Id"+id);
+            throw  new recursosNoEncontradoException("No existe el salon a actualizar con Id"+id);
         }
         // cat_salon.setIdcatalogo_Salon(gradoResivido.getIdGrado());
         cat_salon.setNombreSalon(CatSalonRecibido.getNombreSalon());
@@ -50,7 +50,7 @@ public class CatalogoSalonControler {
     @GetMapping(path = "/catalogo/salon/{id}") //listar por ID
     public ResponseEntity<CatalogoSalon> getPorSalonId(@PathVariable Integer id){
         if(id == null){
-            throw  new recurosNoEncontradoException("No se encontro el salon con Id"+id);
+            throw  new recursosNoEncontradoException("No se encontro el salon con Id"+id);
         }
         return ResponseEntity.ok(iCatalogoSalonServicio.buscarCatalogoSalonPorId(id));
     }
