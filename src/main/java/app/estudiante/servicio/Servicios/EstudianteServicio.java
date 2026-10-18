@@ -3,7 +3,7 @@ package app.estudiante.servicio.Servicios;
 
 import app.estudiante.api.GradoControlador;
 import app.estudiante.modelo.Estudiante;
-import app.estudiante.exception.recurosNoEncontradoException;
+import app.estudiante.exception.recursosNoEncontradoException;
 import app.estudiante.repositorio.EstudianteRepositorio;
 import app.estudiante.repositorio.EstudianteTutorRepositorio;
 import app.estudiante.repositorio.TutorRepositorio;
@@ -50,7 +50,7 @@ public class EstudianteServicio implements IEstudianteServicio {
     @Override
     public Estudiante buscarEstudiantePorCodigo(String codEstudiante) {
         return estudianteRepositorio.findByCodEstudiante(codEstudiante)
-                .orElseThrow(() -> new recurosNoEncontradoException(
+                .orElseThrow(() -> new recursosNoEncontradoException(
                         "No se encontró un estudiante con código " + codEstudiante));
     }
 

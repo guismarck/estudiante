@@ -827,12 +827,11 @@ SELECT
 FROM `pago` p
 GROUP BY DATE(p.`fecha_pago`), p.`tipo_pago`, p.`creado_por`;
 
-
+/*
 CREATE OR REPLACE VIEW vw_sec_permisos_usuario AS
 SELECT 
     ru.usuario_id,
     m.codigo AS modulo_codigo,
-    m.recurso AS modulo_recurso,
     MAX(pr.puede_buscar)    AS puede_buscar,
     MAX(pr.puede_agregar)   AS puede_agregar,
     MAX(pr.puede_modificar) AS puede_modificar,
@@ -840,9 +839,8 @@ SELECT
     MAX(pr.puede_procesar)  AS puede_procesar,
     MAX(pr.puede_guardar)   AS puede_guardar,
     MAX(pr.puede_exportar)  AS puede_exportar
-FROM sec_roles_usuario ru
-INNER JOIN sec_roles r ON ru.rol_id = r.id
-INNER JOIN sec_permisos_rol pr ON r.id = pr.rol_id
-INNER JOIN sec_modulos m ON pr.modulo_id = m.id
-WHERE m.estado = 1 AND pr.estado = 1
-GROUP BY ru.usuario_id, m.codigo, m.recurso;
+FROM roles_usuario ru
+INNER JOIN roles r ON ru.rol_id = r.id
+INNER JOIN permisos_rol pr ON r.id = pr.rol_id
+
+*/

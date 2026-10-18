@@ -1,6 +1,6 @@
 package app.estudiante.api;
 
-import app.estudiante.exception.recurosNoEncontradoException;
+import app.estudiante.exception.recursosNoEncontradoException;
 import app.estudiante.modelo.Docente;
 import app.estudiante.servicio.InterfacesServicios.IDocenteServicio;
 import app.estudiante.utils.DocenteAsignacionResponseDTO;
@@ -56,7 +56,7 @@ public class DocenteControler {
     @GetMapping(path = "/docentes/{id}")// buscar por ID
     public ResponseEntity<Docente> getDocenteId(@PathVariable Integer id){
         if(id == null){
-            throw  new recurosNoEncontradoException("No se encontro el grado con Id"+id);
+            throw  new recursosNoEncontradoException("No se encontro el grado con Id"+id);
         }
         return  ResponseEntity.ok(docenteServicio.buscarDocentePorId(id));
     }
@@ -66,7 +66,7 @@ public class DocenteControler {
 
         Docente docente = docenteServicio.buscarDocentePorId(id);
         if(docente == null){
-            throw  new recurosNoEncontradoException("No exite el a actualizar con Id"+id);
+            throw  new recursosNoEncontradoException("No exite el a actualizar con Id"+id);
         }
         docente.setNombre_completo(docenteResivido.getNombre_completo());
         docente.setApellido_completo(docenteResivido.getApellido_completo());

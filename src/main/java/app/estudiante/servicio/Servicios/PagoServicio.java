@@ -1,7 +1,7 @@
 package app.estudiante.servicio.Servicios;
 
 import app.estudiante.modelo.Pago;
-import app.estudiante.exception.recurosNoEncontradoException;
+import app.estudiante.exception.recursosNoEncontradoException;
 import app.estudiante.repositorio.PagoRepositorio;
 import app.estudiante.servicio.InterfacesServicios.IPagoServicio;
 import app.estudiante.utils.EmisionReciboResponseDTO;
@@ -62,7 +62,7 @@ public class PagoServicio implements IPagoServicio {
                         saldo.getMontoPagado(),
                         saldo.getSaldoRestante()
                 ))
-                .orElseThrow(() -> new recurosNoEncontradoException(
+                .orElseThrow(() -> new recursosNoEncontradoException(
                         "No se encontró la tarifa con ID " + idTarifa));
     }
 
@@ -83,7 +83,7 @@ public class PagoServicio implements IPagoServicio {
                 ))
                 .toList();
         if (solvencias.isEmpty()) {
-            throw new recurosNoEncontradoException(
+            throw new recursosNoEncontradoException(
                     "El estudiante con ID " + idPersona
                             + " no ha realizado pagos de matrícula para el año lectivo " + anioLectivo);
         }

@@ -1,7 +1,6 @@
 package app.estudiante.api;
 
-import app.estudiante.exception.recurosNoEncontradoException;
-import app.estudiante.modelo.EstudianteTutor;
+import app.estudiante.exception.recursosNoEncontradoException;
 import app.estudiante.servicio.InterfacesServicios.IEstudianteServicio;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -82,7 +81,7 @@ public class EstudianteControler {
    @GetMapping(path = "/estudiantes/{id:\\d+}")// buscar por ID
    public ResponseEntity<Estudiante>getEstudianteId(@PathVariable Integer id){
        if(id == null){
-           throw  new recurosNoEncontradoException("No se encontro el grado con Id"+id);
+           throw  new recursosNoEncontradoException("No se encontro el grado con Id"+id);
        }
         return  ResponseEntity.ok(estudianteServicio.buscarEstudinatePorId(id));
    }
@@ -92,7 +91,7 @@ public class EstudianteControler {
                                                 @Valid @RequestBody Estudiante estudianteResivido){
         Estudiante estudiante = estudianteServicio.buscarEstudinatePorId(id);
        if(estudiante == null){
-           throw  new recurosNoEncontradoException("No exite el a actualizar con Id"+id);
+           throw  new recursosNoEncontradoException("No exite el a actualizar con Id"+id);
        }
        estudiante.setNombre_completo(estudianteResivido.getNombre_completo());
        estudiante.setApellido_completo(estudianteResivido.getApellido_completo());
