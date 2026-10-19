@@ -1,6 +1,6 @@
 DROP DATABASE IF EXISTS `colegiosilviano_dev`;
-CREATE DATABASE IF NOT EXISTS `colegiosilviano_dev` 
-  DEFAULT CHARACTER SET utf8mb4 
+CREATE DATABASE IF NOT EXISTS `colegiosilviano_dev`
+  DEFAULT CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 
 USE `colegiosilviano_dev`;
@@ -137,7 +137,7 @@ UNLOCK TABLES;
 -- 2. SEGURIDAD Y CONTROL DE ACCESO (RBAC)
 -- ==========================================
 
-CREATE TABLE IF NOT EXISTS `sec_usuarios` (
+CREATE TABLE IF NOT EXISTS `usuario` (
     `id`             INT UNSIGNED AUTO_INCREMENT,
     `idpersona`      INT UNSIGNED NULL COMMENT 'Relación opcional 1:1 con la persona asociada',
     `username`       VARCHAR(50)  NOT NULL,
@@ -147,13 +147,13 @@ CREATE TABLE IF NOT EXISTS `sec_usuarios` (
     `creado_en`      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `actualizado_en` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
-    CONSTRAINT `pk_sec_usuarios` PRIMARY KEY (`id`),
-    CONSTRAINT `uq_sec_usuarios__username` UNIQUE (`username`),
-    CONSTRAINT `uq_sec_usuarios__idpersona` UNIQUE (`idpersona`),
-    CONSTRAINT `fk_sec_usuarios__persona` FOREIGN KEY (`idpersona`) REFERENCES `persona` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE
+    CONSTRAINT `pk_usuarios` PRIMARY KEY (`id`),
+    CONSTRAINT `uq_usuarios__username` UNIQUE (`username`),
+    CONSTRAINT `uq_usuarios__idpersona` UNIQUE (`idpersona`),
+    CONSTRAINT `fk_usuarios__persona` FOREIGN KEY (`idpersona`) REFERENCES `persona` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Usuarios del sistema educativo';
 
-CREATE TABLE IF NOT EXISTS `sec_roles` (
+CREATE TABLE IF NOT EXISTS `roles` (
     `id`              SMALLINT UNSIGNED AUTO_INCREMENT,
     `codigo`          VARCHAR(32)  NOT NULL COMMENT 'Ej: ROL_PROFESOR, ROL_APODERADO',
     `descripcion`     VARCHAR(60)  NOT NULL,
@@ -162,23 +162,23 @@ CREATE TABLE IF NOT EXISTS `sec_roles` (
     `actualizado_en`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `actualizado_por` VARCHAR(50)  DEFAULT NULL,
 
-    CONSTRAINT `pk_sec_roles` PRIMARY KEY (`id`),
-    CONSTRAINT `uq_sec_roles__codigo` UNIQUE (`codigo`),
-    CONSTRAINT `ck_sec_roles__actualizado_ge_creado` CHECK (`actualizado_en` >= `creado_en`)
+    CONSTRAINT `pk_roles` PRIMARY KEY (`id`),
+    CONSTRAINT `uq_roles__codigo` UNIQUE (`codigo`),
+    CONSTRAINT `ck_roles__actualizado_ge_creado` CHECK (`actualizado_en` >= `creado_en`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Catalogo de roles del sistema educativo';
 
-CREATE TABLE IF NOT EXISTS `sec_roles_usuario` (
+CREATE TABLE IF NOT EXISTS `roles_usuario` (
     `usuario_id` INT UNSIGNED      NOT NULL,
     `rol_id`     SMALLINT UNSIGNED NOT NULL,
     `creado_en`  DATETIME          NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `creado_por` VARCHAR(50)       DEFAULT NULL,
 
-    CONSTRAINT `pk_sec_roles_usuario` PRIMARY KEY (`usuario_id`, `rol_id`),
-    CONSTRAINT `fk_sec_roles_usuario__usuario` FOREIGN KEY (`usuario_id`) REFERENCES `sec_usuarios`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT `fk_sec_roles_usuario__rol` FOREIGN KEY (`rol_id`) REFERENCES `sec_roles`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT `pk_roles_usuario` PRIMARY KEY (`usuario_id`, `rol_id`),
+    CONSTRAINT `fk_roles_usuario__usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuario`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_roles_usuario__rol` FOREIGN KEY (`rol_id`) REFERENCES `roles`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Asignación de roles por usuario';
 
-CREATE TABLE IF NOT EXISTS `sec_modulos` (
+CREATE TABLE IF NOT EXISTS `modulos` (
     `id`              INT UNSIGNED AUTO_INCREMENT,
     `nombre`          VARCHAR(100) NOT NULL,
     `codigo`          VARCHAR(60)  NOT NULL,
@@ -209,7 +209,7 @@ CREATE TABLE IF NOT EXISTS `sec_permisos_rol` (
     `actualizado_en`  DATETIME          NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
     CONSTRAINT `pk_sec_permisos_rol` PRIMARY KEY (`rol_id`, `modulo_id`),
-    CONSTRAINT `fk_sec_permisos_rol__rol` FOREIGN KEY (`rol_id`) REFERENCES `sec_roles`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_sec_permisos_rol__rol` FOREIGN KEY (`rol_id`) REFERENCES `roles`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT `fk_sec_permisos_rol__modulo` FOREIGN KEY (`modulo_id`) REFERENCES `sec_modulos`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Matriz de permisos granulares por rol y módulo';
 
@@ -455,9 +455,9 @@ TRUNCATE TABLE `pago`;
 TRUNCATE TABLE `catalogo_tarifa`;
 TRUNCATE TABLE `sec_permisos_rol`;
 TRUNCATE TABLE `sec_modulos`;
-TRUNCATE TABLE `sec_roles_usuario`;
-TRUNCATE TABLE `sec_roles`;
-TRUNCATE TABLE `sec_usuarios`;
+TRUNCATE TABLE `roles_usuario`;
+TRUNCATE TABLE `roles`;
+TRUNCATE TABLE `usuario`;
 TRUNCATE TABLE `calificaciones`;
 TRUNCATE TABLE `detalle_plan_de_estudio`;
 TRUNCATE TABLE `periodo_evaluativo`;
@@ -479,8 +479,8 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- 1. POBLADO DE PERSONAS Y ROLES
 -- ==========================================
 
-INSERT INTO `persona` 
-  (`idpersona`, `nombre_completo`, `apellido_completo`, `sexo`, `fecha_nacimiento`, `cedula`, `partida_nacimiento`, `direccion`, `creado_por`) 
+INSERT INTO `persona`
+  (`idpersona`, `nombre_completo`, `apellido_completo`, `sexo`, `fecha_nacimiento`, `cedula`, `partida_nacimiento`, `direccion`, `creado_por`)
 VALUES
   (1, 'Carlos Alberto', 'Mendoza López', 'MASCULINO', '1980-05-12', '001-120580-0001U', NULL, 'Barrio Central, Managua', 'ADMIN'),
   (2, 'María Elena', 'García Gutiérrez', 'FEMENINO', '1985-08-25', '001-250885-0002A', NULL, 'Reparto San Juan, Managua', 'ADMIN'),
@@ -493,31 +493,31 @@ VALUES
   (9, 'Lucas Gabriel', 'García Ruiz', 'MASCULINO', '2011-01-05', NULL, 'PN-2011-00987', 'Reparto San Juan, Managua', 'ADMIN'),
   (10, 'Admin', 'Sistema Silviano', 'MASCULINO', '1995-06-01', '001-010695-0000A', NULL, 'Oficina Central Colegio', 'ADMIN');
 
-INSERT INTO `tutor` 
-  (`idtutor`, `idpersona`, `ocupacion`, `telefono_principal`, `telefono_secundario`, `creado_por`) 
+INSERT INTO `tutor`
+  (`idtutor`, `idpersona`, `ocupacion`, `telefono_principal`, `telefono_secundario`, `creado_por`)
 VALUES
   (1, 1, 'Ingeniero Civil', '88881111', '22221111', 'ADMIN'),
   (2, 2, 'Contadora Pública', '88882222', NULL, 'ADMIN');
 
-INSERT INTO `estudiante` 
-  (`idpersona`, `cod_estudiante`, `codigo_MINED`, `estado`, `creado_por`) 
+INSERT INTO `estudiante`
+  (`idpersona`, `cod_estudiante`, `codigo_MINED`, `estado`, `creado_por`)
 VALUES
   (6, 'EST-2026-001', 'MINED-6661', 1, 'ADMIN'),
   (7, 'EST-2026-002', 'MINED-6662', 1, 'ADMIN');
 
-INSERT INTO `estudiante_tutor` 
-  (`idpersona_estudiante`, `idtutor`, `parentesco`, `es_representante_legal`, `creado_por`) 
+INSERT INTO `estudiante_tutor`
+  (`idpersona_estudiante`, `idtutor`, `parentesco`, `es_representante_legal`, `creado_por`)
 VALUES
   (6, 1, 'PADRE', 1, 'ADMIN'),
   (7, 2, 'MADRE', 1, 'ADMIN');
 
-INSERT INTO `docente` 
-  (`idpersona`, `cod_docente`, `especialidad`, `estado`, `creado_por`) 
+INSERT INTO `docente`
+  (`idpersona`, `cod_docente`, `especialidad`, `estado`, `creado_por`)
 VALUES
   (4, 'DOC-001', 'Licenciatura en Matemáticas', 1, 'ADMIN'),
   (5, 'DOC-002', 'Licenciatura en Lengua y Literatura', 1, 'ADMIN');
 
-INSERT INTO `sec_usuarios`
+INSERT INTO `usuario`
   (`id`, `idpersona`, `username`, `password_hash`, `estado`, `creado_por`)
 VALUES
   (1, 10, 'admin', '$2a$12$eImiTXuWVxfM37uY4JANjOL.884488448844884488448844884488', 1, 'ADMIN'),
@@ -527,33 +527,72 @@ VALUES
 -- 2. ESTRUCTURA ACADÉMICA Y INFRAESTRUCTURA
 -- ==========================================
 
-INSERT INTO `nivel_educativo` 
-  (`idnivel`, `nombre`, `descripcion`, `creado_por`) 
+INSERT INTO `nivel_educativo`
+  (`idnivel`, `nombre`, `descripcion`, `creado_por`)
 VALUES
   (1, 'Primaria', 'Educación Básica Primaria de 1er a 6to Grado', 'ADMIN'),
   (2, 'Secundaria', 'Educación Secundaria de 7mo a 11mo Año', 'ADMIN');
+-- ============================================================================
+-- SCRIPT DE INSERCIÓN: GRADOS Y PLANES DE ESTUDIO
+-- ============================================================================
 
-INSERT INTO `grado` 
-  (`idGrado`, `idnivel`, `nombre`, `creado_por`) 
+-- 1. INSERCIÓN EN LA TABLA DE GRADOS
+-- Asuncion de Niveles: idnivel = 1 (Secundaria), idnivel = 2 (Primaria)
+-- Se omiten idGrado = 1 (7mo Grado) e idGrado = 2 (8vo Grado) ya creados.
+
+INSERT INTO grado (idGrado, idnivel, nombre, creado_por, creado_el)
 VALUES
-  (1, 1, '5to Grado', 'ADMIN'),
-  (2, 2, '7mo Año', 'ADMIN');
+    -- Primaria (Nivel 1)
+    (1, 1, '1er Grado',  'admin_system', NOW()),
+    (2, 1, '2do Grado',  'admin_system', NOW()),
+    (3, 1, '3er Grado',  'admin_system', NOW()),
+    (4, 1, '4to Grado',  'admin_system', NOW()),
+    (5, 1, '5to Grado',  'admin_system', NOW()),
+    (6, 1, '6to Grado',  'admin_system', NOW()),
 
-INSERT INTO `asignatura` 
-  (`idAsignatura`, `nombre`, `codigo`, `creado_por`) 
+    -- Secundaria Faltante (Nivel 1)
+    (9,  2, '7mo Grado',  'admin_system', NOW()),
+    (9,  2, '8vo Grado',  'admin_system', NOW()),
+    (9,  2, '9no Grado',  'admin_system', NOW()),
+    (10, 2, '10mo Grado', 'admin_system', NOW()),
+    (11, 2, '11mo Grado', 'admin_system', NOW());
+
+-- ============================================================================
+-- 2. INSERCIÓN EN LA TABLA DE PLANES DE ESTUDIO
+-- Se omite idGrado = 1 para el año 2026 ya existente.
+
+INSERT INTO plan_de_estudio (idGrado, anio_lectivo, estado, creado_por, creado_el)
+VALUES
+    -- Primaria
+    (1,  2026, 1, 'admin_system', NOW()),
+    (2,  2026, 1, 'admin_system', NOW()),
+    (3,  2026, 1, 'admin_system', NOW()),
+    (4,  2026, 1, 'admin_system', NOW()),
+    (5,  2026, 1, 'admin_system', NOW()),
+    (6,  2026, 1, 'admin_system', NOW()),
+
+    -- Secundaria (Restantes)--
+    (7,  2026, 1, 'admin_system', NOW()),
+    (8,  2026, 1, 'admin_system', NOW()),
+    (9,  2026, 1, 'admin_system', NOW()),
+    (10, 2026, 1, 'admin_system', NOW()),
+    (11, 2026, 1, 'admin_system', NOW());
+
+INSERT INTO `asignatura`
+  (`idAsignatura`, `nombre`, `codigo`, `creado_por`)
 VALUES
   (1, 'Matemáticas', 'MAT-101', 'ADMIN'),
   (2, 'Lengua y Literatura', 'LEN-101', 'ADMIN');
 
-INSERT INTO `catalogo_salon` 
-  (`idcatalogo_salon`, `nombre_salon`, `capacidad`, `creado_por`) 
+INSERT INTO `catalogo_salon`
+  (`idcatalogo_salon`, `nombre_salon`, `capacidad`, `creado_por`)
 VALUES
   (1, 'Aula A-101 (Pabellón Primaria)', 35, 'ADMIN'),
   (2, 'Aula B-201 (Pabellón Secundaria)', 40, 'ADMIN');
 
 -- Ajuste Crítico: Inserción de anio_lectivo alineado a la oferta del salón
-INSERT INTO `salon` 
-  (`idSalon`, `idGrado`, `idcatalogo_salon`, `anio_lectivo`, `turno`, `seccion`, `creado_por`) 
+INSERT INTO `salon`
+  (`idSalon`, `idGrado`, `idcatalogo_salon`, `anio_lectivo`, `turno`, `seccion`, `creado_por`)
 VALUES
   (1, 1, 1, 2026, 'MANANA', 'A', 'ADMIN'),
   (2, 2, 2, 2026, 'MANANA', 'A', 'ADMIN');
@@ -561,16 +600,9 @@ VALUES
 -- ==========================================
 -- 3. PLANIFICACIÓN Y MATRÍCULA (AÑO LECTIVO 2026)
 -- ==========================================
-
-INSERT INTO `plan_de_estudio` 
-  (`idPlan_de_estudio`, `idGrado`, `anio_lectivo`, `estado`, `creado_por`) 
-VALUES
-  (1, 1, 2026, 1, 'ADMIN'),
-  (2, 2, 2026, 1, 'ADMIN');
-
 -- Ajuste Crítico: Corrección del año lectivo y fechas de matriculación a 2026
-INSERT INTO `matricula` 
-  (`idmatricula`, `idpersona`, `idSalon`, `anio_lectivo`, `costo_matricula`, `fecha_matricula`, `estado`, `creado_por`) 
+INSERT INTO `matricula`
+  (`idmatricula`, `idpersona`, `idSalon`, `anio_lectivo`, `costo_matricula`, `fecha_matricula`, `estado`, `creado_por`)
 VALUES
   (1, 6, 1, 2026, 1200.00, '2026-01-15 08:30:00', 'ACTIVA', 'ADMIN'),
   (2, 7, 2, 2026, 1500.00, '2026-01-16 09:15:00', 'ACTIVA', 'ADMIN');
@@ -579,20 +611,20 @@ VALUES
 -- 4. EVALUACIONES Y CALIFICACIONES
 -- ==========================================
 
-INSERT INTO `periodo_evaluativo` 
-  (`idperiodo_evaluativo`, `nombre_periodo`, `numero_periodo`, `anio_escolar`, `estado`, `creado_por`) 
+INSERT INTO `periodo_evaluativo`
+  (`idperiodo_evaluativo`, `nombre_periodo`, `numero_periodo`, `anio_escolar`, `estado`, `creado_por`)
 VALUES
   (1, 'I Bloque', 1, 2026, 1, 'ADMIN'),
   (2, 'II Bloque', 2, 2026, 1, 'ADMIN');
 
-INSERT INTO `detalle_plan_de_estudio` 
-  (`iddetalle_plan_de_estudio`, `idPlan_de_estudio`, `idAsignatura`, `idDocente`, `creado_por`) 
+INSERT INTO `detalle_plan_de_estudio`
+  (`iddetalle_plan_de_estudio`, `idPlan_de_estudio`, `idAsignatura`, `idDocente`, `creado_por`)
 VALUES
   (1, 1, 1, 4, 'ADMIN'),
   (2, 2, 2, 5, 'ADMIN');
 
-INSERT INTO `calificaciones` 
-  (`idcalificacion`, `idmatricula`, `iddetalle_plan_de_estudio`, `idperiodo_evaluativo`, `acumulado`, `examen`, `creado_por`) 
+INSERT INTO `calificaciones`
+  (`idcalificacion`, `idmatricula`, `iddetalle_plan_de_estudio`, `idperiodo_evaluativo`, `acumulado`, `examen`, `creado_por`)
 VALUES
   (1, 1, 1, 1, 40.00, 38.00, 'ADMIN'),
   (2, 2, 2, 1, 28.00, 32.00, 'ADMIN');
@@ -601,21 +633,21 @@ VALUES
 -- 5. MÓDULO FINANCIERO Y COBROS
 -- ==========================================
 
-INSERT INTO `catalogo_tarifa` 
+INSERT INTO `catalogo_tarifa`
   (`id_tarifa`, `idnivel`, `anio_lectivo`, `concepto`, `monto`, `creado_por`)
 VALUES
   (1, 1, 2026, 'MENSUALIDAD FEBRERO', 1000.00, 'ADMIN'),
   (2, 2, 2026, 'MENSUALIDAD FEBRERO', 1300.00, 'ADMIN');
 
 -- Ajuste Crítico: Fechas de pago coherentes con el ciclo escolar 2026
-INSERT INTO `pago` 
+INSERT INTO `pago`
   (`idpago`, `idpersona`, `idmatricula`, `num_recibo`, `fecha_pago`, `tipo_pago`, `concepto`, `monto`, `monto_total`, `creado_por`)
 VALUES
   (1, 6, 1, 'REC-2026-0001', '2026-02-05 10:00:00', 'EFECTIVO', 'Mensualidad de Febrero 2026 - Primaria', 1000.00, 1000.00, 'ADMIN'),
   (2, 7, 2, 'REC-2026-0002', '2026-02-06 11:30:00', 'TRANSFERENCIA', 'Mensualidad de Febrero 2026 - Secundaria', 1300.00, 1300.00, 'ADMIN');
 
 -- Ajuste Crítico: Completado el registro cortado e inyectadas relaciones correctas
-INSERT INTO `detalle_pago` 
+INSERT INTO `detalle_pago`
   (`iddetalle_pago`, `idpago`, `id_tarifa`, `concepto`, `monto`, `creado_por`)
 VALUES
   (1, 1, 1, 'Mensualidad de Febrero 2026 - Primaria', 1000.00, 'ADMIN'),
@@ -629,8 +661,8 @@ START TRANSACTION;
 SET FOREIGN_KEY_CHECKS = 0;
 TRUNCATE TABLE `sec_permisos_rol`;
 TRUNCATE TABLE `sec_modulos`;
-TRUNCATE TABLE `sec_roles_usuario`;
-TRUNCATE TABLE `sec_roles`;
+TRUNCATE TABLE `roles_usuario`;
+TRUNCATE TABLE `roles`;
 TRUNCATE TABLE `sec_usuarios`;
 SET FOREIGN_KEY_CHECKS = 1;
 
@@ -638,25 +670,25 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- Contraseña para ambos usuarios: Admin123!
 -- Hash generado: $2a$12$E2UPv7arXym3L0.3.d812.iYw3W2J8.12g6M/622h7i3l0W1m.L1G
 
-INSERT INTO `sec_usuarios` (`id`, `idpersona`, `username`, `password_hash`, `estado`, `creado_por`) 
-VALUES 
+INSERT INTO `sec_usuarios` (`id`, `idpersona`, `username`, `password_hash`, `estado`, `creado_por`)
+VALUES
   (1, 10, 'admin', '$2a$12$E2UPv7arXym3L0.3.d812.iYw3W2J8.12g6M/622h7i3l0W1m.L1G', 1, 'SYSTEM'),   (2, 4, 'MGARCIA', '$2a$12$E2UPv7arXym3L0.3.d812.iYw3W2J8.12g6M/622h7i3l0W1m.L1G', 1, 'SYSTEM');
 
 -- 4. INSERCIÓN DE ROLES
-INSERT INTO `sec_roles` (`id`, `codigo`, `descripcion`, `creado_por`) 
-VALUES 
+INSERT INTO `roles` (`id`, `codigo`, `descripcion`, `creado_por`)
+VALUES
   (1, 'ADMIN', 'Administrador General', 'SYSTEM'),
   (2, 'DOCENTE', 'Docente de Asignatura', 'SYSTEM');
 
 -- 5. ASIGNACIÓN DE ROLES A USUARIOS
-INSERT INTO `sec_roles_usuario` (`usuario_id`, `rol_id`, `creado_por`) 
-VALUES 
+INSERT INTO `roles_usuario` (`usuario_id`, `rol_id`, `creado_por`)
+VALUES
   (1, 1, 'SYSTEM'), -- admin -> ADMIN
   (2, 2, 'SYSTEM'); -- MGARCIA -> DOCENTE
 
 -- 6. REGISTRO DE MÓDULOS DEL SISTEMA
-INSERT INTO `sec_modulos` (`id`, `nombre`, `codigo`, `recurso`, `component_key`, `modulo_padre_id`, `orden`, `estado`) 
-VALUES 
+INSERT INTO `sec_modulos` (`id`, `nombre`, `codigo`, `recurso`, `component_key`, `modulo_padre_id`, `orden`, `estado`)
+VALUES
   (1, 'Gestión Académica', 'MOD_ACADEMICO', '/academico', NULL, NULL, 1, 1),
   (2, 'Expediente Estudiantil', 'MOD_ESTUDIANTES', '/estudiantes', 'Estudiantes', 1, 1, 1),
   (3, 'Calificaciones', 'MOD_EVALUACIONES', '/evaluaciones', NULL, NULL, 2, 1),
@@ -664,9 +696,9 @@ VALUES
 
 -- 7. ASIGNACIÓN DE PERMISOS GRANULARES
 -- Rol DOCENTE en MOD_NOTAS_REGISTRO
-INSERT INTO `sec_permisos_rol` 
-  (`rol_id`, `modulo_id`, `puede_buscar`, `puede_agregar`, `puede_modificar`, `puede_inactivar`, `puede_procesar`, `puede_guardar`, `puede_exportar`, `estado`) 
-VALUES 
+INSERT INTO `sec_permisos_rol`
+  (`rol_id`, `modulo_id`, `puede_buscar`, `puede_agregar`, `puede_modificar`, `puede_inactivar`, `puede_procesar`, `puede_guardar`, `puede_exportar`, `estado`)
+VALUES
   (2, 4, 1, 1, 1, 0, 0, 1, 1, 1), -- DOCENTE en Notas
   (2, 2, 1, 0, 0, 0, 0, 0, 1, 1); -- DOCENTE en Estudiantes (Solo lectura)
 
@@ -741,7 +773,7 @@ BEGIN
         SET MESSAGE_TEXT = 'Error de Negocio: El monto ingresado excede el saldo pendiente de la tarifa.';
     END IF;
 
-    SELECT IFNULL(MAX(CAST(SUBSTRING(num_recibo, 10) AS UNSIGNED)), 0) + 1 
+    SELECT IFNULL(MAX(CAST(SUBSTRING(num_recibo, 10) AS UNSIGNED)), 0) + 1
     INTO v_siguiente_numero
     FROM `pago`
     WHERE `num_recibo` LIKE CONCAT('REC-', p_anio_lectivo, '-%')
@@ -752,8 +784,8 @@ BEGIN
 
     INSERT INTO `pago` (
         `idpersona`,
-        `num_recibo`, 
-        `fecha_pago`, 
+        `num_recibo`,
+        `fecha_pago`,
         `tipo_pago`,
         `concepto`,
         `monto`,
@@ -773,9 +805,9 @@ BEGIN
     SET v_idpago_nuevo = LAST_INSERT_ID();
 
     INSERT INTO `detalle_pago` (
-        `idpago`, 
+        `idpago`,
         `id_tarifa`,
-        `concepto`, 
+        `concepto`,
         `monto`,
         `creado_por`
     ) VALUES (
@@ -794,31 +826,11 @@ END$$
 
 DELIMITER ;
 
-
-/*SELECT
-    u.login,
-    r.codigo AS rol,
-    m.codigo AS modulo,
-    p.puede_buscar,
-    p.puede_agregar,
-    p.puede_modificar,
-    p.puede_guardar,
-    p.puede_exportar
-FROM sec_usuarios u
-INNER JOIN sec_roles_usuario ru ON u.id = ru.usuario_id
-INNER JOIN sec_roles r ON ru.role_id = r.id
-INNER JOIN sec_permisos_rol p ON r.id = p.role_id
-INNER JOIN sec_modulos m ON p.modulo_id = m.id
-WHERE u.login = 'prof.rodriguez' 
-  AND m.codigo = 'MOD_NOTAS_REGISTRO'
-  AND u.estado = 1 
-  AND p.estado = 1;*/
-
 -- ==========================================
 -- VISTA DE ARQUEO DIARIO DE CAJA
 -- ==========================================
 CREATE OR REPLACE VIEW `vw_arqueo_caja_diario` AS
-SELECT 
+SELECT
     DATE(p.`fecha_pago`) AS `fecha_emision`,
     p.`tipo_pago`,
     p.`creado_por` AS `cajero`,
@@ -829,7 +841,7 @@ GROUP BY DATE(p.`fecha_pago`), p.`tipo_pago`, p.`creado_por`;
 
 /*
 CREATE OR REPLACE VIEW vw_sec_permisos_usuario AS
-SELECT 
+SELECT
     ru.usuario_id,
     m.codigo AS modulo_codigo,
     MAX(pr.puede_buscar)    AS puede_buscar,

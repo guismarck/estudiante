@@ -89,60 +89,60 @@ public class DocenteServicio implements IDocenteServicio {
                     docente.getIdpersona());
         }
 
-    @Override
-    @Transactional
-    public DocenteAsignacionResponseDTO asignarCarga(DocenteAsignacionRequestDTO request) {
-            Docente docente = docenteRepositorio.findById(request.idDocente())
-                    .orElseThrow(() -> new recursosNoEncontradoException(
-                            "No se encontró el docente solicitado."));
-            PlandeEstudio plan = planDeEstudioRepositorio.findById(request.idPlanDeEstudio())
-                    .orElseThrow(() -> new recursosNoEncontradoException(
-                            "No se encontró el plan de estudio solicitado."));
-            Asignatura asignatura = asignaturaRepositorio.findById(request.idAsignatura())
-                    .orElseThrow(() -> new recursosNoEncontradoException(
-                            "No se encontró la asignatura solicitada."));
-            Salon salon = salonRepositorio.findById(request.idSalon())
-                    .orElseThrow(() -> new recursosNoEncontradoException(
-                            "No se encontró el salón solicitado."));
+@Override
+@Transactional
+public DocenteAsignacionResponseDTO asignarCarga(DocenteAsignacionRequestDTO request) {
+    Docente docente = docenteRepositorio.findById(request.idDocente())
+            .orElseThrow(() -> new recursosNoEncontradoException("No se encontró el docente solicitado."));
+    
+    PlandeEstudio plan = planDeEstudioRepositorio.findById(request.idPlanDeEstudio())
+            .orElseThrow(() -> new recursosNoEncontradoException("No se encontró el plan de estudio solicitado."));
+    
+    Asignatura asignatura = asignaturaRepositorio.findById(request.idAsignatura())
+            .orElseThrow(() -> new recursosNoEncontradoException("No se encontró la asignatura solicitada."));
+    
+    Salon salon = salonRepositorio.findById(request.idSalon())
+            .orElseThrow(() -> new recursosNoEncontradoException("No se encontró el salón solicitado."));
 
-            if (!Boolean.TRUE.equals(plan.getEstado())) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT,
-                        "No se puede asignar carga a un plan de estudio inactivo.");
-            }
-            if (!plan.getGrado().getIdGrado().equals(salon.getGrado().getIdGrado())
-                    || !plan.getAnioLectivo().equals(salon.getAnioLectivo().intValue())) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "El salón debe pertenecer al mismo grado y año lectivo del plan de estudio.");
-            }
-            if (detallePlanDeEstudioRepositorio
-                    .existsByPlanDeEstudio_IdPlanDeEstudioAndAsignatura_IdAsignaturaAndSalon_IdSalon(
-                            plan.getIdPlanDeEstudio(), asignatura.getIdAsignatura(), salon.getIdSalon())) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT,
-                        "Ya existe esa asignatura asignada para el salón y plan indicados.");
-            }
-
-            DetallePlanDeEstudio detalle = new DetallePlanDeEstudio();
-            detalle.setPlanDeEstudio(plan);
-            detalle.setAsignatura(asignatura);
-            detalle.setDocente(docente);
-            detalle.setSalon(salon);
-            detalle.setCreadoPor(request.usuarioCreacion().trim());
-            detalle.setCreadoEl(LocalDateTime.now());
-            detalle = detallePlanDeEstudioRepositorio.save(detalle);
-
-            return new DocenteAsignacionResponseDTO(
-                    detalle.getIdDetallePlanDeEstudio(),
-                    plan.getIdPlanDeEstudio(),
-                    asignatura.getIdAsignatura(),
-                    asignatura.getNombre(),
-                    plan.getGrado().getIdGrado(),
-                    plan.getGrado().getNombre(),
-                    plan.getAnioLectivo(),
-                    salon.getIdSalon(),
-                    salon.getSeccion(),
-                    salon.getTurno()
-            );
+    if (!Boolean.TRUE.equals(plan.getEstado())) {
+        throw new ResponseStatusException(HttpStatus.CONFLICT, "No se puede asignar carga a un plan de estudio inactivo.");
     }
+
+    // Validación segura contra NullPointerExceptions
+    if (salon.getGrado() == null || !plan.getGrado().getIdGrado().equals(salon.getGrado().getIdGrado())
+            || salon.getAnioLectivo() == null || !plan.getAnioLectivo().equals(salon.getAnioLectivo())) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El salón debe pertenecer al mismo grado y año lectivo del plan de estudio.");
+    }
+
+    if (detallePlanDeEstudioRepositorio.existsByPlanDeEstudio_IdPlanDeEstudioAndAsignatura_IdAsignaturaAndSalon_IdSalon(
+            plan.getIdPlanDeEstudio(), asignatura.getIdAsignatura(), salon.getIdSalon())) {
+        throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya existe esa asignatura asignada para el salón y plan indicados.");
+    }
+
+    DetallePlanDeEstudio detalle = new DetallePlanDeEstudio();
+    detalle.setPlanDeEstudio(plan);
+    detalle.setAsignatura(asignatura);
+    detalle.setDocente(docente);
+    detalle.setSalon(salon);
+    // Manejo seguro de nulos en usuarioCreacion
+    detalle.setCreadoPor(request.usuarioCreacion() != null ? request.usuarioCreacion().trim() : "SISTEMA");
+    detalle.setCreadoEl(LocalDateTime.now());
+    
+    detalle = detallePlanDeEstudioRepositorio.save(detalle);
+
+    return new DocenteAsignacionResponseDTO(
+            detalle.getIdDetallePlanDeEstudio(),
+            plan.getIdPlanDeEstudio(),
+            asignatura.getIdAsignatura(),
+            asignatura.getNombre(),
+            plan.getGrado().getIdGrado(),
+            plan.getGrado().getNombre(),
+            plan.getAnioLectivo(),
+            salon.getIdSalon(),
+            salon.getSeccion(),
+            salon.getTurno()
+    );
+}
 
     @Override
     @Transactional
