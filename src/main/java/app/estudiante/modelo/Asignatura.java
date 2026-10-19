@@ -19,6 +19,7 @@ public class Asignatura {
     private Integer  idAsignatura;
     @Column
     private String nombre;
-
+    @Column
+    private String codigo;
 
 }

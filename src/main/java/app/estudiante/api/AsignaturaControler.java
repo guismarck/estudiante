@@ -14,49 +14,95 @@ import java.util.List;
 ////http://localhost:8080/estudiante-app/asignatura/1
 @RequestMapping("estudiante-app")
 @CrossOrigin(value = "http://localhost:3000")
-public class AsignaturaControler { private static final
+public class AsignaturaControler {
+    private static final
     Logger logger = LoggerFactory.getLogger(AsignaturaControler.class);//Infomacion de la consola
-    private IAsignaturaServicio asignaturaServicio;
+    private   final   IAsignaturaServicio asignaturaServicio;
+
+    // Spring inyecta automáticamente el servicio
+    public AsignaturaControler(
+            IAsignaturaServicio asignaturaServicio) {
+        this.asignaturaServicio = asignaturaServicio;
+    }
+
 
     //http://localhost:8080/estudiante-app/asignatura
     @GetMapping(path = "/asignatura")
-    public List<Asignatura> obtenerCatalogoSalon(){
-        var asignatura = asignaturaServicio.ListarAsignatura();
+    public  List<Asignatura> obtenerCatalogoSalon(){
+        List<Asignatura> asignaturas =
+                asignaturaServicio.ListarAsignatura();
 
-        asignatura.forEach((salon -> logger.info(salon.toString())));//probado en consola
-        return asignatura;
+        asignaturas.forEach(asignatura ->
+                logger.info(asignatura.toString()));
+
+        return asignaturas;
     }
     ////http://localhost:8080/estudiante-app/catalogo/salon/update
-    @PutMapping(path = "/asignatura/{id}")
-    public ResponseEntity<Asignatura> ActualizarporID(@PathVariable Integer id,
-                                                         @RequestBody Asignatura asignaturaRecibido){
-        Asignatura asignatura = asignaturaServicio.buscarAsignaturaPorId(id);
-        if(asignatura == null){
-            throw  new recurosNoEncontradoException("No existe el salon a actualizar con Id"+id);
+    // GET: buscar asignatura por ID
+    @GetMapping("/asignatura/{id}")
+    public ResponseEntity<Asignatura> getPorSalonId(
+            @PathVariable Integer id) {
+
+        Asignatura asignatura =
+                asignaturaServicio.buscarAsignaturaPorId(id);
+
+        if (asignatura == null) {
+            throw new recurosNoEncontradoException(
+                    "No existe la asignatura con ID " + id);
         }
-        // cat_salon.setIdcatalogo_Salon(gradoResivido.getIdGrado());
-        asignatura.setNombre(asignaturaRecibido.getNombre());
-        asignaturaServicio.guardarAsignatura(asignatura);
-        return  ResponseEntity.ok(asignatura);
+
+        return ResponseEntity.ok(asignatura);
     }
 
-    @GetMapping(path = "/asignatura/{id}") //listar por ID
-    public ResponseEntity<Asignatura> getPorSalonId(@PathVariable Integer id){
-        if(id == null){
-            throw  new recurosNoEncontradoException("No se encontro el salon con Id"+id);
+    // PUT: actualizar asignatura
+    @PutMapping("/asignatura/{id}")
+    public ResponseEntity<Asignatura> actualizarPorID(
+            @PathVariable Integer id,
+            @RequestBody Asignatura asignaturaRecibida) {
+
+        Asignatura asignatura =
+                asignaturaServicio.buscarAsignaturaPorId(id);
+
+        if (asignatura == null) {
+            throw new recurosNoEncontradoException(
+                    "No existe la asignatura con ID " + id);
         }
-        return ResponseEntity.ok(asignaturaServicio.buscarAsignaturaPorId(id));
-    }
 
-    @PostMapping("/asignatura/create") // agregar asignatura
-    public void agregarCatSalon(@RequestBody Asignatura asignatura){
-        logger.info("el salon a agregar "+asignatura);
+        asignatura.setNombre(asignaturaRecibida.getNombre());
+        asignatura.setCodigo(asignaturaRecibida.getCodigo());
+
         asignaturaServicio.guardarAsignatura(asignatura);
 
+        return ResponseEntity.ok(asignatura);
     }
 
-    @DeleteMapping("/asignatura/{id}")  // eliminar asignatura
-    public void eliminarAsignaturaPorID(@PathVariable Integer id) {
-        asignaturaServicio.eliminarAsignatura(asignaturaServicio.buscarAsignaturaPorId(id));
+    // POST: crear asignatura
+    @PostMapping("/asignatura/create")
+    public void  agregarCatSalon(
+            @RequestBody Asignatura asignatura) {
+
+        //logger.info("Asignatura a agregar: {}", asignatura);
+
+        asignaturaServicio.guardarAsignatura(asignatura);
+
+
+    }
+
+    // DELETE: eliminar asignatura
+    @DeleteMapping("/asignatura/{id}")
+    public ResponseEntity<Void> eliminarAsignaturaPorID(
+            @PathVariable Integer id) {
+
+        Asignatura asignatura =
+                asignaturaServicio.buscarAsignaturaPorId(id);
+
+        if (asignatura == null) {
+            throw new recurosNoEncontradoException(
+                    "No existe la asignatura con ID " + id);
+        }
+
+        asignaturaServicio.eliminarAsignatura(asignatura);
+
+        return ResponseEntity.noContent().build();
     }
 }

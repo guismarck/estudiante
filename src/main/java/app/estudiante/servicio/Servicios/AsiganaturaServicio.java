@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 @Service
 public class AsiganaturaServicio implements IAsignaturaServicio {
-    @Autowired
 
+    @Autowired
     private AsignaturaRepositorio asignaturaRepositorio;
     @Override
     public List<Asignatura> ListarAsignatura() {
