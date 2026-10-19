@@ -14,6 +14,14 @@ import app.estudiante.utils.DocenteAsignacionResponseDTO;
 @Repository
 public interface DetallePlandeEstudioRepositorio extends JpaRepository<DetallePlanDeEstudio , Long> {
 
+    boolean existsByPlanDeEstudio_IdPlanDeEstudioAndAsignatura_IdAsignaturaAndSalon_IdSalon(
+            Integer idPlanDeEstudio, Integer idAsignatura, Integer idSalon);
+
+    boolean existsBySalon_IdSalon(Integer idSalon);
+
+    java.util.Optional<DetallePlanDeEstudio> findByIdDetallePlanDeEstudioAndDocente_Idpersona(
+            Long idDetallePlanDeEstudio, Integer idDocente);
+
     @Query("""
         SELECT new app.estudiante.utils.DocenteAsignacionResponseDTO(
             dpe.idDetallePlanDeEstudio,
@@ -25,13 +33,15 @@ public interface DetallePlandeEstudioRepositorio extends JpaRepository<DetallePl
             pe.anioLectivo,
             s.idSalon,
             s.seccion,
-            s.turno
+            s.turno,
+            cs.nombreSalon
         )
         FROM DetallePlanDeEstudio dpe
         JOIN dpe.planDeEstudio pe
         JOIN pe.grado g
         JOIN dpe.asignatura a
         LEFT JOIN dpe.salon s
+        LEFT JOIN s.catalogoSalon cs
         WHERE dpe.docente.idpersona = :idDocente
           AND pe.estado = true
         ORDER BY pe.anioLectivo DESC, g.nombre, a.nombre

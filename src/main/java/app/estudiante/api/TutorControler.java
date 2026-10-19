@@ -1,7 +1,7 @@
 package app.estudiante.api;
 
 
-import app.estudiante.exception.recurosNoEncontradoException;
+import app.estudiante.exception.recursosNoEncontradoException;
 import app.estudiante.modelo.Tutor;
 
 import app.estudiante.servicio.InterfacesServicios.ITutorServicio;
@@ -46,7 +46,7 @@ public class TutorControler {
     @GetMapping(path = "/tutores/{id}")// buscar por ID
     public ResponseEntity<Tutor>getTutorId(@PathVariable Integer id){
         if(id == null){
-            throw  new recurosNoEncontradoException("No se encontro el tutor con Id"+id);
+            throw  new recursosNoEncontradoException("No se encontro el tutor con Id"+id);
         }
         return  ResponseEntity.ok(tutorServicio.buscarTutorPorId(id));
     }
@@ -56,7 +56,7 @@ public class TutorControler {
                                                  @RequestBody Tutor tutorResivido){
         Tutor tutor = tutorServicio.buscarTutorPorId(id);
         if(tutor == null){
-            throw  new recurosNoEncontradoException("No exite el a actualizar con Id"+id);
+            throw  new recursosNoEncontradoException("No exite el a actualizar con Id"+id);
         }
         tutor.setNombre_completo(tutorResivido.getNombre_completo());
         tutor.setApellido_completo(tutorResivido.getApellido_completo());

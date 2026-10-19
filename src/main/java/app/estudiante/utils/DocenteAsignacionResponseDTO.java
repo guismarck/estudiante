@@ -10,6 +10,7 @@ public record DocenteAsignacionResponseDTO(
         Integer anioLectivo,
         Integer idSalon,
         String seccion,
-        String turno
+        String turno,
+        String nombreSalon
 ) {
 }

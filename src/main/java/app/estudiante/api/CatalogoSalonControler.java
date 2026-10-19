@@ -35,7 +35,7 @@ public class CatalogoSalonControler {
     }
     ////http://localhost:8080/estudiante-app/catalogo/salon/update
     @PutMapping(path = "/catalogo/salon/{id}")
-    public ResponseEntity<CatalogoSalon> ActualizarporID(@PathVariable Integer id,
+    public ResponseEntity<CatalogoSalon> ActualizarporID(@PathVariable Long id,
                                                 @RequestBody CatalogoSalon CatSalonRecibido){
         CatalogoSalon cat_salon = iCatalogoSalonServicio.buscarCatalogoSalonPorId(id);
         if(cat_salon == null){
@@ -48,7 +48,7 @@ public class CatalogoSalonControler {
     }
 
     @GetMapping(path = "/catalogo/salon/{id}") //listar por ID
-    public ResponseEntity<CatalogoSalon> getPorSalonId(@PathVariable Integer id){
+    public ResponseEntity<CatalogoSalon> getPorSalonId(@PathVariable Long id){
         if(id == null){
             throw  new recursosNoEncontradoException("No se encontro el salon con Id"+id);
         }
@@ -63,7 +63,7 @@ public class CatalogoSalonControler {
     }
 
     @DeleteMapping("/catalogo/salon/{id}")  // eliminar salon
-    public void eliminarCatSalonporID(@PathVariable Integer id) {
+    public void eliminarCatSalonporID(@PathVariable Long id) {
         iCatalogoSalonServicio.eliminarCatalogoSalon(iCatalogoSalonServicio.buscarCatalogoSalonPorId(id));
     }
 

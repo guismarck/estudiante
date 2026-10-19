@@ -17,7 +17,7 @@ public class CatalogoSalonServicio  implements ICatalogoSalonServicio {
     }
 
     @Override
-    public CatalogoSalon buscarCatalogoSalonPorId(Integer idcatalogo_salon) {
+    public CatalogoSalon buscarCatalogoSalonPorId(Long idcatalogo_salon) {
         CatalogoSalon catalogoSalon = catalogoSalonRepositorio.findById(idcatalogo_salon).orElse(null);
         return catalogoSalon;
     }

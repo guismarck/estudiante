@@ -14,6 +14,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -67,6 +68,21 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now()
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ApiErrorResponse> handleResponseStatusException(
+            ResponseStatusException ex, HttpServletRequest request) {
+
+        HttpStatus status = HttpStatus.valueOf(ex.getStatusCode().value());
+        ApiErrorResponse response = new ApiErrorResponse(
+                status.value(),
+                status.getReasonPhrase(),
+                ex.getReason() != null ? ex.getReason() : status.getReasonPhrase(),
+                request.getRequestURI(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity.status(status).body(response);
     }
 
     @ExceptionHandler(DataAccessException.class)

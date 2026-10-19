@@ -5,10 +5,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Repository;
 
-@Service
-public interface CatalogoSalonRepositorio extends JpaRepository<CatalogoSalon , Integer> {
+@Repository
+public interface CatalogoSalonRepositorio extends JpaRepository<CatalogoSalon , Long> {
 
     @Modifying
     @Query("UPDATE CatalogoSalon s SET s.capacidad = s.capacidad - 1, s.actualizadoEl = CURRENT_TIMESTAMP WHERE s.idCatalogoSalon = :idSalon AND s.capacidad > 0")

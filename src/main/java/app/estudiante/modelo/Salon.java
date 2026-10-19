@@ -1,6 +1,7 @@
 package app.estudiante.modelo;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 @Entity
@@ -55,8 +56,14 @@ public class Salon extends AuditableEntity {
     @Column(name = "seccion", nullable = false, length = 5)
     private String seccion;
 
+    @JsonProperty("nombreSalon")
+    public String getNombreSalon() {
+        return catalogoSalon != null ? catalogoSalon.getNombreSalon() : null;
+    }
+
     @PrePersist
     public void prePersist() {
+        super.prePersist();
         if (this.seccion == null || this.seccion.isBlank()) {
             this.seccion = "A";
         }

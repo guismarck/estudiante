@@ -12,6 +12,7 @@ import app.estudiante.modelo.Estudiante;
 import org.springframework.http.HttpStatus;
 import java.util.List;
 import java.util.Map;
+import app.estudiante.utils.EstudianteRequestDTO;
 
 @RestController
 @RequestMapping("estudiante-app")
@@ -39,7 +40,7 @@ public class EstudianteControler {
        return ResponseEntity.ok(estudianteServicio.buscarEstudiantePorCodigo(codEstudiante));
    }
 
-   @PostMapping(path = "/estudiantes/create") // agregar estudiante
+   /*@PostMapping(path = "/estudiantes/create") // agregar estudiante
    public ResponseEntity<String> agregarEstudiante(@Valid @RequestBody Estudiante estudiante){
        logger.info("el estudiante a agregar " + estudiante);
        try {
