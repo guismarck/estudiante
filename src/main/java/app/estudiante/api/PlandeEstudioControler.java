@@ -29,8 +29,11 @@ public class PlandeEstudioControler {
     }*/
 
     @GetMapping(path = "/plandeEstudio")
-    public List<PlandeEstudio> obtenerPlandeEstudio(){
-        var planEstudios = plandeEstudioServicio.ListarPlandeEstudio();
+    public List<PlandeEstudio> obtenerPlandeEstudio(
+            @RequestParam(value = "anioLectivo", required = false) Integer anioLectivo) {
+        var planEstudios = anioLectivo == null
+                ? plandeEstudioServicio.ListarPlandeEstudio()
+                : plandeEstudioServicio.buscarPorAnioLectivo(anioLectivo);
         planEstudios.forEach((planEstudio -> logger.info(planEstudio.toString())));//probado en consola
         return planEstudios;
     }

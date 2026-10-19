@@ -4,6 +4,8 @@ import app.estudiante.exception.recursosNoEncontradoException;
 import app.estudiante.modelo.Docente;
 import app.estudiante.servicio.InterfacesServicios.IDocenteServicio;
 import app.estudiante.utils.DocenteAsignacionResponseDTO;
+import app.estudiante.utils.DocenteAsignacionRequestDTO;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,13 +49,27 @@ public class DocenteControler {
                 docenteServicio.obtenerMisAsignaciones(idDocente, codigoDocente));
     }
 
+    @PostMapping(path = "/docentes/asignar-carga")
+    public ResponseEntity<DocenteAsignacionResponseDTO> asignarCarga(
+            @Valid @RequestBody DocenteAsignacionRequestDTO request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(docenteServicio.asignarCarga(request));
+    }
+
+    @DeleteMapping(path = "/docentes/{idDocente}/carga-academica/{idDetallePlanDeEstudio}")
+    public ResponseEntity<Void> eliminarCargaAcademica(
+            @PathVariable Integer idDocente,
+            @PathVariable Long idDetallePlanDeEstudio) {
+        docenteServicio.eliminarCargaAcademica(idDocente, idDetallePlanDeEstudio);
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping(path = "/docentes/create") // agregar docente
     public void agregarDocente(@RequestBody Docente  docente){
         logger.info("el empledo a agregar " + docente);
         docenteServicio.guardarDocente(docente);
     }
 
-    @GetMapping(path = "/docentes/{id}")// buscar por ID
+    @GetMapping(path = "/docentes/{id:\\d+}")// buscar por ID
     public ResponseEntity<Docente> getDocenteId(@PathVariable Integer id){
         if(id == null){
             throw  new recursosNoEncontradoException("No se encontro el grado con Id"+id);
@@ -61,7 +77,7 @@ public class DocenteControler {
         return  ResponseEntity.ok(docenteServicio.buscarDocentePorId(id));
     }
 
-    @PutMapping(path = "/docentes/{id}")// actulizar estudiante
+    @PutMapping(path = "/docentes/{id:\\d+}")// actulizar estudiante
     public ResponseEntity<Docente>ActulizarId(@PathVariable Integer id,
                                               @RequestBody Docente docenteResivido){
         Docente docente = docenteServicio.buscarDocentePorId(id);
@@ -82,7 +98,7 @@ public class DocenteControler {
         return ResponseEntity.ok(docente);
     }
 
-    @DeleteMapping(path = "/docentes/{id}")// eliminar docente
+    @DeleteMapping(path = "/docentes/{id:\\d+}")// eliminar docente
     public  void eliminarDocenteID(@PathVariable Integer id){
         docenteServicio.eliminarDocente(docenteServicio.buscarDocentePorId(id));
     }

@@ -14,6 +14,14 @@ import app.estudiante.utils.DocenteAsignacionResponseDTO;
 @Repository
 public interface DetallePlandeEstudioRepositorio extends JpaRepository<DetallePlanDeEstudio , Long> {
 
+    boolean existsByPlanDeEstudio_IdPlanDeEstudioAndAsignatura_IdAsignaturaAndSalon_IdSalon(
+            Integer idPlanDeEstudio, Integer idAsignatura, Integer idSalon);
+
+    boolean existsBySalon_IdSalon(Integer idSalon);
+
+    java.util.Optional<DetallePlanDeEstudio> findByIdDetallePlanDeEstudioAndDocente_Idpersona(
+            Long idDetallePlanDeEstudio, Integer idDocente);
+
     @Query("""
         SELECT new app.estudiante.utils.DocenteAsignacionResponseDTO(
             dpe.idDetallePlanDeEstudio,
