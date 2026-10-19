@@ -10,6 +10,7 @@ import java.util.List;
 
 @Repository
 public interface MatriculaRepositorio extends JpaRepository<Matricula, Integer> {
+    boolean existsBySalon_IdSalon(Integer idSalon);
     @Query(value = "select e from Matricula e where idMatricula = ?1  ")
     List<Matricula> busquedaGeneral(String search);
 

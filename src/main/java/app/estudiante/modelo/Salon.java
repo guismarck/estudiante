@@ -57,6 +57,7 @@ public class Salon extends AuditableEntity {
 
     @PrePersist
     public void prePersist() {
+        super.prePersist();
         if (this.seccion == null || this.seccion.isBlank()) {
             this.seccion = "A";
         }

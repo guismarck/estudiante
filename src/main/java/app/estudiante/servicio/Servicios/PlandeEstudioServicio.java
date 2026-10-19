@@ -18,6 +18,11 @@ public class PlandeEstudioServicio implements IPlandeEstudioServicio {
         return plandeEstudios;
     }
 
+    @Override
+    public List<PlandeEstudio> buscarPorAnioLectivo(Integer anioLectivo) {
+        return plandeEstudioRepositorio.findByAnioLectivo(anioLectivo);
+    }
+
    /* @Override
     public List<PlandeEstudio> busquedaGeneral(String search) {
         var isInt = NumerUtils.isInt(search);

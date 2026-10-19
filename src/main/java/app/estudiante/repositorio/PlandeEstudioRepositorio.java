@@ -10,6 +10,7 @@ import java.util.List;
 
 @Repository
 public interface PlandeEstudioRepositorio extends JpaRepository<PlandeEstudio, Integer> {
+   List<PlandeEstudio> findByAnioLectivo(Integer anioLectivo);
    // @Query(value = "select e from plan_de_estudio e where idPlan_de_estudio = ?1  ")
     //List<PlandeEstudio> busquedaGeneral(String search);
 }

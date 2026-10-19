@@ -11,6 +11,18 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface SalonRepositorio extends JpaRepository<Salon, Integer> {
+    boolean existsByCatalogoSalon_IdCatalogoSalonAndTurnoAndAnioLectivo(
+            Long idCatalogoSalon, String turno, Short anioLectivo);
+
+    boolean existsByCatalogoSalon_IdCatalogoSalonAndTurnoAndAnioLectivoAndIdSalonNot(
+            Long idCatalogoSalon, String turno, Short anioLectivo, Integer idSalon);
+
+    boolean existsByGrado_IdGradoAndSeccionAndTurnoAndAnioLectivo(
+            Integer idGrado, String seccion, String turno, Short anioLectivo);
+
+    boolean existsByGrado_IdGradoAndSeccionAndTurnoAndAnioLectivoAndIdSalonNot(
+            Integer idGrado, String seccion, String turno, Short anioLectivo, Integer idSalon);
+
     /**
      * Retorna la entidad Salon directamente.
      * Utiliza JOIN FETCH para traer el CatalogoSalon y el Grado en la misma consulta,

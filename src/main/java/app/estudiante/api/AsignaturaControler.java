@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
@@ -14,8 +15,10 @@ import java.util.List;
 ////http://localhost:8080/estudiante-app/asignatura/1
 @RequestMapping("estudiante-app")
 @CrossOrigin(value = "http://localhost:3000")
+
 public class AsignaturaControler { private static final
     Logger logger = LoggerFactory.getLogger(AsignaturaControler.class);//Infomacion de la consola
+    @Autowired
     private IAsignaturaServicio asignaturaServicio;
 
     //http://localhost:8080/estudiante-app/asignatura

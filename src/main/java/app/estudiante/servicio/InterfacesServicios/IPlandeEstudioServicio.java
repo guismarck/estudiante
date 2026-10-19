@@ -4,6 +4,7 @@ import java.util.List;
 
 public interface IPlandeEstudioServicio {
     public List<PlandeEstudio> ListarPlandeEstudio();
+    public List<PlandeEstudio> buscarPorAnioLectivo(Integer anioLectivo);
    // public List<PlandeEstudio> busquedaGeneral(String search);
     public PlandeEstudio buscarPlandeEstudioPorId(Integer idPlan_de_estudio);
     public void guardarPlandeEstudio(PlandeEstudio plandeEstudio);
