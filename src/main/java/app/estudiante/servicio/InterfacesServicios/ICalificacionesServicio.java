@@ -7,7 +7,7 @@ import app.estudiante.utils.ComboItemDTO;
 import app.estudiante.utils.EstadoPeriodoEvaluativoResponseDTO;
 import app.estudiante.utils.NominaEstudianteResponseDTO;
 
-public interface IcalificacionesServicio {
+public interface ICalificacionesServicio {
     List<NominaEstudianteResponseDTO> obtenerNominaPorGradoYSalon(
             Integer idGrado, Integer idSalon, Long idDetallePlanDeEstudio,
             Integer idPeriodoEvaluativo, Integer idDocente);

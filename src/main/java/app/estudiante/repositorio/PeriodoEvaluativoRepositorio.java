@@ -38,4 +38,8 @@ public interface PeriodoEvaluativoRepositorio extends JpaRepository<PeriodoEvalu
     boolean existeAutorizacionExtemporanea(
             @Param("idDetallePlan") Long idDetallePlan,
             @Param("idPeriodo") Integer idPeriodo);
+
+    List<PeriodoEvaluativo> findByAnioEscolar(Integer anioEscolar);
+
+    List<PeriodoEvaluativo> findByEstadoTrue();
 }

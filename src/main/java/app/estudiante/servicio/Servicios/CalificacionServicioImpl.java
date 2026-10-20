@@ -17,7 +17,7 @@ import app.estudiante.repositorio.MatriculaRepositorio;
 import app.estudiante.repositorio.NivelEducativoRepositorio;
 import app.estudiante.repositorio.PeriodoEvaluativoRepositorio;
 import app.estudiante.repositorio.SalonRepositorio;
-import app.estudiante.servicio.InterfacesServicios.IcalificacionesServicio;
+import app.estudiante.servicio.InterfacesServicios.ICalificacionesServicio;
 import app.estudiante.utils.CalificacionBatchRequestDTO;
 import app.estudiante.utils.CalificacionItemDTO;
 import app.estudiante.utils.ComboItemDTO;
@@ -36,7 +36,7 @@ import java.time.Year;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class CalificacionServicioImpl implements IcalificacionesServicio {
+public class CalificacionServicioImpl implements ICalificacionesServicio {
 
     private final CalificacionesRepositorio calificacionRepository;
     private final DetallePlandeEstudioRepositorio detallePlanDeEstudioRepository;

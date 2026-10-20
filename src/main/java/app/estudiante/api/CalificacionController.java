@@ -1,6 +1,6 @@
 package app.estudiante.api;
 
-import app.estudiante.servicio.InterfacesServicios.IcalificacionesServicio;
+import app.estudiante.servicio.InterfacesServicios.ICalificacionesServicio;
 import app.estudiante.utils.CalificacionBatchRequestDTO;
 import app.estudiante.utils.ComboItemDTO;
 import app.estudiante.utils.NominaEstudianteResponseDTO;
@@ -25,7 +25,7 @@ import java.util.List;
 @Validated
 public class CalificacionController {
 
-    private final IcalificacionesServicio calificacionServicio;
+    private final ICalificacionesServicio calificacionServicio;
 
     @GetMapping(path = "/nomina")
     public ResponseEntity<List<NominaEstudianteResponseDTO>> obtenerNominaEstudiantes(
