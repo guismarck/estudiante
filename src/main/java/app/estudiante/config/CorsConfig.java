@@ -22,7 +22,7 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:3000", "http://localhost:4200")
+                        .allowedOrigins("http://localhost:3000", "http://localhost:4200","https://miniature-space-enigma-65prg5v459vh46xx-3000.app.github.dev")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*");
             }

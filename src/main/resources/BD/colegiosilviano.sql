@@ -36,7 +36,7 @@ DROP TABLE IF EXISTS `asignatura`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `asignatura` (
-  `idAsignatura` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `idAsignatura` int unsigned NOT NULL AUTO_INCREMENT,
   `nombre` varchar(60) COLLATE utf8mb4_unicode_ci NOT NULL,
   `codigo` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
   `creado_por` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -94,9 +94,9 @@ DROP TABLE IF EXISTS `autorizacion_extemporanea`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `autorizacion_extemporanea` (
-  `idautorizacion` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `iddetalle_plan_de_estudio` int(10) unsigned NOT NULL COMMENT 'Asignatura y docente especifico autorizados',
-  `idperiodo_evaluativo` int(10) unsigned NOT NULL COMMENT 'Periodo evaluativo al que se concede la prorroga',
+  `idautorizacion` int unsigned NOT NULL AUTO_INCREMENT,
+  `iddetalle_plan_de_estudio` int unsigned NOT NULL COMMENT 'Asignatura y docente especifico autorizados',
+  `idperiodo_evaluativo` int unsigned NOT NULL COMMENT 'Periodo evaluativo al que se concede la prorroga',
   `fecha_expiracion` datetime NOT NULL COMMENT 'Fecha y hora limite exacta hasta la cual se permite editar',
   `motivo` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Justificacion academica o administrativa',
   `estado` tinyint(1) NOT NULL DEFAULT '1' COMMENT '1: Vigente/Habilitada, 0: Revocada/Inactiva',
@@ -130,9 +130,9 @@ DROP TABLE IF EXISTS `calificaciones`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `calificaciones` (
   `idcalificacion` bigint(20) NOT NULL AUTO_INCREMENT,
-  `idmatricula` int(10) unsigned NOT NULL,
-  `iddetalle_plan_de_estudio` int(10) unsigned NOT NULL,
-  `idperiodo_evaluativo` int(10) unsigned NOT NULL,
+  `idmatricula` int unsigned NOT NULL,
+  `iddetalle_plan_de_estudio` int unsigned NOT NULL,
+  `idperiodo_evaluativo` int unsigned NOT NULL,
   `acumulado` decimal(5,2) NOT NULL DEFAULT '0.00',
   `examen` decimal(5,2) NOT NULL DEFAULT '0.00',
   `nota_final` decimal(5,2) GENERATED ALWAYS AS ((`acumulado` + `examen`)) STORED,
@@ -169,7 +169,7 @@ DROP TABLE IF EXISTS `catalogo_requisito`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `catalogo_requisito` (
-  `idrequisito` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `idrequisito` int unsigned NOT NULL AUTO_INCREMENT,
   `nombre` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
   `es_obligatorio` tinyint(1) NOT NULL DEFAULT '0',
   `tipo_ingreso` enum('NUEVO INGRESO','REINGRESO','AMBOS') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'AMBOS',
@@ -199,7 +199,7 @@ DROP TABLE IF EXISTS `catalogo_salon`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `catalogo_salon` (
-  `idcatalogo_salon` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `idcatalogo_salon` int unsigned NOT NULL AUTO_INCREMENT,
   `nombre_salon` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `capacidad` int(11) NOT NULL,
   `creado_por` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -247,14 +247,14 @@ DROP TABLE IF EXISTS `catalogo_tarifa`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `catalogo_tarifa` (
-  `id_tarifa` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `idnivel` int(10) unsigned DEFAULT NULL,
-  `id_grado` int(10) unsigned DEFAULT NULL,
-  `anio_lectivo` int(11) NOT NULL,
-  `concepto` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `id_tarifa` int unsigned NOT NULL AUTO_INCREMENT,
+  `idnivel` int unsigned DEFAULT NULL,
+  `id_grado` int unsigned DEFAULT NULL,
+  `anio_lectivo` int NOT NULL,
+  `concepto` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
   `monto` decimal(10,2) NOT NULL,
   `es_obligatorio` tinyint(1) NOT NULL DEFAULT '1',
-  `mes_aplicacion` int(11) DEFAULT NULL,
+  `mes_aplicacion` int DEFAULT NULL,
   `creado_por` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `creado_el` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `actualizado_por` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -285,9 +285,9 @@ DROP TABLE IF EXISTS `detalle_pago`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `detalle_pago` (
-  `iddetalle_pago` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `idpago` int(10) unsigned NOT NULL,
-  `id_tarifa` int(10) unsigned DEFAULT NULL,
+  `iddetalle_pago` int unsigned NOT NULL AUTO_INCREMENT,
+  `idpago` int unsigned NOT NULL,
+  `id_tarifa` int unsigned DEFAULT NULL,
   `concepto` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `monto` decimal(10,2) NOT NULL,
   `creado_por` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -320,11 +320,11 @@ DROP TABLE IF EXISTS `detalle_plan_de_estudio`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `detalle_plan_de_estudio` (
-  `iddetalle_plan_de_estudio` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `idPlan_de_estudio` int(10) unsigned NOT NULL,
-  `idAsignatura` int(10) unsigned NOT NULL,
-  `idDocente` int(10) unsigned NOT NULL,
-  `idSalon` int(10) unsigned DEFAULT NULL,
+  `iddetalle_plan_de_estudio` int unsigned NOT NULL AUTO_INCREMENT,
+  `idPlan_de_estudio` int unsigned NOT NULL,
+  `idAsignatura` int unsigned NOT NULL,
+  `idDocente` int unsigned NOT NULL,
+  `idSalon` int unsigned DEFAULT NULL,
   `creado_por` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `creado_el` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `actualizado_por` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -387,7 +387,7 @@ DROP TABLE IF EXISTS `docente`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `docente` (
-  `idpersona` int(10) unsigned NOT NULL,
+  `idpersona` int unsigned NOT NULL,
   `cod_docente` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
   `especialidad` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `estado` tinyint(1) NOT NULL DEFAULT '1',
@@ -433,7 +433,7 @@ DROP TABLE IF EXISTS `docenteplandeestudio`;
 CREATE TABLE `docenteplandeestudio` (
   `idDocente_plan_de_estudio` int(11) NOT NULL AUTO_INCREMENT,
   `idpersona` int(11) DEFAULT NULL,
-  `idSalon` int(10) unsigned DEFAULT NULL,
+  `idSalon` int unsigned DEFAULT NULL,
   PRIMARY KEY (`idDocente_plan_de_estudio`),
   KEY `FKmpn9nax1ygkjq147mcahg1rqd` (`idSalon`),
   CONSTRAINT `FKmpn9nax1ygkjq147mcahg1rqd` FOREIGN KEY (`idSalon`) REFERENCES `salon` (`idSalon`)
@@ -457,7 +457,7 @@ DROP TABLE IF EXISTS `estudiante`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `estudiante` (
-  `idpersona` int(10) unsigned NOT NULL,
+  `idpersona` int unsigned NOT NULL,
   `cod_estudiante` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
   `codigo_MINED` varchar(30) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `estado` tinyint(1) NOT NULL DEFAULT '1' COMMENT '1 = Activo, 0 = Inactivo',
@@ -490,8 +490,8 @@ DROP TABLE IF EXISTS `estudiante_tutor`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `estudiante_tutor` (
-  `idpersona_estudiante` int(10) unsigned NOT NULL,
-  `idtutor` int(10) unsigned NOT NULL,
+  `idpersona_estudiante` int unsigned NOT NULL,
+  `idtutor` int unsigned NOT NULL,
   `parentesco` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL,
   `es_representante_legal` tinyint(1) NOT NULL DEFAULT '0',
   `creado_por` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -523,8 +523,8 @@ DROP TABLE IF EXISTS `grado`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `grado` (
-  `idGrado` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `idnivel` int(10) unsigned NOT NULL,
+  `idGrado` int unsigned NOT NULL AUTO_INCREMENT,
+  `idnivel` int unsigned NOT NULL,
   `nombre` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `creado_por` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `creado_el` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -554,10 +554,10 @@ DROP TABLE IF EXISTS `matricula`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `matricula` (
-  `idmatricula` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `idpersona` int(10) unsigned NOT NULL,
-  `idSalon` int(10) unsigned NOT NULL,
-  `tipo_ingreso` enum('NUEVO INGRESO','REINGRESO') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'NUEVO INGRESO',
+  `idmatricula` int unsigned NOT NULL AUTO_INCREMENT,
+  `idpersona` int unsigned NOT NULL,
+  `idSalon` int unsigned NOT NULL,
+  `tipo_ingreso` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'NUEVO INGRESO',
   `anio_lectivo` smallint(6) NOT NULL,
   `costo_matricula` decimal(10,2) NOT NULL DEFAULT '0.00',
   `fecha_matricula` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -593,8 +593,8 @@ DROP TABLE IF EXISTS `matricula_requisito`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `matricula_requisito` (
-  `idmatricula` int(10) unsigned NOT NULL,
-  `idrequisito` int(10) unsigned NOT NULL,
+  `idmatricula` int unsigned NOT NULL,
+  `idrequisito` int unsigned NOT NULL,
   `entregado` tinyint(1) NOT NULL DEFAULT '1',
   `fecha_recepcion` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `observacion` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -623,7 +623,7 @@ DROP TABLE IF EXISTS `nivel_educativo`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `nivel_educativo` (
-  `idnivel` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `idnivel` int unsigned NOT NULL AUTO_INCREMENT,
   `nombre` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `descripcion` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `creado_por` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -653,9 +653,9 @@ DROP TABLE IF EXISTS `pago`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `pago` (
-  `idpago` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `idpersona` int(10) unsigned NOT NULL,
-  `idmatricula` int(10) unsigned DEFAULT NULL,
+  `idpago` int unsigned NOT NULL AUTO_INCREMENT,
+  `idpersona` int unsigned NOT NULL,
+  `idmatricula` int unsigned DEFAULT NULL,
   `num_recibo` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL,
   `fecha_pago` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `tipo_pago` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -717,10 +717,10 @@ DROP TABLE IF EXISTS `periodo_evaluativo`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `periodo_evaluativo` (
-  `idperiodo_evaluativo` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `idperiodo_evaluativo` int unsigned NOT NULL AUTO_INCREMENT,
   `nombre_periodo` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `numero_periodo` int(11) NOT NULL,
-  `anio_escolar` int(11) NOT NULL,
+  `numero_periodo` int NOT NULL,
+  `anio_escolar` int NOT NULL,
   `fecha_inicio` date NOT NULL,
   `fecha_fin` date NOT NULL,
   `fecha_cierre_docente` datetime NOT NULL COMMENT 'Fecha y hora limite para que los docentes ingresen/editen notas',
@@ -763,7 +763,7 @@ DROP TABLE IF EXISTS `persona`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `persona` (
-  `idpersona` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `idpersona` int unsigned NOT NULL AUTO_INCREMENT,
   `nombre_completo` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
   `apellido_completo` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
   `sexo` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -857,9 +857,9 @@ DROP TABLE IF EXISTS `plan_de_estudio`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `plan_de_estudio` (
-  `idPlan_de_estudio` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `idGrado` int(10) unsigned NOT NULL,
-  `anio_lectivo` int(11) NOT NULL,
+  `idPlan_de_estudio` int unsigned NOT NULL AUTO_INCREMENT,
+  `idGrado` int unsigned NOT NULL,
+  `anio_lectivo` int NOT NULL,
   `estado` tinyint(1) NOT NULL DEFAULT '1',
   `creado_por` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `creado_el` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -941,7 +941,7 @@ DROP TABLE IF EXISTS `roles_usuario`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `roles_usuario` (
-  `usuario_id` int(10) unsigned NOT NULL,
+  `usuario_id` int unsigned NOT NULL,
   `rol_id` smallint(5) unsigned NOT NULL,
   `creado_por` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `creado_el` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -973,9 +973,9 @@ DROP TABLE IF EXISTS `salon`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `salon` (
-  `idSalon` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `idGrado` int(10) unsigned NOT NULL,
-  `idcatalogo_salon` int(10) unsigned NOT NULL,
+  `idSalon` int unsigned NOT NULL AUTO_INCREMENT,
+  `idGrado` int unsigned NOT NULL,
+  `idcatalogo_salon` int unsigned NOT NULL,
   `anio_lectivo` smallint(6) NOT NULL,
   `turno` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
   `seccion` varchar(5) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'A',
@@ -1027,8 +1027,8 @@ DROP TABLE IF EXISTS `tutor`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tutor` (
-  `idtutor` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `idpersona` int(10) unsigned NOT NULL,
+  `idtutor` int unsigned NOT NULL AUTO_INCREMENT,
+  `idpersona` int unsigned NOT NULL,
   `ocupacion` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `creado_por` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `creado_el` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -1064,8 +1064,8 @@ DROP TABLE IF EXISTS `usuario`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `usuario` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `idpersona` int(10) unsigned DEFAULT NULL COMMENT 'Relación opcional 1:1 con persona',
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `idpersona` int unsigned DEFAULT NULL COMMENT 'Relación opcional 1:1 con persona',
   `username` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `password_hash` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `estado` int(11) NOT NULL,
@@ -1196,7 +1196,7 @@ SET character_set_client = @saved_cs_client;
 /*!50003 SET character_set_results = utf8 */ ;
 /*!50003 SET collation_connection  = utf8_general_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_guardar_matricula_completa`(
     -- Parámetros Estudiante
@@ -1401,7 +1401,7 @@ DELIMITER ;
 /*!50003 SET character_set_results = utf8 */ ;
 /*!50003 SET collation_connection  = utf8_general_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_otorgar_prorroga_docente`(
     IN p_iddetalle_plan_de_estudio INT UNSIGNED,
@@ -1448,7 +1448,7 @@ DELIMITER ;
 /*!50003 SET character_set_results = utf8 */ ;
 /*!50003 SET collation_connection  = utf8_general_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_procesar_emision_recibo`(
     IN `p_idpersona` INT UNSIGNED,       -- ID de la Persona / Estudiante

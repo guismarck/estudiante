@@ -25,7 +25,7 @@ public class PeriodoEvaluativoController {
    private final IPeriodoEvaluativoServicio periodoEvaluativoServicio;
     private final ICalificacionesServicio calificacionServicio;
 
-    @GetMapping
+    @GetMapping(path = "periodos-evaluativos")
     public ResponseEntity<List<PeriodoEvaluativoResponseDTO>> listar() {
         return ResponseEntity.ok(periodoEvaluativoServicio.listarPeriodosEvaluativos());
     }
@@ -42,7 +42,7 @@ public class PeriodoEvaluativoController {
         return ResponseEntity.ok(calificacionServicio.obtenerEstadoEdicion(id, idDetallePlanDeEstudio));
     }
 
-    @PostMapping
+    @PostMapping(path = "crearPeriodo")
     public ResponseEntity<PeriodoEvaluativoResponseDTO> crear(
             @Valid @RequestBody PeriodoEvaluativoRequestDTO requestDTO) {
         PeriodoEvaluativoResponseDTO creado = periodoEvaluativoServicio.crearPeriodoEvaluativo(requestDTO);
@@ -55,7 +55,7 @@ public class PeriodoEvaluativoController {
         return ResponseEntity.created(location).body(creado);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("periodoActualizar/{id}")
     public ResponseEntity<PeriodoEvaluativoResponseDTO> actualizar(
             @PathVariable Integer id,
             @Valid @RequestBody PeriodoEvaluativoRequestDTO requestDTO) {
@@ -63,7 +63,7 @@ public class PeriodoEvaluativoController {
         return ResponseEntity.ok(actualizado);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("periodoEliminar/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
         periodoEvaluativoServicio.eliminarPeriodoEvaluativo(id);
         return ResponseEntity.noContent().build();
