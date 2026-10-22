@@ -1,15 +1,16 @@
 package app.estudiante.servicio.InterfacesServicios;
-
 import app.estudiante.modelo.Estudiante;
-
+import app.estudiante.utils.EstudianteRequestDTO;
 import java.util.List;
 
 public interface IEstudianteServicio {
-    List<Estudiante> ListarEstudiantes();
     Estudiante buscarEstudinatePorId(Integer idEstudiante);
     Estudiante buscarEstudiantePorCodigo(String codEstudiante);
     List<Estudiante> busquedaGeneral(String search);
-    void guardarEstudiante (Estudiante estudiante);
-     void eliminarEstudinate(Estudiante estudiante);
+    Estudiante guardarEstudiante (Estudiante estudiante);
+    Estudiante registrarEstudianteConTutores (EstudianteRequestDTO solicitud);
+    void eliminarEstudinate(Estudiante estudiante);
+    List<Estudiante> ListarEstudiantes();
+
 
 }

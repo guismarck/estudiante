@@ -1,6 +1,7 @@
 package app.estudiante.api;
 
 import app.estudiante.exception.recurosNoEncontradoException;
+import app.estudiante.modelo.EstudianteTutor;
 import app.estudiante.servicio.InterfacesServicios.IEstudianteServicio;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -9,7 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import app.estudiante.modelo.Estudiante;
+import org.springframework.http.HttpStatus;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("estudiante-app")
@@ -47,7 +50,34 @@ public class EstudianteControler {
            return ResponseEntity.badRequest().body(e.getMessage());
        }
 
-   }
+   }*/
+
+    @PostMapping("/estudiantes/create")
+    public ResponseEntity<?> agregarEstudiante(@RequestBody EstudianteRequestDTO estudianteRequest) {
+        logger.info("Iniciando registro completo de estudiante y tutores: {}", estudianteRequest);
+
+        try {
+            // Una sola llamada al servicio maneja todo el flujo de negocio de forma segura
+            Estudiante estudianteRegistrado = estudianteServicio.registrarEstudianteConTutores(estudianteRequest);
+
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(estudianteRegistrado);
+
+        } catch (IllegalArgumentException e) {
+            logger.error("Error de validación en la solicitud", e);
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("mensaje", e.getMessage()));
+        } catch (Exception e) {
+            logger.error("Error crítico al registrar estudiante y tutores", e);
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("mensaje", "Ocurrió un error interno en el servidor: " + e.getMessage()));
+        }
+    }
+
+
 
    @GetMapping(path = "/estudiantes/{id:\\d+}")// buscar por ID
    public ResponseEntity<Estudiante>getEstudianteId(@PathVariable Integer id){

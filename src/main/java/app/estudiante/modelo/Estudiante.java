@@ -1,9 +1,13 @@
 package app.estudiante.modelo;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import lombok.*;
 import jakarta.validation.constraints.NotBlank;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "estudiante")
@@ -27,4 +31,9 @@ public class Estudiante extends Persona {
 
     @Column(name = "estado", nullable = false)
     private Boolean estado = true;
+
+    @OneToMany(mappedBy = "persona", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties("persona")
+    private List<EstudianteTutor> tutores = new ArrayList<>();
+
 }
