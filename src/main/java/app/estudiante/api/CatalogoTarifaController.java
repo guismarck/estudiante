@@ -15,21 +15,19 @@ import java.util.List;
 @RestController
 @RequestMapping("estudiante-app")
 @CrossOrigin(
-    origins = "https://miniature-space-enigma-65prg5v459vh46xx-3000.app.github.dev"
+    origins = "http://localhost:3000"
 )
 public class CatalogoTarifaController {
     @Autowired
-    private final ICatalogoTarifaServicio tarifaServicio = null;
+    private  ICatalogoTarifaServicio tarifaServicio;
 
-    @GetMapping
-    public ResponseEntity<List<CatalogoTarifa>> listarTodas(@RequestParam(required = false) Integer anioLectivo) {
-        List<CatalogoTarifa> tarifas = (anioLectivo != null)
-                ? tarifaServicio.obtenerPorAnio(anioLectivo)
-                : tarifaServicio.obtenerTodas();
+    @GetMapping(path = "/catalogo/tarifa")
+    public ResponseEntity<List<CatalogoTarifa>> listarTodas(@RequestParam Integer anioLectivo) {
+        List<CatalogoTarifa> tarifas = tarifaServicio.obtenerPorAnio(anioLectivo);
         return ResponseEntity.ok(tarifas);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping(path = "/catalogo/tarifa/{id}")
     public ResponseEntity<CatalogoTarifa> obtenerPorId(@PathVariable Integer id) {
         return ResponseEntity.ok(tarifaServicio.obtenerPorId(id));
     }
@@ -64,7 +62,7 @@ public class CatalogoTarifaController {
         return new ResponseEntity<>(pdfContent, headers, HttpStatus.OK);
     }
 
-    @GetMapping("/buscar")
+    @GetMapping("catalogo/tarifa/buscar")
     public ResponseEntity<CatalogoTarifa> obtenerTarifaPorGradoYConcepto(
             @RequestParam(name = "idGrado") Integer idGrado,
             @RequestParam(name = "anioLectivo") Integer anioLectivo,

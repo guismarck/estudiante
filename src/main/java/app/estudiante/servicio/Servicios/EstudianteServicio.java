@@ -3,9 +3,7 @@ package app.estudiante.servicio.Servicios;
 
 import app.estudiante.api.GradoControlador;
 import app.estudiante.modelo.Estudiante;
-import app.estudiante.modelo.EstudianteTutor;
-import app.estudiante.modelo.EstudianteTutorId;
-import app.estudiante.modelo.Tutor;
+import app.estudiante.exception.recurosNoEncontradoException;
 import app.estudiante.repositorio.EstudianteRepositorio;
 import app.estudiante.repositorio.EstudianteTutorRepositorio;
 import app.estudiante.repositorio.TutorRepositorio;
@@ -19,6 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Date;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -45,11 +46,26 @@ public class EstudianteServicio implements IEstudianteServicio {
         Estudiante estudiante = estudianteRepositorio.findById(idEstudiante).orElse(null);
         return estudiante;
     }
+
     @Override
+    public Estudiante buscarEstudiantePorCodigo(String codEstudiante) {
+        return estudianteRepositorio.findByCodEstudiante(codEstudiante)
+                .orElseThrow(() -> new recurosNoEncontradoException(
+                        "No se encontró un estudiante con código " + codEstudiante));
+    }
+
     public List<Estudiante> busquedaGeneral(String search){
-        var isInt = NumerUtils.isInt(search);
-        if (isInt) return List.of(buscarEstudinatePorId(Integer.parseInt(search)));
-        return estudianteRepositorio.busquedaGeneral(search);
+        List<Estudiante> estudiantes = new ArrayList<>(estudianteRepositorio.busquedaGeneral(search));
+        if (NumerUtils.isInt(search)) {
+            estudianteRepositorio.findById(Integer.parseInt(search)).ifPresent(estudiante -> {
+                boolean yaIncluido = estudiantes.stream()
+                        .anyMatch(resultado -> resultado.getIdpersona().equals(estudiante.getIdpersona()));
+                if (!yaIncluido) {
+                    estudiantes.add(0, estudiante);
+                }
+            });
+        }
+        return estudiantes;
     }
 
     @Override

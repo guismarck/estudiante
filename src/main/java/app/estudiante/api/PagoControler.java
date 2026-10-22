@@ -31,7 +31,7 @@ public class PagoControler {
         return pagos;
     }
 
-    @GetMapping(path = "/pago/{id}")// buscar por ID
+    @GetMapping(path = "/pago/{id:\\d+}")// buscar por ID
     public ResponseEntity<Pago> getPagoId(@PathVariable Integer id){
         if(id == null){
             throw  new recurosNoEncontradoException("No se encontro el grado con Id"+id);
@@ -51,7 +51,7 @@ public class PagoControler {
 
     }
 
-    @PutMapping(path = "/pago/{id}")// actulizar Pago
+    @PutMapping(path = "/pago/{id:\\d+}")// actulizar Pago
     public ResponseEntity<Pago>ActulizarId(@PathVariable Integer id,
                                                     @RequestBody Pago pagoResivido){
         Pago pago = pagoServicio.buscarPagoPorId(id);
@@ -65,13 +65,27 @@ public class PagoControler {
         return ResponseEntity.ok(pago);
     }
 
-    @DeleteMapping(path = "/pago/{id}")// eliminar Pago
+    @DeleteMapping(path = "/pago/{id:\\d+}")// eliminar Pago
     public  void eliminarporID(@PathVariable Integer id){
         pagoServicio.
                 eliminarPago(pagoServicio.buscarPagoPorId(id));
     }
 
-    @PostMapping("/procesar-emision")
+    @GetMapping(path = "/pago/saldo")
+    public ResponseEntity<PagoSaldoResponseDTO> buscarSaldoPorPersonaYTarifa(
+            @RequestParam Integer idPersona,
+            @RequestParam Integer idTarifa) {
+        return ResponseEntity.ok(pagoServicio.buscarSaldoPorPersonaYTarifa(idPersona, idTarifa));
+    }
+
+    @GetMapping(path = "/pago/solvencia-matricula")
+    public ResponseEntity<List<SolvenciaMatriculaResponseDTO>> buscarSolvenciaMatricula(
+            @RequestParam Integer idPersona,
+            @RequestParam Integer anioLectivo) {
+        return ResponseEntity.ok(pagoServicio.buscarSolvenciaMatricula(idPersona, anioLectivo));
+    }
+
+    @PostMapping(path = "/procesar-emision")
     public ResponseEntity<EmisionReciboResponseDTO> procesarEmisionRecibo(
              @RequestBody EmisionReciboRequestDTO requestDTO) {
 

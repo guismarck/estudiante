@@ -5,87 +5,134 @@ CREATE DATABASE IF NOT EXISTS `colegiosilviano_dev`
 
 USE `colegiosilviano_dev`;
 
--- ==========================================
--- 1. ENTIDADES BASE Y PERSONAS
--- ==========================================
-
-CREATE TABLE IF NOT EXISTS `persona` (
-  `idpersona`         INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `nombre_completo`   VARCHAR(150) NOT NULL,
-  `apellido_completo` VARCHAR(150) NOT NULL,
-  `sexo`              VARCHAR(20)  NOT NULL,
-  `fecha_nacimiento`  DATE         NOT NULL,
-  `cedula`            VARCHAR(20)  DEFAULT NULL,
-  `partida_nacimiento` VARCHAR(30) DEFAULT NULL,
-  `direccion`         VARCHAR(300) NOT NULL,
-  `creado_por`        VARCHAR(50)  DEFAULT NULL,
-  `creado_el`         DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `actualizado_por`   VARCHAR(50)  DEFAULT NULL,
-  `actualizado_el`    DATETIME     DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+DROP TABLE IF EXISTS `persona`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `persona` (
+  `idpersona` int unsigned NOT NULL AUTO_INCREMENT,
+  `nombre_completo` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `apellido_completo` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `sexo` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `fecha_nacimiento` date NOT NULL,
+  `cedula` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `partida_nacimiento` varchar(30) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `direccion` varchar(300) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `creado_por` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `creado_el` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `actualizado_por` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `actualizado_el` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`idpersona`),
   UNIQUE KEY `uk_persona_cedula` (`cedula`),
-  INDEX `idx_persona_apellidos` (`apellido_completo`, `nombre_completo`),
-  CONSTRAINT `chk_persona_sexo` CHECK (`sexo` IN ('MASCULINO', 'FEMENINO', 'OTRO'))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  KEY `idx_persona_apellidos` (`apellido_completo`,`nombre_completo`)
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
-CREATE TABLE `tutor` (
-  `idtutor`             INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `idpersona`           INT UNSIGNED NOT NULL,
-  `ocupacion`           VARCHAR(100) DEFAULT NULL,
-  `telefono_principal`  VARCHAR(15)  NOT NULL,
-  `telefono_secundario` VARCHAR(15)  DEFAULT NULL,
-  `creado_por`          VARCHAR(50)  DEFAULT NULL,
-  `creado_el`           DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `actualizado_por`     VARCHAR(50)  DEFAULT NULL,
-  `actualizado_el`      DATETIME     DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`idtutor`),
-  UNIQUE KEY `uk_tutor_persona` (`idpersona`),
-  CONSTRAINT `fk_tutor_persona` FOREIGN KEY (`idpersona`) REFERENCES `persona` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+--
+-- Table structure for table `docente`
+--
 
+DROP TABLE IF EXISTS `docente`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `docente` (
+  `idpersona` int unsigned NOT NULL,
+  `cod_docente` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `especialidad` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `estado` tinyint(1) NOT NULL DEFAULT '1',
+  `creado_por` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `creado_el` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `actualizado_por` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `actualizado_el` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`idpersona`),
+  UNIQUE KEY `uk_docente_codigo` (`cod_docente`),
+  CONSTRAINT `fk_docente_persona` FOREIGN KEY (`idpersona`) REFERENCES `persona` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+DROP TABLE IF EXISTS `estudiante`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `estudiante` (
-  `idpersona`      INT UNSIGNED NOT NULL,
-  `cod_estudiante` VARCHAR(20)  NOT NULL,
-  `codigo_MINED`   VARCHAR(30)  DEFAULT NULL,
-  `estado`         TINYINT(1)   NOT NULL DEFAULT 1 COMMENT '1 = Activo, 0 = Inactivo',
-  `creado_por`     VARCHAR(50)  DEFAULT NULL,
-  `creado_el`      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `actualizado_por` VARCHAR(50) DEFAULT NULL,
-  `actualizado_el` DATETIME     DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `idpersona` int unsigned NOT NULL,
+  `cod_estudiante` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `codigo_MINED` varchar(30) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `estado` tinyint(1) NOT NULL DEFAULT '1' COMMENT '1 = Activo, 0 = Inactivo',
+  `creado_por` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `creado_el` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `actualizado_por` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `actualizado_el` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`idpersona`),
   UNIQUE KEY `uk_estudiante_codigo` (`cod_estudiante`),
   UNIQUE KEY `uk_estudiante_mined` (`codigo_MINED`),
   CONSTRAINT `fk_estudiante_persona` FOREIGN KEY (`idpersona`) REFERENCES `persona` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
+
+
+DROP TABLE IF EXISTS `tutor`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tutor` (
+  `idtutor` int unsigned NOT NULL AUTO_INCREMENT,
+  `idpersona` int unsigned NOT NULL,
+  `ocupacion` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `telefono_principal` varchar(15) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `telefono_secundario` varchar(15) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `creado_por` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `creado_el` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `actualizado_por` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `actualizado_el` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`idtutor`),
+  UNIQUE KEY `uk_tutor_persona` (`idpersona`),
+  CONSTRAINT `fk_tutor_persona` FOREIGN KEY (`idpersona`) REFERENCES `persona` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+
+--
+-- Table structure for table `estudiante_tutor`
+--
+
+DROP TABLE IF EXISTS `estudiante_tutor`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `estudiante_tutor` (
-  `idpersona_estudiante`   INT UNSIGNED NOT NULL,
-  `idtutor`                INT UNSIGNED NOT NULL,
-  `parentesco`             VARCHAR(30)  NOT NULL,
-  `es_representante_legal` TINYINT(1)   NOT NULL DEFAULT 0,
-  `creado_por`             VARCHAR(50)  DEFAULT NULL,
-  `creado_el`              DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `actualizado_por`        VARCHAR(50)  DEFAULT NULL,
-  `actualizado_el`         DATETIME     DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`idpersona_estudiante`, `idtutor`),
+  `idpersona_estudiante` int unsigned NOT NULL,
+  `idtutor` int unsigned NOT NULL,
+  `parentesco` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `es_representante_legal` tinyint(1) NOT NULL DEFAULT '0',
+  `creado_por` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `creado_el` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `actualizado_por` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `actualizado_el` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`idpersona_estudiante`,`idtutor`),
+  KEY `fk_et_tutor` (`idtutor`),
   CONSTRAINT `fk_et_estudiante` FOREIGN KEY (`idpersona_estudiante`) REFERENCES `estudiante` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_et_tutor` FOREIGN KEY (`idtutor`) REFERENCES `tutor` (`idtutor`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
-CREATE TABLE `docente` (
-  `idpersona`      INT UNSIGNED NOT NULL,
-  `cod_docente`    VARCHAR(20)  NOT NULL,
-  `especialidad`   VARCHAR(100) DEFAULT NULL,
-  `estado`         TINYINT(1)   NOT NULL DEFAULT 1,
-  `creado_por`     VARCHAR(50)  DEFAULT NULL,
-  `creado_el`      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `actualizado_por` VARCHAR(50)  DEFAULT NULL,
-  `actualizado_el` DATETIME     DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`idpersona`),
-  UNIQUE KEY `uk_docente_codigo` (`cod_docente`),
-  CONSTRAINT `fk_docente_persona` FOREIGN KEY (`idpersona`) REFERENCES `persona` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `persona`
+--
+
+LOCK TABLES `persona` WRITE;
+/*!40000 ALTER TABLE `persona` DISABLE KEYS */;
+INSERT INTO `persona` VALUES (1,'Carlos Alberto','Mendoza López','MASCULINO','1980-05-12','001-120580-0001U',NULL,'Barrio Central, Managua','ADMIN','2026-10-06 18:34:34',NULL,NULL),(2,'María Elena','García Gutiérrez','FEMENINO','1985-08-25','001-250885-0002A',NULL,'Reparto San Juan, Managua','ADMIN','2026-10-06 18:34:34',NULL,NULL),(3,'Roberto José','Martínez Silva','MASCULINO','1978-11-03','001-031178-0003B',NULL,'Villa Fontana, Managua','ADMIN','2026-10-06 18:34:34',NULL,NULL),(4,'Ana Lucía','Torres Morales','FEMENINO','1990-02-14','001-140290-0004C',NULL,'Ciudad Sandino, Managua','ADMIN','2026-10-06 18:34:34',NULL,NULL),(5,'Fernando José','Brennans Ruiz','MASCULINO','1982-09-30','001-300982-0005D',NULL,'Bello Horizonte, Managua','ADMIN','2026-10-06 18:34:34',NULL,NULL),(6,'Sofia Beatris','Reyes Castillo','FEMENINO','2010-04-15',NULL,'PN-2010-00123','Barrio Central, Managua','ADMIN','2026-10-06 18:34:34',NULL,NULL),(7,'Mateo Alexander','Mendoza García','MASCULINO','2012-07-20',NULL,'PN-2012-00456','Barrio Central, Managua','ADMIN','2026-10-06 18:34:34',NULL,NULL),(8,'Valeria Isabella','Martínez Torres','FEMENINO','2008-12-10','001-101208-1001X','PN-2008-00789','Villa Fontana, Managua','ADMIN','2026-10-06 18:34:34',NULL,NULL),(9,'Lucas Gabriel','García Ruiz','MASCULINO','2011-01-05',NULL,'PN-2011-00987','Reparto San Juan, Managua','ADMIN','2026-10-06 18:34:34',NULL,NULL),(10,'Admin','Sistema Silviano','MASCULINO','1995-06-01','001-010695-0000A',NULL,'Oficina Central Colegio','ADMIN','2026-10-06 18:34:34',NULL,NULL),(13,'Guismarck Josue','Nuñez Gonzalez','M','2026-10-07','401-010497-0002c',NULL,'Bo.Israel Galeano Centro de Salud Laureles Sur 6c al Norte 3c al este,Managua',NULL,'2026-10-07 20:32:51',NULL,'2026-10-07 20:59:30'),(14,'Josue David ','Reyes','M','2026-10-07','402-01013-43434',NULL,'de Siudad sandino ',NULL,'2026-10-07 20:45:54',NULL,NULL),(16,'Dayana Valeska ','Vaskes dias','F','2026-10-07','401-23232-000H','si','De ciudad sandino',NULL,'2026-10-07 22:01:22',NULL,'2026-10-08 00:57:44');
+/*!40000 ALTER TABLE `persona` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Dumping data for table `tutor`
+--
+
+LOCK TABLES `tutor` WRITE;
+/*!40000 ALTER TABLE `tutor` DISABLE KEYS */;
+INSERT INTO `tutor` VALUES (1,1,'Ingeniero Civil','88881111','22221111','ADMIN','2026-10-06 18:34:34',NULL,NULL),(2,2,'Contadora Pública','88882222',NULL,'ADMIN','2026-10-06 18:34:34',NULL,NULL);
+/*!40000 ALTER TABLE `tutor` ENABLE KEYS */;
+UNLOCK TABLES;
 -- ==========================================
 -- 2. SEGURIDAD Y CONTROL DE ACCESO (RBAC)
 -- ==========================================
@@ -136,6 +183,7 @@ CREATE TABLE IF NOT EXISTS `sec_modulos` (
     `nombre`          VARCHAR(100) NOT NULL,
     `codigo`          VARCHAR(60)  NOT NULL,
     `recurso`         VARCHAR(255) NOT NULL,
+    `component_key`   varchar(50),
     `path_img`        VARCHAR(255) NULL,
     `modulo_padre_id` INT UNSIGNED NULL,
     `orden`           SMALLINT UNSIGNED NOT NULL DEFAULT 1,
@@ -299,7 +347,7 @@ CREATE TABLE `detalle_plan_de_estudio` (
   `idPlan_de_estudio`         INT UNSIGNED NOT NULL,
   `idAsignatura`              INT UNSIGNED NOT NULL,
   `idDocente`                 INT UNSIGNED NOT NULL,
-  `idSalon`                   INT UNSIGNED NULL AFTER `idDocente`,
+  `idSalon`                   INT UNSIGNED NULL ,
   `creado_por`                VARCHAR(50)  DEFAULT NULL,
   `creado_el`                 DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `actualizado_por`           VARCHAR(50)  DEFAULT NULL,
@@ -309,7 +357,7 @@ CREATE TABLE `detalle_plan_de_estudio` (
   CONSTRAINT `fk_det_plan` FOREIGN KEY (`idPlan_de_estudio`) REFERENCES `plan_de_estudio` (`idPlan_de_estudio`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_det_asig` FOREIGN KEY (`idAsignatura`) REFERENCES `asignatura` (`idAsignatura`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_det_docente` FOREIGN KEY (`idDocente`) REFERENCES `docente` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_det_salon` FOREIGN KEY (`idSalon`) REFERENCES `salon` (`idSalon`) ON DELETE RESTRICT ON UPDATE CASCADE
+  CONSTRAINT `fk_det_salon` FOREIGN KEY (`idSalon`) REFERENCES `salon` (`idSalon`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `calificaciones` (
@@ -339,7 +387,7 @@ CREATE TABLE `calificaciones` (
 
 CREATE TABLE `catalogo_tarifa` (
   `id_tarifa`       INT UNSIGNED  NOT NULL AUTO_INCREMENT,
-  `id_nivel`        INT UNSIGNED  DEFAULT NULL,
+  `idnivel`         INT UNSIGNED  DEFAULT NULL,
   `id_grado`        INT UNSIGNED  DEFAULT NULL,
   `anio_lectivo`    YEAR          NOT NULL,
   `concepto`        VARCHAR(100)  NOT NULL,
@@ -351,7 +399,7 @@ CREATE TABLE `catalogo_tarifa` (
   `actualizado_por` VARCHAR(50)   DEFAULT NULL,
   `actualizado_el`  DATETIME      DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_tarifa`),
-  CONSTRAINT `fk_tarifa__nivel` FOREIGN KEY (`id_nivel`) REFERENCES `nivel_educativo` (`idnivel`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_tarifa__nivel` FOREIGN KEY (`idnivel`) REFERENCES `nivel_educativo` (`idnivel`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_tarifa__grado` FOREIGN KEY (`id_grado`) REFERENCES `grado` (`idGrado`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `chk_tarifa__monto` CHECK (`monto` >= 0.00),
   CONSTRAINT `chk_tarifa__mes_aplicacion` CHECK (`mes_aplicacion` IS NULL OR `mes_aplicacion` BETWEEN 1 AND 12)
@@ -359,10 +407,13 @@ CREATE TABLE `catalogo_tarifa` (
 
 CREATE TABLE `pago` (
   `idpago`          INT UNSIGNED  NOT NULL AUTO_INCREMENT,
-  `idmatricula`     INT UNSIGNED  NOT NULL,
+  `idpersona`       INT UNSIGNED  NOT NULL,
+  `idmatricula`     INT UNSIGNED  DEFAULT NULL,
   `num_recibo`      VARCHAR(30)   NOT NULL,
   `fecha_pago`      DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `tipo_pago`       VARCHAR(30)   NOT NULL,
+  `concepto`        VARCHAR(100)  DEFAULT NULL,
+  `monto`           DECIMAL(10,2) NOT NULL DEFAULT 0.00,
   `monto_total`     DECIMAL(10,2) NOT NULL,
   `creado_por`      VARCHAR(50)   DEFAULT NULL,
   `creado_el`       DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -371,6 +422,7 @@ CREATE TABLE `pago` (
   PRIMARY KEY (`idpago`),
   UNIQUE KEY `uk_pago_num_recibo` (`num_recibo`),
   INDEX `idx_pago_fecha` (`fecha_pago`),
+  CONSTRAINT `fk_pago_estudiante` FOREIGN KEY (`idpersona`) REFERENCES `estudiante` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_pago_matricula` FOREIGN KEY (`idmatricula`) REFERENCES `matricula` (`idmatricula`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `chk_monto_pago` CHECK (`monto_total` >= 0.00),
   CONSTRAINT `chk_pago_tipo` CHECK (`tipo_pago` IN ('EFECTIVO', 'TRANSFERENCIA', 'TARJETA', 'DEPOSITO'))
@@ -542,25 +594,25 @@ VALUES
 INSERT INTO `calificaciones` 
   (`idcalificacion`, `idmatricula`, `iddetalle_plan_de_estudio`, `idperiodo_evaluativo`, `acumulado`, `examen`, `creado_por`) 
 VALUES
-  (1, 1, 1, 1, 55.00, 38.00, 'ADMIN'),
-  (2, 2, 2, 1, 48.00, 32.00, 'ADMIN');
+  (1, 1, 1, 1, 40.00, 38.00, 'ADMIN'),
+  (2, 2, 2, 1, 28.00, 32.00, 'ADMIN');
 
 -- ==========================================
 -- 5. MÓDULO FINANCIERO Y COBROS
 -- ==========================================
 
 INSERT INTO `catalogo_tarifa` 
-  (`id_tarifa`, `id_nivel`, `anio_lectivo`, `concepto`, `monto`, `creado_por`)
+  (`id_tarifa`, `idnivel`, `anio_lectivo`, `concepto`, `monto`, `creado_por`)
 VALUES
   (1, 1, 2026, 'MENSUALIDAD FEBRERO', 1000.00, 'ADMIN'),
   (2, 2, 2026, 'MENSUALIDAD FEBRERO', 1300.00, 'ADMIN');
 
 -- Ajuste Crítico: Fechas de pago coherentes con el ciclo escolar 2026
 INSERT INTO `pago` 
-  (`idpago`, `idmatricula`, `num_recibo`, `fecha_pago`, `tipo_pago`, `monto_total`, `creado_por`) 
+  (`idpago`, `idpersona`, `idmatricula`, `num_recibo`, `fecha_pago`, `tipo_pago`, `concepto`, `monto`, `monto_total`, `creado_por`)
 VALUES
-  (1, 1, 'REC-2026-0001', '2026-02-05 10:00:00', 'EFECTIVO', 1000.00, 'ADMIN'),
-  (2, 2, 'REC-2026-0002', '2026-02-06 11:30:00', 'TRANSFERENCIA', 1300.00, 'ADMIN');
+  (1, 6, 1, 'REC-2026-0001', '2026-02-05 10:00:00', 'EFECTIVO', 'Mensualidad de Febrero 2026 - Primaria', 1000.00, 1000.00, 'ADMIN'),
+  (2, 7, 2, 'REC-2026-0002', '2026-02-06 11:30:00', 'TRANSFERENCIA', 'Mensualidad de Febrero 2026 - Secundaria', 1300.00, 1300.00, 'ADMIN');
 
 -- Ajuste Crítico: Completado el registro cortado e inyectadas relaciones correctas
 INSERT INTO `detalle_pago` 
@@ -637,23 +689,24 @@ DELIMITER $$
 DROP PROCEDURE IF EXISTS `sp_procesar_emision_recibo`$$
 
 CREATE PROCEDURE `sp_procesar_emision_recibo`(
-    IN `p_idpersona` INT,              -- ID del Estudiante
-    IN `p_idSalon` INT,                -- Salón asignado para el año lectivo
+    IN `p_idpersona` INT UNSIGNED,
     IN `p_anio_lectivo` YEAR,
-    IN `p_concepto` VARCHAR(100),       -- Ej: 'MATRICULA', 'MENSUALIDAD'
-    IN `p_tipo_pago` VARCHAR(20),       -- Ej: 'EFECTIVO', 'TRANSFERENCIA', 'TARJETA'
+    IN `p_concepto` VARCHAR(100),
+    IN `p_tipo_pago` VARCHAR(30),
     IN `p_monto` DECIMAL(10,2),
-    IN `p_idtarifa` INT,               -- ID opcional del catálogo tarifario
-    IN `p_fecha_transaccion` DATETIME,
-    IN `p_usuario` VARCHAR(50),        -- Usuario del sistema que emite el recibo
-    OUT `p_recibo_generado` VARCHAR(30)
+    IN `p_idtarifa` INT UNSIGNED,
+    IN `p_usuario` VARCHAR(50),
+    OUT `p_recibo_generado` VARCHAR(30),
+    OUT `p_saldo_restante` DECIMAL(10,2)
 )
 BEGIN
-    DECLARE v_idmatricula INT;
     DECLARE v_siguiente_numero INT DEFAULT 1;
     DECLARE v_num_recibo_nuevo VARCHAR(30);
+    DECLARE v_costo_tarifa DECIMAL(10,2) DEFAULT 0.00;
+    DECLARE v_monto_pagado_previo DECIMAL(10,2) DEFAULT 0.00;
+    DECLARE v_saldo_pendiente DECIMAL(10,2) DEFAULT 0.00;
+    DECLARE v_idpago_nuevo INT UNSIGNED;
 
-    -- Manejo de excepciones: Deshace la transacción en caso de falla
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         ROLLBACK;
@@ -662,47 +715,32 @@ BEGIN
 
     START TRANSACTION;
 
-    -- =====================================================
-    -- PASO 1: OBTENER O REGISTRAR LA MATRÍCULA ACADÉMICA
-    -- =====================================================
-    -- Busca si el estudiante ya tiene una matrícula activa para el año lectivo
-    SELECT `idmatricula` INTO v_idmatricula
-    FROM `matricula`
-    WHERE `idpersona` = p_idpersona AND `anio_lectivo` = p_anio_lectivo
-    LIMIT 1;
+    SELECT MAX(`monto`) INTO v_costo_tarifa
+    FROM `catalogo_tarifa`
+    WHERE `id_tarifa` = p_idtarifa
+      AND `anio_lectivo` = p_anio_lectivo;
 
-    -- Si no existe matrícula previa y el concepto es MATRICULA, se crea automáticamente
-    IF v_idmatricula IS NULL THEN
-        IF UPPER(p_concepto) LIKE '%MATRI%' THEN
-            INSERT INTO `matricula` (
-                `idpersona`, 
-                `idSalon`, 
-                `anio_lectivo`, 
-                `costo_matricula`, 
-                `fecha_matricula`,
-                `estado`,
-                `creado_por`
-            ) VALUES (
-                p_idpersona, 
-                p_idSalon, 
-                p_anio_lectivo, 
-                p_monto, 
-                COALESCE(p_fecha_transaccion, CURRENT_TIMESTAMP),
-                'ACTIVA',
-                p_usuario
-            );
-            
-            SET v_idmatricula = LAST_INSERT_ID();
-        ELSE
-            SIGNAL SQLSTATE '45000' 
-            SET MESSAGE_TEXT = 'Error: El estudiante no cuenta con una matrícula activa para este año lectivo.';
-        END IF;
+    IF v_costo_tarifa IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Error de Negocio: La tarifa especificada no existe en el catálogo para el año lectivo indicado.';
     END IF;
 
-    -- =====================================================
-    -- : GENERACIÓN DEL CORRELATIVO BLOQUEADO (FOR UPDATE)
-    -- Format: REC-2026-000001
-    -- =====================================================
+    SELECT IFNULL(SUM(dp.`monto`), 0.00) INTO v_monto_pagado_previo
+    FROM `detalle_pago` dp
+    INNER JOIN `pago` p ON dp.`idpago` = p.`idpago`
+    WHERE p.`idpersona` = p_idpersona
+      AND dp.`id_tarifa` = p_idtarifa;
+
+    SET v_saldo_pendiente = v_costo_tarifa - v_monto_pagado_previo;
+
+    IF v_saldo_pendiente <= 0.00 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Error de Negocio: La tarifa/arancel seleccionada ya se encuentra totalmente cancelada.';
+    ELSEIF p_monto > v_saldo_pendiente THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Error de Negocio: El monto ingresado excede el saldo pendiente de la tarifa.';
+    END IF;
+
     SELECT IFNULL(MAX(CAST(SUBSTRING(num_recibo, 10) AS UNSIGNED)), 0) + 1 
     INTO v_siguiente_numero
     FROM `pago`
@@ -712,28 +750,28 @@ BEGIN
     SET v_num_recibo_nuevo = CONCAT('REC-', p_anio_lectivo, '-', LPAD(v_siguiente_numero, 6, '0'));
     SET p_recibo_generado = v_num_recibo_nuevo;
 
-    -- =====================================================
-    -- PASO 3: REGISTRO EN CABECERA DE PAGO
-    -- =====================================================
     INSERT INTO `pago` (
-        `idmatricula`, 
+        `idpersona`,
         `num_recibo`, 
         `fecha_pago`, 
         `tipo_pago`,
+        `concepto`,
+        `monto`,
         `monto_total`,
         `creado_por`
     ) VALUES (
-        v_idmatricula, 
-        v_num_recibo_nuevo, 
-        COALESCE(p_fecha_transaccion, CURRENT_TIMESTAMP), 
-        UPPER(p_tipo_pago),
+        p_idpersona,
+        v_num_recibo_nuevo,
+        NOW(),
+        UPPER(TRIM(p_tipo_pago)),
+        TRIM(p_concepto),
+        p_monto,
         p_monto,
         p_usuario
     );
 
-    -- =====================================================
-    -- PASO 4: REGISTRO EN DETALLE DE PAGO
-    -- =====================================================
+    SET v_idpago_nuevo = LAST_INSERT_ID();
+
     INSERT INTO `detalle_pago` (
         `idpago`, 
         `id_tarifa`,
@@ -741,12 +779,15 @@ BEGIN
         `monto`,
         `creado_por`
     ) VALUES (
-        LAST_INSERT_ID(), 
+        v_idpago_nuevo,
         p_idtarifa,
-        p_concepto, 
+        TRIM(p_concepto),
         p_monto,
         p_usuario
     );
+
+    SET p_recibo_generado = v_num_recibo_nuevo;
+    SET p_saldo_restante = v_saldo_pendiente - p_monto;
 
     COMMIT;
 END$$

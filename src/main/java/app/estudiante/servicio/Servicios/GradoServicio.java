@@ -36,7 +36,7 @@ public class GradoServicio implements IGradoServicio {
 
     @Override
     public List<Grado> obtenerGradosPorNivel(Integer idNivel) {
-        List<Grado> grados = gradoRepositorio.findByNivelEducativoIdnivel(idNivel);
+        List<Grado> grados = gradoRepositorio.findByNivelEducativoIdNivel(idNivel);
 
         return grados;
     }

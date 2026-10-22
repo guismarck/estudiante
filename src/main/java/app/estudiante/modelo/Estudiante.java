@@ -2,7 +2,9 @@ package app.estudiante.modelo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonAlias;
 import lombok.*;
+import jakarta.validation.constraints.NotBlank;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +21,8 @@ import java.util.List;
 public class Estudiante extends Persona {
 
 
+    @NotBlank(message = "El código del estudiante es obligatorio")
+    @JsonAlias("cod_estudiante")
     @Column(name = "cod_estudiante", nullable = false, unique = true, length = 45)
     private String codEstudiante;
 

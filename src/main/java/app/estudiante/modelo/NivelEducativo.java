@@ -1,30 +1,30 @@
 package app.estudiante.modelo;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 
-@Entity 
+@Entity
+@Table(
+    name = "nivel_educativo",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "uk_nivel_nombre", columnNames = {"nombre"})
+    }
+)
 @Getter
 @Setter
-@Table(name = "nivel_educativo")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class NivelEducativo extends AuditableEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idnivel")
-    private Integer idnivel;
+    private Integer idNivel;
 
     @Column(name = "nombre", nullable = false, length = 50)
     private String nombre;
 
-    @Column(name = "descripcion", nullable = false, length = 50)
+    @Column(name = "descripcion", length = 150)
     private String descripcion;
-    
 }

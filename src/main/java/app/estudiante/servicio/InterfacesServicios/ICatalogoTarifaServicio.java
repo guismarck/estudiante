@@ -1,12 +1,7 @@
 package app.estudiante.servicio.InterfacesServicios;
 
 import app.estudiante.modelo.CatalogoTarifa;
-
-import java.time.Year;
 import java.util.List;
-import java.util.Optional;
-
-import org.springframework.data.repository.query.Param;
 
 public interface ICatalogoTarifaServicio {
     List<CatalogoTarifa> obtenerTodas();

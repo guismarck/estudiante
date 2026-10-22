@@ -3,7 +3,7 @@ package app.estudiante.api;
 import app.estudiante.exception.recurosNoEncontradoException;
 import app.estudiante.modelo.EstudianteTutor;
 import app.estudiante.servicio.InterfacesServicios.IEstudianteServicio;
-import app.estudiante.utils.EstudianteRequestDTO;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,15 +25,23 @@ public class EstudianteControler {
     private IEstudianteServicio  estudianteServicio;
 
     //http://localhost:8080/estudiante-app/estudiantes
-    @GetMapping(path = "/estudiantes")
-   public List<Estudiante>obternerEstudiantes(@RequestParam(value = "search",required = false) String search){
-        if (search == null || search.trim().isEmpty())
+    @GetMapping(path = {"/estudiantes/buscar", "/buscar"})
+   public List<Estudiante>obternerEstudiantes(
+           @RequestParam(value = "search", required = false) String search,
+           @RequestParam(value = "criterio", required = false) String criterio){
+        String busqueda = criterio != null ? criterio : search;
+        if (busqueda == null || busqueda.trim().isEmpty())
             return  estudianteServicio.ListarEstudiantes();
-        return estudianteServicio.busquedaGeneral(search);
+        return estudianteServicio.busquedaGeneral(busqueda.trim());
     }
 
-  /* @PostMapping(path = "/estudiantes/create") // agregar estudiante
-   public ResponseEntity agregarEstudiante(@RequestBody Estudiante estudiante){
+   @GetMapping(path = "/estudiantes/codigo/{codEstudiante}")
+   public ResponseEntity<Estudiante> getEstudiantePorCodigo(@PathVariable String codEstudiante) {
+       return ResponseEntity.ok(estudianteServicio.buscarEstudiantePorCodigo(codEstudiante));
+   }
+
+   @PostMapping(path = "/estudiantes/create") // agregar estudiante
+   public ResponseEntity<String> agregarEstudiante(@Valid @RequestBody Estudiante estudiante){
        logger.info("el estudiante a agregar " + estudiante);
        try {
            estudianteServicio.guardarEstudiante(estudiante);
@@ -71,7 +79,7 @@ public class EstudianteControler {
 
 
 
-    @GetMapping(path = "/estudiantes/{id}")// buscar por ID
+   @GetMapping(path = "/estudiantes/{id:\\d+}")// buscar por ID
    public ResponseEntity<Estudiante>getEstudianteId(@PathVariable Integer id){
        if(id == null){
            throw  new recurosNoEncontradoException("No se encontro el grado con Id"+id);
@@ -79,9 +87,9 @@ public class EstudianteControler {
         return  ResponseEntity.ok(estudianteServicio.buscarEstudinatePorId(id));
    }
 
-   @PutMapping(path = "/estudiantes/{id}")// actulizar estudiante
+   @PutMapping(path = "/estudiantes/{id:\\d+}")// actulizar estudiante
    public ResponseEntity<Estudiante>ActulizarId(@PathVariable Integer id,
-                                                @RequestBody Estudiante estudianteResivido){
+                                                @Valid @RequestBody Estudiante estudianteResivido){
         Estudiante estudiante = estudianteServicio.buscarEstudinatePorId(id);
        if(estudiante == null){
            throw  new recurosNoEncontradoException("No exite el a actualizar con Id"+id);
@@ -100,7 +108,7 @@ public class EstudianteControler {
         return ResponseEntity.ok(estudiante);
    }
 
-   @DeleteMapping(path = "/estudiantes/{id}")// eliminar estudiante
+   @DeleteMapping(path = "/estudiantes/{id:\\d+}")// eliminar estudiante
     public  void eliminarEstudinateporID(@PathVariable Integer id){
         estudianteServicio.eliminarEstudinate(estudianteServicio.buscarEstudinatePorId(id));
    }
