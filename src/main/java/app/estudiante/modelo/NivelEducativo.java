@@ -1,5 +1,6 @@
 package app.estudiante.modelo;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,6 +20,7 @@ public class NivelEducativo extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonProperty("idnivel")
     @Column(name = "idnivel")
     private Integer idNivel;
 
