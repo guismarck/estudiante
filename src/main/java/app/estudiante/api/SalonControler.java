@@ -111,6 +111,12 @@ public class SalonControler {
 
         salonExistente.setSeccion(
                 salonRecibido.getSeccion());
+        if (salonRecibido.getGrado() != null) {
+            salonExistente.setGrado(salonRecibido.getGrado());
+        }
+        if (salonRecibido.getCatalogoSalon() != null) {
+            salonExistente.setCatalogoSalon(salonRecibido.getCatalogoSalon());
+        }
 
         // Guardar los cambios
         salonServicio.guardarSalon(salonExistente);
