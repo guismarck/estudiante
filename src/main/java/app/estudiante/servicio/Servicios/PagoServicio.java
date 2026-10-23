@@ -110,7 +110,7 @@ public EmisionReciboResponseDTO emitirRecibo(EmisionReciboRequestDTO requestDTO)
     query.setParameter(2, requestDTO.anioLectivo());
     query.setParameter(3, requestDTO.concepto());
     query.setParameter(4, requestDTO.tipoPago());
-    query.setParameter(5, requestDTO.monto());
+    query.setParameter(5, requestDTO.monto() == null ? BigDecimal.ZERO : requestDTO.monto());
     query.setParameter(6, Math.toIntExact(requestDTO.idTarifa()));
     query.setParameter(7, requestDTO.usuario());
     query.execute();

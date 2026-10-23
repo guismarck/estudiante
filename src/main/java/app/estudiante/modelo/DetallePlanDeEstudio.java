@@ -65,7 +65,7 @@ public class DetallePlanDeEstudio {
     private String creadoPor;
 
     @CreatedDate
-    @Column(name = "creado_el", nullable = false, updatable = false)
+    @Column(name = "creado_el", updatable = false)
     private LocalDateTime creadoEl;
 
     @Column(name = "actualizado_por", length = 50)

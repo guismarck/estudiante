@@ -59,7 +59,7 @@ public class Salon extends AuditableEntity {
     public void prePersist() {
         super.prePersist();
         if (this.seccion == null || this.seccion.isBlank()) {
-            this.seccion = "A";
+            this.seccion = "";
         }
     }
 }

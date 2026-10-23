@@ -26,7 +26,7 @@ public class Pago {
     private String num_recibo;
     @Column
     private  String concepto;
-    @Column(name = "monto", nullable = false, precision = 10, scale = 2)
+    @Column(name = "monto", precision = 10, scale = 2)
     private BigDecimal monto;
     @Column
     private Date  fecha_pago;
