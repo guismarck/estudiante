@@ -22,4 +22,5 @@ public class Asignatura {
     @Column
     private String codigo;
 
+
 }

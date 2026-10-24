@@ -1,6 +1,7 @@
 package app.estudiante.servicio.Servicios;
 
 
+import app.estudiante.api.GradoControlador;
 import app.estudiante.modelo.Estudiante;
 import app.estudiante.exception.recurosNoEncontradoException;
 import app.estudiante.modelo.EstudianteTutor;
@@ -53,7 +54,7 @@ public class EstudianteServicio implements IEstudianteServicio {
                         "No se encontró un estudiante con código " + codEstudiante));
     }
 
-    @Override
+
     public List<Estudiante> busquedaGeneral(String search){
         List<Estudiante> estudiantes = new ArrayList<>(estudianteRepositorio.busquedaGeneral(search));
         if (NumerUtils.isInt(search)) {
