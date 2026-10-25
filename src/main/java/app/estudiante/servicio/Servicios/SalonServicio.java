@@ -90,7 +90,7 @@ public class SalonServicio implements ISalonServicio {
 
         Integer idGrado = salon.getGrado().getIdGrado();
 
-        Integer idCatalogo = Math.toIntExact(salon.getCatalogoSalon().getIdCatalogoSalon());
+        Long idCatalogo = salon.getCatalogoSalon().getIdCatalogoSalon();
 
 
         Grado grado = gradoRepositorio.findById(idGrado)

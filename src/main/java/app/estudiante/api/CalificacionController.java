@@ -71,7 +71,7 @@ public class CalificacionController {
         return ResponseEntity.ok(calificacionServicio.obtenerGradosCombo(idNivel));
     }
 
-    @GetMapping(path = "/salones")
+    @GetMapping(path = "/salone")
     public ResponseEntity<List<ComboItemDTO>> obtenerSalonesCombo(
             @RequestParam @NotNull(message = "El idGrado es requerido") Integer idGrado,
             @RequestParam(required = false) Integer anioLectivo) {

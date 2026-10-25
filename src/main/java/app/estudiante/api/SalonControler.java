@@ -5,7 +5,7 @@ import app.estudiante.servicio.InterfacesServicios.ISalonServicio;
 import app.estudiante.utils.SalonRequestDTO;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import app.estudiante.exception.recurosNoEncontradoException;
+import app.estudiante.exception.recursosNoEncontradoException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ProblemDetail;
@@ -95,7 +95,7 @@ public class SalonControler {
         Salon salon = salonServicio.buscarSalonPorId(id);
 
         if (salon == null) {
-            throw new recurosNoEncontradoException(
+            throw new recursosNoEncontradoException(
                     "No existe el salón con ID " + id);
         }
 
@@ -111,7 +111,7 @@ public class SalonControler {
         Salon salonExistente = salonServicio.buscarSalonPorId(id);
 
         if (salonExistente == null) {
-            throw new recurosNoEncontradoException(
+            throw new recursosNoEncontradoException(
                     "No existe el salón a actualizar con ID " + id);
         }
 
@@ -144,7 +144,7 @@ public class SalonControler {
         Salon salon = salonServicio.buscarSalonPorId(id);
 
         if (salon == null) {
-            throw new recurosNoEncontradoException(
+            throw new recursosNoEncontradoException(
                     "No existe el salón a eliminar con ID " + id);
         }
 

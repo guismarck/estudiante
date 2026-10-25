@@ -49,7 +49,7 @@ public class AsignaturaControler {
                 asignaturaServicio.buscarAsignaturaPorId(id);
 
         if (asignatura == null) {
-            throw new recurosNoEncontradoException(
+            throw new recursosNoEncontradoException(
                     "No existe la asignatura con ID " + id);
         }
 
@@ -66,7 +66,7 @@ public class AsignaturaControler {
                 asignaturaServicio.buscarAsignaturaPorId(id);
 
         if (asignatura == null) {
-            throw new recurosNoEncontradoException(
+            throw new recursosNoEncontradoException(
                     "No existe la asignatura con ID " + id);
         }
 
@@ -99,7 +99,7 @@ public class AsignaturaControler {
                 asignaturaServicio.buscarAsignaturaPorId(id);
 
         if (asignatura == null) {
-            throw new recurosNoEncontradoException(
+            throw new recursosNoEncontradoException(
                     "No existe la asignatura con ID " + id);
         }
 
