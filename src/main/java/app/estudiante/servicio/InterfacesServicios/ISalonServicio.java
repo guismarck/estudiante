@@ -6,6 +6,7 @@ import app.estudiante.utils.SalonRequestDTO;
 import java.util.List;
 
 public interface ISalonServicio {
+
     public List<Salon> ListarSalon();
     List<Salon> listarSalones();
     public Salon buscarSalonPorId(Integer idSalon);
@@ -16,4 +17,5 @@ public interface ISalonServicio {
     Salon actualizarSalon(Integer idSalon, SalonRequestDTO request);
     void eliminarSalonPorId(Integer idSalon);
     List<Salon> obtenerSalonesDisponiblesPorGrado(Integer idGrado);
+
 }

@@ -18,24 +18,24 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping("nivel-educativo")
+@RequestMapping("estudiante-app")
 @CrossOrigin(value = "http://localhost:3000")
 public class NivelEducativoController {
 
     @Autowired
     private INivelEducativoServicio servicio;
 
-    @GetMapping("/")
+    @GetMapping("/nivel-educativo")
     public ResponseEntity<List<NivelEducativoResponseDTO>> listarTodos() {
         return ResponseEntity.ok(servicio.listarTodos());
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/nivel-educativo/{id}")
     public ResponseEntity<NivelEducativoResponseDTO> obtenerPorId(@PathVariable Integer id) {
         return ResponseEntity.ok(servicio.obtenerPorId(id));
     }
 
-    @PostMapping
+    @PostMapping("/nivel-educativo")
     public ResponseEntity<NivelEducativoResponseDTO> crear(@RequestBody NivelEducativoRequestDTO dto) {
         NivelEducativoResponseDTO creado = servicio.crear(dto);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
@@ -45,20 +45,20 @@ public class NivelEducativoController {
         return ResponseEntity.created(location).body(creado);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/nivel-educativo/{id}")
     public ResponseEntity<NivelEducativoResponseDTO> actualizar(
             @PathVariable Integer id,
             @RequestBody NivelEducativoRequestDTO dto) {
         return ResponseEntity.ok(servicio.actualizar(id, dto));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/nivel-educativo/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
         servicio.eliminar(id);
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{id}/reporte-pdf")
+    @GetMapping("/nivel-educativo/{id}/reporte-pdf")
     public ResponseEntity<byte[]> descargarReportePdf(@PathVariable Integer id) {
         byte[] pdfBytes = servicio.generarReporteJasper(id);
 

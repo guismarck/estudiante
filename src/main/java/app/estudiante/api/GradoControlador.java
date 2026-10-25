@@ -28,7 +28,7 @@ public class GradoControlador {
        grados.forEach((grado -> logger.info(grado.toString())));//probado en consola
         return grados;
     }
-    ////http://localhost:8080/estudiante-app/grados/update
+    ////http://localhost:8080/estudiante-app/grados/
     @PutMapping(path = "/grados/{id}")
     public  ResponseEntity<Grado>ActulizarporID(@PathVariable Integer id,
                                                 @RequestBody Grado gradoResivido){

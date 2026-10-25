@@ -4,6 +4,9 @@ package app.estudiante.servicio.Servicios;
 import app.estudiante.api.GradoControlador;
 import app.estudiante.modelo.Estudiante;
 import app.estudiante.exception.recursosNoEncontradoException;
+import app.estudiante.exception.recurosNoEncontradoException;
+import app.estudiante.modelo.EstudianteTutor;
+import app.estudiante.modelo.Tutor;
 import app.estudiante.repositorio.EstudianteRepositorio;
 import app.estudiante.repositorio.EstudianteTutorRepositorio;
 import app.estudiante.repositorio.TutorRepositorio;
@@ -17,8 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Date;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -54,6 +55,7 @@ public class EstudianteServicio implements IEstudianteServicio {
                 .orElseThrow(() -> new recursosNoEncontradoException(
                         "No se encontró un estudiante con código " + codEstudiante));
     }
+
 
     public List<Estudiante> busquedaGeneral(String search){
         List<Estudiante> estudiantes = new ArrayList<>(estudianteRepositorio.busquedaGeneral(search));
