@@ -31,7 +31,7 @@ public class Salon extends AuditableEntity {
     @Column(name = "idSalon", columnDefinition = "INT UNSIGNED")
     private Integer idSalon;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "idGrado",
             nullable = false,

@@ -18,6 +18,7 @@ import app.estudiante.modelo.Estudiante;
 import org.springframework.http.HttpStatus;
 import java.util.List;
 import java.util.Map;
+import app.estudiante.utils.EstudianteRequestDTO;
 import java.util.Map;
 import java.util.Map;
 import java.util.Map;
@@ -49,6 +50,14 @@ public class EstudianteControler {
             return  estudianteServicio.ListarEstudiantes();
         return estudianteServicio.busquedaGeneral(busqueda.trim());
     }
+
+   @GetMapping(path = "/estudiantes/codigo/{codEstudiante}")
+   public ResponseEntity<Estudiante> getEstudiantePorCodigo(@PathVariable String codEstudiante) {
+       return ResponseEntity.ok(estudianteServicio.buscarEstudiantePorCodigo(codEstudiante));
+   }
+
+   /*@PostMapping(path = "/estudiantes/create") // agregar estudiante
+   public ResponseEntity<String> agregarEstudiante(@Valid @RequestBody Estudiante estudiante){
 
   /* @PostMapping(path = "/estudiantes/create") // agregar estudiante
    public ResponseEntity agregarEstudiante(@RequestBody Estudiante estudiante){
