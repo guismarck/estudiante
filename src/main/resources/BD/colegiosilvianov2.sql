@@ -74,7 +74,6 @@ DROP TABLE IF EXISTS `tutor`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tutor` (
-  `idtutor` int unsigned NOT NULL AUTO_INCREMENT,
   `idpersona` int unsigned NOT NULL,
   `ocupacion` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `telefono_principal` varchar(15) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -83,10 +82,9 @@ CREATE TABLE `tutor` (
   `creado_el` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `actualizado_por` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `actualizado_el` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`idtutor`),
-  UNIQUE KEY `uk_tutor_persona` (`idpersona`),
+  PRIMARY KEY (`idpersona`),
   CONSTRAINT `fk_tutor_persona` FOREIGN KEY (`idpersona`) REFERENCES `persona` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -109,7 +107,7 @@ CREATE TABLE `estudiante_tutor` (
   PRIMARY KEY (`idpersona_estudiante`,`idtutor`),
   KEY `fk_et_tutor` (`idtutor`),
   CONSTRAINT `fk_et_estudiante` FOREIGN KEY (`idpersona_estudiante`) REFERENCES `estudiante` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `fk_et_tutor` FOREIGN KEY (`idtutor`) REFERENCES `tutor` (`idtutor`) ON DELETE RESTRICT ON UPDATE CASCADE
+  CONSTRAINT `fk_et_tutor` FOREIGN KEY (`idtutor`) REFERENCES `tutor` (`idpersona`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -130,7 +128,7 @@ UNLOCK TABLES;
 
 LOCK TABLES `tutor` WRITE;
 /*!40000 ALTER TABLE `tutor` DISABLE KEYS */;
-INSERT INTO `tutor` VALUES (1,1,'Ingeniero Civil','88881111','22221111','ADMIN','2026-10-06 18:34:34',NULL,NULL),(2,2,'Contadora Pública','88882222',NULL,'ADMIN','2026-10-06 18:34:34',NULL,NULL);
+INSERT INTO `tutor` VALUES (1,'Ingeniero Civil','88881111','22221111','ADMIN','2026-10-06 18:34:34',NULL,NULL),(2,'Contadora Pública','88882222',NULL,'ADMIN','2026-10-06 18:34:34',NULL,NULL);
 /*!40000 ALTER TABLE `tutor` ENABLE KEYS */;
 UNLOCK TABLES;
 -- ==========================================
@@ -494,10 +492,10 @@ VALUES
   (10, 'Admin', 'Sistema Silviano', 'MASCULINO', '1995-06-01', '001-010695-0000A', NULL, 'Oficina Central Colegio', 'ADMIN');
 
 INSERT INTO `tutor` 
-  (`idtutor`, `idpersona`, `ocupacion`, `telefono_principal`, `telefono_secundario`, `creado_por`) 
+  (`idpersona`, `ocupacion`, `telefono_principal`, `telefono_secundario`, `creado_por`)
 VALUES
-  (1, 1, 'Ingeniero Civil', '88881111', '22221111', 'ADMIN'),
-  (2, 2, 'Contadora Pública', '88882222', NULL, 'ADMIN');
+  (1, 'Ingeniero Civil', '88881111', '22221111', 'ADMIN'),
+  (2, 'Contadora Pública', '88882222', NULL, 'ADMIN');
 
 INSERT INTO `estudiante` 
   (`idpersona`, `cod_estudiante`, `codigo_MINED`, `estado`, `creado_por`) 

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class TutorServicios implements ITutorServicio {
@@ -35,8 +36,11 @@ public class TutorServicios implements ITutorServicio {
     @Override
     public List<Tutor> busquedaGeneral(String search) {
         var isInt = NumerUtils.isInt(search);
-        if (isInt) return List.of(buscarTutorPorId(Integer.parseInt(search)));
-        return tutorRepositorio.busquedaGeneral(search);
+        if (isInt) {
+            Optional<Tutor> tutor = tutorRepositorio.findById(Integer.parseInt(search));
+            if (tutor.isPresent()) return List.of(tutor.get());
+        }
+        return tutorRepositorio.busquedaGeneral(search.trim());
     }
 
 
