@@ -93,6 +93,8 @@ public class DocenteControler {
         docente.setEstado(docenteResivido.getEstado());
         docente.setCodDocente(docenteResivido.getCodDocente());
         docente.setFecha_nacimiento(docenteResivido.getFecha_nacimiento());
+        docente.setEmail(docenteResivido.getEmail());
+        docente.setTelefono(docenteResivido.getTelefono());
         docenteServicio.guardarDocente(docente);
         //docente.setPart(docenteResivido.getPartidad_nacimiento());
         //
