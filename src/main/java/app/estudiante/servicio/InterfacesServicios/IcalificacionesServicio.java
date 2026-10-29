@@ -16,7 +16,7 @@ public interface IcalificacionesServicio {
     List<ComboItemDTO> obtenerGradosCombo(Integer idNivel);
     List<ComboItemDTO> obtenerSalonesCombo(Integer idGrado, Integer anioLectivo);
     List<ComboItemDTO> obtenerAsignaturasSeccionesCombo(Integer idGrado, Integer idSalon, Integer idDocente);
-    List<ComboItemDTO> obtenerPeriodosEvaluativosCombo(Integer anioLectivo);
+    List<ComboItemDTO> obtenerPeriodosEvaluativosCombo();
     EstadoPeriodoEvaluativoResponseDTO obtenerEstadoEdicion(Integer idPeriodoEvaluativo, Long idDetallePlanDeEstudio);
     byte[] generarActaCalificacionesPdf(Long idDetallePlanDeEstudio, Integer idPeriodoEvaluativo);
 

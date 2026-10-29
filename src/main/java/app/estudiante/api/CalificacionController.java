@@ -89,10 +89,8 @@ public class CalificacionController {
     }
 
     @GetMapping(path = "/periodos")
-    public ResponseEntity<List<ComboItemDTO>> obtenerPeriodosEvaluativosCombo(
-            @RequestParam(required = false) Integer anioLectivo) {
-        int anio = anioLectivo == null ? Year.now().getValue() : anioLectivo;
-        return ResponseEntity.ok(calificacionServicio.obtenerPeriodosEvaluativosCombo(anio));
+    public ResponseEntity<List<ComboItemDTO>> obtenerPeriodosEvaluativosCombo() {
+        return ResponseEntity.ok(calificacionServicio.obtenerPeriodosEvaluativosCombo());
     }
 
     @GetMapping(path = "/reportes/acta-pdf")

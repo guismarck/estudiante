@@ -15,6 +15,10 @@ public interface PeriodoEvaluativoRepositorio extends JpaRepository<PeriodoEvalu
 
     List<PeriodoEvaluativo> findByAnioEscolarAndEstadoTrueOrderByNumeroPeriodoAsc(Integer anioEscolar);
 
+    List<PeriodoEvaluativo> findByAnioEscolarOrderByNumeroPeriodoAsc(Integer anioEscolar);
+
+    List<PeriodoEvaluativo> findAllByOrderByNumeroPeriodoAsc();
+
     @Query(value = """
         SELECT permite_edicion AS permiteEdicion,
                mensaje_pantalla AS mensajePantalla,
@@ -35,7 +39,7 @@ public interface PeriodoEvaluativoRepositorio extends JpaRepository<PeriodoEvalu
               AND fecha_expiracion >= CURRENT_TIMESTAMP
         )
         """, nativeQuery = true)
-    boolean existeAutorizacionExtemporanea(
+    Long existeAutorizacionExtemporanea(
             @Param("idDetallePlan") Long idDetallePlan,
             @Param("idPeriodo") Integer idPeriodo);
 }

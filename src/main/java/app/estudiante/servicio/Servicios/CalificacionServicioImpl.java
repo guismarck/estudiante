@@ -222,9 +222,9 @@ public class CalificacionServicioImpl implements IcalificacionesServicio {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ComboItemDTO> obtenerPeriodosEvaluativosCombo(Integer anioLectivo) {
-        log.info("Cargando catálogo de Períodos Evaluativos para el año lectivo: {}", anioLectivo);
-        return periodoEvaluativoRepository.findByAnioEscolarAndEstadoTrueOrderByNumeroPeriodoAsc(anioLectivo)
+    public List<ComboItemDTO> obtenerPeriodosEvaluativosCombo() {
+        log.info("Cargando todos los períodos evaluativos");
+        return periodoEvaluativoRepository.findAllByOrderByNumeroPeriodoAsc()
                 .stream()
                 .map(p -> new ComboItemDTO(p.getIdPeriodoEvaluativo(), p.getNombrePeriodo()))
                 .toList();
@@ -245,7 +245,7 @@ public class CalificacionServicioImpl implements IcalificacionesServicio {
 
         if (!permiteEdicion && idDetallePlanDeEstudio != null
                 && periodoEvaluativoRepository.existeAutorizacionExtemporanea(
-                        idDetallePlanDeEstudio, idPeriodoEvaluativo)) {
+                        idDetallePlanDeEstudio, idPeriodoEvaluativo) > 0L) {
             permiteEdicion = true;
             mensaje = "Edición autorizada de forma extemporánea.";
         }

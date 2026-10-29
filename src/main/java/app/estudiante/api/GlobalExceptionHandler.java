@@ -6,6 +6,7 @@ import app.estudiante.utils.MatriculaDuplicadaException;
 import app.estudiante.exception.recursosNoEncontradoException;
 import app.estudiante.utils.CredencialesInvalidasException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.persistence.PersistenceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -85,9 +86,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(response);
     }
 
-    @ExceptionHandler(DataAccessException.class)
+    @ExceptionHandler({DataAccessException.class, PersistenceException.class, SQLException.class})
     public ResponseEntity<ApiErrorResponse> handleErrorBaseDatos(
-            DataAccessException ex, HttpServletRequest request) {
+            Exception ex, HttpServletRequest request) {
 
         SQLException sqlException = findSqlException(ex);
         if (sqlException != null && "45000".equals(sqlException.getSQLState())) {
