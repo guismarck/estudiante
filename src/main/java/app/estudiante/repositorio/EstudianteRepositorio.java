@@ -22,4 +22,13 @@ public interface EstudianteRepositorio extends JpaRepository<Estudiante,Integer>
                     like lower(concat('%', :search, '%'))
             """)
     List<Estudiante> busquedaGeneral(@Param("search") String search);
+
+
+    // Contar estudiantes activos
+    @Query("SELECT COUNT(e) FROM Estudiante e WHERE e.estado = true")
+    Long contarEstudiantesActivos();
+
+    // Contar estudiantes inactivos
+    @Query("SELECT COUNT(e) FROM Estudiante e WHERE e.estado = false")
+    Long contarEstudiantesInactivos();
 }

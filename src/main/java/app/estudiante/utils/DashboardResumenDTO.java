@@ -1,3 +1,4 @@
+
 package app.estudiante.utils;
 
 import lombok.Getter;
@@ -15,6 +16,12 @@ public class DashboardResumenDTO {
     private long grados;
     private long salones;
     private long asignaturas;
+
+    // Estados de los estudiantes
+    private long activos;
+    private long inactivos;
+
+    // Matrículas del año lectivo
     private long matriculados;
 
     public DashboardResumenDTO(
@@ -24,14 +31,18 @@ public class DashboardResumenDTO {
             long salones,
             long tutores,
             long asignaturas,
+            long activos,
+            long inactivos,
             long matriculados) {
 
         this.estudiantes = estudiantes;
         this.docentes = docentes;
-        this.grados = grados;
         this.salones = salones;
         this.tutores = tutores;
+        this.grados = grados;
         this.asignaturas = asignaturas;
+        this.activos = activos;
+        this.inactivos = inactivos;
         this.matriculados = matriculados;
     }
 }
