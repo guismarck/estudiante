@@ -1,13 +1,19 @@
 package app.estudiante.servicio.InterfacesServicios;
 
-import app.estudiante.modelo.PeriodoEvaluativo;
+import app.estudiante.utils.PeriodoEvaluativoRequestDTO;
+import app.estudiante.utils.PeriodoEvaluativoResponseDTO;
 
 import java.util.List;
 
 public interface IPeridoEvaluativoServicio {
-    public List<PeriodoEvaluativo> ListarPeriodoEvaluativo();
-    public PeriodoEvaluativo buscarPeriodoEvaluativoPorId(Integer idperiodo_evaluativo);
-    public void guardarPeriodoEvaluativo(PeriodoEvaluativo periodoEvaluativo);
-    public  void eliminarPeriodoEvaluativo(PeriodoEvaluativo periodoEvaluativo);
+   List<PeriodoEvaluativoResponseDTO> listarPeriodosEvaluativos();
+
+    PeriodoEvaluativoResponseDTO buscarPeriodoEvaluativoPorId(Integer idPeriodoEvaluativo);
+
+    PeriodoEvaluativoResponseDTO crearPeriodoEvaluativo(PeriodoEvaluativoRequestDTO dto);
+
+    PeriodoEvaluativoResponseDTO actualizarPeriodoEvaluativo(Integer idPeriodoEvaluativo, PeriodoEvaluativoRequestDTO dto);
+
+    void eliminarPeriodoEvaluativo(Integer idPeriodoEvaluativo);
 
 }
