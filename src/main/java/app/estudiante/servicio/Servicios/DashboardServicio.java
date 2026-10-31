@@ -1,3 +1,4 @@
+
 package app.estudiante.servicio.Servicios;
 
 import app.estudiante.repositorio.*;
@@ -36,16 +37,35 @@ public class DashboardServicio {
     }
 
     public DashboardResumenDTO obtenerResumen() {
+
         Short anioLectivo = (short) Year.now().getValue();
 
+        // Totales generales
+        long estudiantes = estudianteRepositorio.count();
+        long docentes = docenteRepositorio.count();
+        long grados = gradoRepositorio.count();
+        long salones = salonRepositorio.count();
+        long tutores = tutorRepositorio.count();
+        long asignaturas = asignaturaRepositorio.count();
+
+        // Estados de estudiantes
+        long activos = estudianteRepositorio.contarEstudiantesActivos();
+        long inactivos = estudianteRepositorio.contarEstudiantesInactivos();
+
+        // Matrículas del año lectivo actual
+        long matriculados =
+                matriculaRepositorio.contarEstudiantesMatriculadosPorAnio(anioLectivo);
+
         return new DashboardResumenDTO(
-                estudianteRepositorio.count(),
-                docenteRepositorio.count(),
-                gradoRepositorio.count(),
-                salonRepositorio.count(),
-                tutorRepositorio.count(),
-                asignaturaRepositorio.count(),
-                matriculaRepositorio.contarEstudiantesMatriculadosPorAnio(anioLectivo)
+                estudiantes,
+                docentes,
+                grados,
+                salones,
+                tutores,
+                asignaturas,
+                activos,
+                inactivos,
+                matriculados
         );
     }
 }
