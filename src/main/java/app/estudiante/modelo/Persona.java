@@ -36,10 +36,7 @@ public class Persona {
     @Column
     private String cedula;
     @Column
-    private String email;
-    @Column
     private String telefono;
-
     @Column(length = 255)
     private String email;
 
