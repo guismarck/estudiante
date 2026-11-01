@@ -2,7 +2,9 @@ package app.estudiante.api;
 
 import app.estudiante.exception.recursosNoEncontradoException;
 import app.estudiante.servicio.InterfacesServicios.IEstudianteServicio;
+import app.estudiante.utils.EstudianteActualizarRequestDTO;
 import app.estudiante.utils.EstudianteRequestDTO;
+import app.estudiante.utils.EstudianteConTutoresResponseDTO;
 import app.estudiante.utils.EstudianteResponseDTO;
 import jakarta.validation.Valid;
 import app.estudiante.utils.EstudianteRequestDTO;
@@ -19,7 +21,6 @@ import app.estudiante.modelo.Estudiante;
 import org.springframework.http.HttpStatus;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import app.estudiante.utils.EstudianteRequestDTO;
 import java.util.Map;
 import java.util.Map;
@@ -37,31 +38,26 @@ public class EstudianteControler {
 
     //http://localhost:8080/estudiante-app/estudiantes
     @GetMapping(path = "/estudiantes", produces = "application/json")
-   public List<EstudianteResponseDTO>obternerEstudiantes(@RequestParam(value = "search",required = false) String search){
-        List<Estudiante> estudiantes = search == null || search.trim().isEmpty()
-                ? estudianteServicio.ListarEstudiantes()
-                : estudianteServicio.busquedaGeneral(search);
-        return estudiantes.stream()
-                .map(EstudianteResponseDTO::from)
-                .collect(Collectors.toList());
+    public List<EstudianteResponseDTO>obternerEstudiantes(@RequestParam(value = "search",required = false) String search){
+       List<Estudiante> estudiantes = search == null || search.trim().isEmpty()
+               ? estudianteServicio.ListarEstudiantes()
+               : estudianteServicio.busquedaGeneral(search.trim());
+       return estudiantes.stream()
+               .map(EstudianteResponseDTO::from)
+               .toList();
     }
 
     @GetMapping(path = {"/estudiantes/buscar", "/buscar"}, produces = "application/json")
-    public List<EstudianteResponseDTO>obternerEstudiantes(
-            @RequestParam(value = "search", required = false) String search,
-            @RequestParam(value = "criterio", required = false) String criterio){
-        String busqueda = criterio != null ? criterio : search;
-        List<Estudiante> estudiantes = busqueda == null || busqueda.trim().isEmpty()
-                ? estudianteServicio.ListarEstudiantes()
-                : estudianteServicio.busquedaGeneral(busqueda.trim());
-        return estudiantes.stream()
-                .map(EstudianteResponseDTO::from)
-                .collect(Collectors.toList());
+    public List<EstudianteConTutoresResponseDTO> buscarEstudiantesParaMatricula(
+           @RequestParam(value = "search", required = false) String search,
+           @RequestParam(value = "criterio", required = false) String criterio){
+           String busqueda = criterio != null ? criterio : search;
+           return estudianteServicio.buscarEstudiantesConTutores(busqueda);
     }
 
    @GetMapping(path = "/estudiantes/codigo/{codEstudiante}")
-   public ResponseEntity<Estudiante> getEstudiantePorCodigo(@PathVariable String codEstudiante) {
-       return ResponseEntity.ok(estudianteServicio.buscarEstudiantePorCodigo(codEstudiante));
+   public ResponseEntity<EstudianteConTutoresResponseDTO> getEstudiantePorCodigo(@PathVariable String codEstudiante) {
+       return ResponseEntity.ok(estudianteServicio.buscarRespuestaPorCodigo(codEstudiante));
    }
 
    /*@PostMapping(path = "/estudiantes/create") // agregar estudiante
@@ -107,32 +103,33 @@ public class EstudianteControler {
 
 
    @GetMapping(path = "/estudiantes/{id}")// buscar por ID
-   public ResponseEntity<Estudiante>getEstudianteId(@PathVariable Integer id){
+   public ResponseEntity<EstudianteConTutoresResponseDTO>getEstudianteId(@PathVariable Integer id){
        if(id == null){
            throw  new recursosNoEncontradoException("No se encontro el grado con Id"+id);
        }
-        return  ResponseEntity.ok(estudianteServicio.buscarEstudinatePorId(id));
+        return  ResponseEntity.ok(estudianteServicio.buscarRespuestaPorId(id));
    }
 
    @PutMapping(path = "/estudiantes/{id:\\d+}")// actulizar estudiante
-   public ResponseEntity<Estudiante>ActulizarId(@PathVariable Integer id,
-                                                @Valid @RequestBody Estudiante estudianteResivido){
+   public ResponseEntity<EstudianteResponseDTO>ActulizarId(
+           @PathVariable Integer id,
+           @Valid @RequestBody EstudianteActualizarRequestDTO estudianteResivido){
         Estudiante estudiante = estudianteServicio.buscarEstudinatePorId(id);
        if(estudiante == null){
            throw  new recursosNoEncontradoException("No exite el a actualizar con Id"+id);
        }
-       estudiante.setNombre_completo(estudianteResivido.getNombre_completo());
-       estudiante.setApellido_completo(estudianteResivido.getApellido_completo());
-       estudiante.setSexo(estudianteResivido.getSexo());
-       estudiante.setDireccion(estudianteResivido.getDireccion());
-       estudiante.setPartida_nacimiento(estudiante.getPartida_nacimiento());
-       estudiante.setFecha_nacimiento(estudianteResivido.getFecha_nacimiento());
-       estudiante.setCedula(estudianteResivido.getCedula());
-       estudiante.setCodEstudiante(estudianteResivido.getCodEstudiante());
-       estudiante.setCodigoMined(estudianteResivido.getCodigoMined());
-       estudiante.setEstado(estudianteResivido.getEstado());
-       estudianteServicio.guardarEstudiante(estudiante);
-        return ResponseEntity.ok(estudiante);
+       estudiante.setNombre_completo(estudianteResivido.nombre_completo());
+       estudiante.setApellido_completo(estudianteResivido.apellido_completo());
+       estudiante.setSexo(estudianteResivido.sexo());
+       estudiante.setDireccion(estudianteResivido.direccion());
+       estudiante.setPartida_nacimiento(estudianteResivido.partida_nacimiento());
+       estudiante.setFecha_nacimiento(estudianteResivido.fecha_nacimiento());
+       estudiante.setCedula(estudianteResivido.cedula());
+       estudiante.setCodEstudiante(estudianteResivido.codEstudiante());
+       estudiante.setCodigoMined(estudianteResivido.codigoMined());
+       estudiante.setEstado(estudianteResivido.estado());
+       return ResponseEntity.ok(
+               EstudianteResponseDTO.from(estudianteServicio.guardarEstudiante(estudiante)));
    }
 
    @DeleteMapping(path = "/estudiantes/{id:\\d+}")// eliminar estudiante

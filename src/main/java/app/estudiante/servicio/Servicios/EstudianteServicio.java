@@ -9,6 +9,7 @@ import app.estudiante.repositorio.EstudianteTutorRepositorio;
 import app.estudiante.repositorio.TutorRepositorio;
 import app.estudiante.servicio.InterfacesServicios.IEstudianteServicio;
 import app.estudiante.utils.EstudianteRequestDTO;
+import app.estudiante.utils.EstudianteConTutoresResponseDTO;
 import app.estudiante.utils.EstudianteTutorDTO;
 import app.estudiante.utils.NumerUtils;
 import app.estudiante.utils.ValidacionEdad;
@@ -23,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import java.util.Set;
 import app.estudiante.modelo.*;
@@ -46,8 +49,7 @@ public class EstudianteServicio implements IEstudianteServicio {
 
     @Override
     public List<Estudiante> ListarEstudiantes() {
-        List<Estudiante> estudiantes = estudianteRepositorio.findAll();
-        return estudiantes;
+        return estudianteRepositorio.findAll();
     }
 
     @Override
@@ -61,6 +63,51 @@ public class EstudianteServicio implements IEstudianteServicio {
         return estudianteRepositorio.findByCodEstudiante(codEstudiante)
                 .orElseThrow(() -> new recursosNoEncontradoException(
                         "No se encontró un estudiante con código " + codEstudiante));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<EstudianteConTutoresResponseDTO> buscarEstudiantesConTutores(String search) {
+        List<Estudiante> estudiantes = search == null || search.trim().isEmpty()
+                ? estudianteRepositorio.findAll()
+                : busquedaGeneral(search.trim());
+        if (estudiantes.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<Integer> ids = estudiantes.stream()
+                .map(Estudiante::getIdpersona)
+                .collect(Collectors.toList());
+        List<EstudianteTutor> relaciones = estudianteTutorRepositorio.findByEstudianteIdIn(ids);
+        Map<Integer, List<EstudianteTutor>> relacionesPorEstudiante = relaciones.stream()
+                .collect(Collectors.groupingBy(
+                        relacion -> relacion.getPersona().getIdpersona()));
+        return estudiantes.stream()
+                .map(estudiante -> EstudianteConTutoresResponseDTO.from(
+                        estudiante,
+                        relacionesPorEstudiante.getOrDefault(
+                                estudiante.getIdpersona(), List.of())))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public EstudianteConTutoresResponseDTO buscarRespuestaPorCodigo(String codEstudiante) {
+        Estudiante estudiante = buscarEstudiantePorCodigo(codEstudiante);
+        return crearRespuestaConTutores(estudiante);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public EstudianteConTutoresResponseDTO buscarRespuestaPorId(Integer idEstudiante) {
+        Estudiante estudiante = estudianteRepositorio.findById(idEstudiante).orElse(null);
+        return estudiante == null ? null : crearRespuestaConTutores(estudiante);
+    }
+
+    private EstudianteConTutoresResponseDTO crearRespuestaConTutores(Estudiante estudiante) {
+        return EstudianteConTutoresResponseDTO.from(
+                estudiante,
+                estudianteTutorRepositorio.findByEstudianteId(estudiante.getIdpersona()));
     }
 
 

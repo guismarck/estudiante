@@ -1,5 +1,6 @@
 package app.estudiante.servicio.InterfacesServicios;
 import app.estudiante.modelo.Estudiante;
+import app.estudiante.utils.EstudianteConTutoresResponseDTO;
 import app.estudiante.utils.EstudianteRequestDTO;
 import java.util.List;
 
@@ -11,6 +12,9 @@ public interface IEstudianteServicio {
     Estudiante registrarEstudianteConTutores (EstudianteRequestDTO solicitud);
     void eliminarEstudinate(Estudiante estudiante);
     List<Estudiante> ListarEstudiantes();
+    List<EstudianteConTutoresResponseDTO> buscarEstudiantesConTutores(String search);
+    EstudianteConTutoresResponseDTO buscarRespuestaPorCodigo(String codEstudiante);
+    EstudianteConTutoresResponseDTO buscarRespuestaPorId(Integer idEstudiante);
 
 
 }

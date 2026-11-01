@@ -34,7 +34,18 @@ public interface EstudianteTutorRepositorio extends JpaRepository<EstudianteTuto
     List<EstudianteTutor> busquedaGeneral(
             @Param("search") String search);
 
-    @Query(value="select et from EstudianteTutor et where et.persona.idpersona = :id")
-    List<EstudianteTutor> findByEstudianteId(Integer id);
+    @Query("""
+            select et from EstudianteTutor et
+            join fetch et.tutor
+            where et.persona.idpersona = :id
+            """)
+    List<EstudianteTutor> findByEstudianteId(@Param("id") Integer id);
+
+    @Query("""
+            select et from EstudianteTutor et
+            join fetch et.tutor
+            where et.persona.idpersona in :ids
+            """)
+    List<EstudianteTutor> findByEstudianteIdIn(@Param("ids") List<Integer> ids);
 
 }
