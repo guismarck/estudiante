@@ -33,7 +33,7 @@ public class Estudiante extends Persona {
     private Boolean estado = true;
 
     @OneToMany(mappedBy = "persona", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnoreProperties("persona")
+    @JsonIgnoreProperties({"persona", "tutor"})
     private List<EstudianteTutor> tutores = new ArrayList<>();
 
 }

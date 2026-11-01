@@ -3,6 +3,7 @@ package app.estudiante.api;
 import app.estudiante.exception.recursosNoEncontradoException;
 import app.estudiante.servicio.InterfacesServicios.IEstudianteServicio;
 import app.estudiante.utils.EstudianteRequestDTO;
+import app.estudiante.utils.EstudianteResponseDTO;
 import jakarta.validation.Valid;
 import app.estudiante.utils.EstudianteRequestDTO;
 import jakarta.validation.Valid;
@@ -18,6 +19,7 @@ import app.estudiante.modelo.Estudiante;
 import org.springframework.http.HttpStatus;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import app.estudiante.utils.EstudianteRequestDTO;
 import java.util.Map;
 import java.util.Map;
@@ -34,21 +36,27 @@ public class EstudianteControler {
     private IEstudianteServicio  estudianteServicio;
 
     //http://localhost:8080/estudiante-app/estudiantes
-    @GetMapping(path = "/estudiantes")
-   public List<Estudiante>obternerEstudiantes(@RequestParam(value = "search",required = false) String search){
-        if (search == null || search.trim().isEmpty())
-            return  estudianteServicio.ListarEstudiantes();
-        return estudianteServicio.busquedaGeneral(search);
+    @GetMapping(path = "/estudiantes", produces = "application/json")
+   public List<EstudianteResponseDTO>obternerEstudiantes(@RequestParam(value = "search",required = false) String search){
+        List<Estudiante> estudiantes = search == null || search.trim().isEmpty()
+                ? estudianteServicio.ListarEstudiantes()
+                : estudianteServicio.busquedaGeneral(search);
+        return estudiantes.stream()
+                .map(EstudianteResponseDTO::from)
+                .collect(Collectors.toList());
     }
 
-    @GetMapping(path = {"/estudiantes/buscar", "/buscar"})
-    public List<Estudiante>obternerEstudiantes(
+    @GetMapping(path = {"/estudiantes/buscar", "/buscar"}, produces = "application/json")
+    public List<EstudianteResponseDTO>obternerEstudiantes(
             @RequestParam(value = "search", required = false) String search,
             @RequestParam(value = "criterio", required = false) String criterio){
         String busqueda = criterio != null ? criterio : search;
-        if (busqueda == null || busqueda.trim().isEmpty())
-            return  estudianteServicio.ListarEstudiantes();
-        return estudianteServicio.busquedaGeneral(busqueda.trim());
+        List<Estudiante> estudiantes = busqueda == null || busqueda.trim().isEmpty()
+                ? estudianteServicio.ListarEstudiantes()
+                : estudianteServicio.busquedaGeneral(busqueda.trim());
+        return estudiantes.stream()
+                .map(EstudianteResponseDTO::from)
+                .collect(Collectors.toList());
     }
 
    @GetMapping(path = "/estudiantes/codigo/{codEstudiante}")
