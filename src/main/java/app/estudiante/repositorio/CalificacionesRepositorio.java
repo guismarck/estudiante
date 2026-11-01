@@ -13,6 +13,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CalificacionesRepositorio extends JpaRepository<Calificacion, Long> {
 
+    boolean existsByMatricula_IdMatricula(Integer idMatricula);
+
     boolean existsByDetallePlanDeEstudio_IdDetallePlanDeEstudio(Long idDetallePlanDeEstudio);
 
     @Query(value = """

@@ -1,7 +1,6 @@
 package app.estudiante.repositorio;
 
 import app.estudiante.modelo.Docente;
-import app.estudiante.modelo.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,8 +11,15 @@ import java.util.Optional;
 
 @Repository
 public interface DocenteRepositorio extends JpaRepository<Docente,Integer> {
-    @Query(value = "select e from Docente e where e.codDocente = ?1 or e.nombre_completo = ?1 or e.apellido_completo = ?1")
-    List<Docente> busquedaGeneral(String search);
+    @Query("""
+            select d from Docente d
+            where lower(d.codDocente) like lower(concat('%', :search, '%'))
+               or lower(d.nombre_completo) like lower(concat('%', :search, '%'))
+               or lower(d.apellido_completo) like lower(concat('%', :search, '%'))
+               or lower(concat(concat(d.nombre_completo, ' '), d.apellido_completo))
+                    like lower(concat('%', :search, '%'))
+            """)
+    List<Docente> busquedaGeneral(@Param("search") String search);
 
     Optional<Docente> findByCodDocente(String codDocente);
 

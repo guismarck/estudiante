@@ -7,9 +7,21 @@ import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface MatriculaRepositorio extends JpaRepository<Matricula, Integer> {
+    @Query("""
+            select m from Matricula m
+            left join fetch m.estudiante estudiante
+            left join fetch m.salon salon
+            left join fetch salon.grado grado
+            left join fetch grado.nivelEducativo
+            left join fetch salon.catalogoSalon
+            where m.idMatricula = :id
+            """)
+    Optional<Matricula> buscarDetallePorId(@Param("id") Integer id);
+
     boolean existsBySalon_IdSalon(Integer idSalon);
     @Query(value = "select e from Matricula e where idMatricula = ?1  ")
     List<Matricula> busquedaGeneral(String search);

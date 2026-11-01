@@ -1,14 +1,20 @@
 package app.estudiante.servicio.Servicios;
 
+import app.estudiante.exception.recursosNoEncontradoException;
 import app.estudiante.modelo.Estudiante;
+import app.estudiante.modelo.Grado;
 import app.estudiante.modelo.Matricula;
+import app.estudiante.modelo.PlandeEstudio;
 import app.estudiante.modelo.Salon;
 import app.estudiante.repositorio.CatalogoSalonRepositorio;
+import app.estudiante.repositorio.CalificacionesRepositorio;
 import app.estudiante.repositorio.EstudianteRepositorio;
 import app.estudiante.repositorio.MatriculaRepositorio;
+import app.estudiante.repositorio.PlandeEstudioRepositorio;
 import app.estudiante.repositorio.SalonRepositorio;
 import app.estudiante.servicio.InterfacesServicios.IMatriculaServicio;
 import app.estudiante.utils.MatriculaDuplicadaException;
+import app.estudiante.utils.MatriculaDetalleDTO;
 import app.estudiante.utils.MatriculaRequestDTO;
 import app.estudiante.utils.MatriculaResponseDTO;
 import app.estudiante.utils.NumerUtils;
@@ -18,8 +24,10 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.ParameterMode;
 import jakarta.persistence.StoredProcedureQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -32,11 +40,15 @@ public class MatriculaServicio implements IMatriculaServicio {
     @Autowired
     private MatriculaRepositorio matriculaRepositorio;
     @Autowired
+    private PlandeEstudioRepositorio planDeEstudioRepositorio;
+    @Autowired
     private SalonRepositorio salonRepositorio;
     @Autowired
     private CatalogoSalonRepositorio catalogoSalonRepositorio;
     @Autowired
     private EstudianteRepositorio estudianteRepositorio;
+    @Autowired
+    private CalificacionesRepositorio calificacionesRepositorio;
     @Autowired
     private EntityManager entityManager;
     @Autowired
@@ -55,6 +67,59 @@ public class MatriculaServicio implements IMatriculaServicio {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public MatriculaDetalleDTO obtenerDetalleMatricula(Integer idmatricula) {
+        Matricula matricula = matriculaRepositorio.buscarDetallePorId(idmatricula)
+                .orElseThrow(() -> new recursosNoEncontradoException(
+                        "Matrícula no encontrada con ID: " + idmatricula));
+
+        Estudiante estudiante = matricula.getEstudiante();
+        Salon salon = matricula.getSalon();
+        Grado grado = salon == null ? null : salon.getGrado();
+
+        PlandeEstudio plan = grado == null
+                ? null
+                : planDeEstudioRepositorio.findByGrado_IdGradoAndAnioLectivo(
+                        grado.getIdGrado(), matricula.getAnioLectivo().intValue())
+                        .orElse(null);
+
+        String nombreCompleto = estudiante == null
+                ? null
+                : java.util.stream.Stream.of(
+                                estudiante.getNombre_completo(),
+                                estudiante.getApellido_completo())
+                        .filter(nombre -> nombre != null && !nombre.isBlank())
+                        .collect(java.util.stream.Collectors.joining(" "));
+        String nombrePlan = plan == null || grado == null
+                ? null
+                : grado.getNombre() + " - " + plan.getAnioLectivo();
+
+        return new MatriculaDetalleDTO(
+                matricula.getIdMatricula(),
+                estudiante == null ? null : estudiante.getIdpersona(),
+                estudiante == null ? null : estudiante.getNombre_completo(),
+                estudiante == null ? null : estudiante.getApellido_completo(),
+                nombreCompleto,
+                grado == null ? null : grado.getNombre(),
+                grado == null || grado.getNivelEducativo() == null
+                        ? null
+                        : grado.getNivelEducativo().getNombre(),
+                plan == null ? null : plan.getIdPlanDeEstudio(),
+                plan == null ? null : plan.getAnioLectivo(),
+                nombrePlan,
+                matricula.getAnioLectivo(),
+                matricula.getCostoMatricula(),
+                matricula.getEstadoMatricula(),
+                matricula.getFechaMatricula(),
+                salon == null || salon.getCatalogoSalon() == null
+                        ? null
+                        : salon.getCatalogoSalon().getNombreSalon(),
+                salon == null ? null : salon.getTurno(),
+                salon == null ? null : salon.getSeccion()
+        );
+    }
+
+    @Override
     public List<Matricula> busquedaGeneral(String search){
         var isInt = NumerUtils.isInt(search);
         if (isInt) return List.of(buscarMatriculaPorId(Integer.parseInt(search)));
@@ -69,8 +134,17 @@ public class MatriculaServicio implements IMatriculaServicio {
     }
 
     @Override
+    @Transactional
     public void eliminarMatricula(Matricula matricula) {
-     matriculaRepositorio.delete(matricula);
+        if (matricula == null) {
+            throw new recursosNoEncontradoException("Matrícula no encontrada.");
+        }
+        if (calificacionesRepositorio.existsByMatricula_IdMatricula(matricula.getIdMatricula())) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "No se puede eliminar esta matrícula porque tiene calificaciones asociadas. Puede cambiar su estado en lugar de eliminarla.");
+        }
+        matriculaRepositorio.delete(matricula);
     }
 
     @Override

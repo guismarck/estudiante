@@ -13,7 +13,6 @@ import app.estudiante.repositorio.DocenteRepositorio;
 import app.estudiante.repositorio.PlandeEstudioRepositorio;
 import app.estudiante.repositorio.SalonRepositorio;
 import app.estudiante.servicio.InterfacesServicios.IDocenteServicio;
-import app.estudiante.utils.NumerUtils;
 import app.estudiante.utils.DocenteAsignacionResponseDTO;
 import app.estudiante.utils.DocenteAsignacionRequestDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,9 +52,7 @@ public class DocenteServicio implements IDocenteServicio {
 
     @Override
     public List<Docente> busquedaGeneral(String search) {
-        var isInt = NumerUtils.isInt(search);
-        if (isInt) return List.of(buscarDocentePorId(Integer.parseInt(search)));
-        return  docenteRepositorio.busquedaGeneral(search);
+        return docenteRepositorio.busquedaGeneral(search.trim());
     }
 
     @Override

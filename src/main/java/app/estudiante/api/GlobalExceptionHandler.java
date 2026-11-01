@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -91,6 +92,28 @@ public class GlobalExceptionHandler {
             Exception ex, HttpServletRequest request) {
 
         SQLException sqlException = findSqlException(ex);
+        if (sqlException != null
+                && "23000".equals(sqlException.getSQLState())
+                && sqlException.getErrorCode() == 1451) {
+            ApiErrorResponse response = new ApiErrorResponse(
+                    HttpStatus.CONFLICT.value(),
+                    HttpStatus.CONFLICT.getReasonPhrase(),
+                    "No se puede eliminar o modificar este registro porque tiene datos relacionados.",
+                    request.getRequestURI(),
+                    LocalDateTime.now()
+            );
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+        }
+        if (ex instanceof DataIntegrityViolationException) {
+            ApiErrorResponse response = new ApiErrorResponse(
+                    HttpStatus.CONFLICT.value(),
+                    HttpStatus.CONFLICT.getReasonPhrase(),
+                    "La operación no se puede completar porque el registro está relacionado con otros datos.",
+                    request.getRequestURI(),
+                    LocalDateTime.now()
+            );
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+        }
         if (sqlException != null && "45000".equals(sqlException.getSQLState())) {
             ApiErrorResponse response = new ApiErrorResponse(
                     HttpStatus.CONFLICT.value(),

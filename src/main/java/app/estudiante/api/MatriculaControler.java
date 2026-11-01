@@ -5,6 +5,7 @@ import app.estudiante.modelo.Matricula;
 import app.estudiante.servicio.InterfacesServicios.IMatriculaServicio;
 import app.estudiante.utils.MatriculaRequestDTO;
 import app.estudiante.utils.MatriculaResponseDTO;
+import app.estudiante.utils.MatriculaDetalleDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,12 +33,12 @@ public class MatriculaControler {
         return matriculaServicio.busquedaGeneral(search);
     }
 
-    @GetMapping(path = "/matriculas/{id}")// buscar por ID
-    public ResponseEntity<Matricula> getMatriculaId(@PathVariable Integer id){
+    @GetMapping(path = {"/matriculas/{id}", "/matriculas/{id}/detalle"})
+    public ResponseEntity<MatriculaDetalleDTO> getMatriculaId(@PathVariable Integer id){
         if(id == null){
-            throw  new recursosNoEncontradoException("No se encontro el grado con Id"+id);
+            throw new recursosNoEncontradoException("Matrícula no encontrada con ID: " + id);
         }
-        return  ResponseEntity.ok(matriculaServicio.buscarMatriculaPorId(id));
+        return ResponseEntity.ok(matriculaServicio.obtenerDetalleMatricula(id));
     }
 
     @PostMapping(path = "/matriculas/create") // agregar matriculas
