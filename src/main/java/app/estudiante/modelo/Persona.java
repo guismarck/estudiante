@@ -35,7 +35,8 @@ public class Persona {
     private Date fecha_nacimiento ;
     @Column
     private String cedula;
-
+    @Column
+    private String telefono;
     @Column(length = 255)
     private String email;
 
