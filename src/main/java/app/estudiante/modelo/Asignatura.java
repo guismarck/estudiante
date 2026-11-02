@@ -12,7 +12,7 @@ import lombok.ToString;
 @NoArgsConstructor //vacio
 @AllArgsConstructor//lleno
 @ToString
-@Table
+@Table(name='asignatura')
 public class Asignatura {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
