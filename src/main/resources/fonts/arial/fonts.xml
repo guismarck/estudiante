@@ -3,20 +3,13 @@
 
 <fontFamilies>
 
-    <fontFamily name="Arial">
-
-        <normal>fonts/arial/LiberationSans-Regular.ttf</normal>
-
-        <bold>fonts/arial/LiberationSans-Bold.ttf</bold>
-
-        <italic>fonts/arial/LiberationSans-Italic.ttf</italic>
-
-        <boldItalic>fonts/arial/LiberationSans-BoldItalic.ttf</boldItalic>
-
+ <fontFamily name="Arial">
+        <normal>fonts/arial/DejaVuSans.ttf</normal>
+        <bold>fonts/arial/DejaVuSans-Bold.ttf</bold>
+        <italic>fonts/arial/DejaVuSans-Oblique.ttf</italic>
+        <boldItalic>fonts/arial/DejaVuSans-BoldOblique.ttf</boldItalic>
         <pdfEncoding>Identity-H</pdfEncoding>
-
         <pdfEmbedded>true</pdfEmbedded>
-
     </fontFamily>
 
 </fontFamilies>
