@@ -1,6 +1,6 @@
 package app.estudiante.modelo;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import lombok.*;
@@ -33,7 +33,7 @@ public class Estudiante extends Persona {
     private Boolean estado = true;
 
     @OneToMany(mappedBy = "persona", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnoreProperties({"persona", "tutor"})
+    @JsonIgnore
     private List<EstudianteTutor> tutores = new ArrayList<>();
 
 }
