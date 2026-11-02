@@ -1,5 +1,4 @@
-
-package ni.gob.inss.estudiante.utils;
+package app.estudiante.utils;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -9,20 +8,30 @@ import java.util.Arrays;
 
 @Component
 public class FontDiagnostic implements CommandLineRunner {
+ private static final Logger logger =
+            LoggerFactory.getLogger(FontDiagnostic.class);
 
-    @Override
-    public void run(String... args) {
+    @PostConstruct
+    public void verificarFuentes() {
 
-        System.out.println("========== FUENTES DISPONIBLES EN JAVA ==========");
+        logger.info("========== INICIO DIAGNOSTICO DE FUENTES ==========");
 
-        String[] fonts = GraphicsEnvironment
-                .getLocalGraphicsEnvironment()
-                .getAvailableFontFamilyNames();
+        try {
+            GraphicsEnvironment environment =
+                    GraphicsEnvironment.getLocalGraphicsEnvironment();
 
-        Arrays.stream(fonts)
-                .sorted()
-                .forEach(System.out::println);
+            String[] fonts = environment.getAvailableFontFamilyNames();
 
-        System.out.println("========== FIN DEL DIAGNÓSTICO ==========");
+            logger.info("Total de fuentes encontradas: {}", fonts.length);
+
+            Arrays.stream(fonts)
+                    .sorted()
+                    .forEach(font -> logger.info("FUENTE DISPONIBLE: {}", font));
+
+        } catch (Exception e) {
+            logger.error("ERROR AL OBTENER LAS FUENTES", e);
+        }
+
+        logger.info("========== FIN DIAGNOSTICO DE FUENTES ==========");
     }
 }
