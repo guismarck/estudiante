@@ -9,7 +9,7 @@ import java.awt.GraphicsEnvironment;
 import java.util.Arrays;
 
 @Component
-public class FontDiagnostic implements CommandLineRunner {
+public class FontDiagnostic {
  private static final Logger logger =
             LoggerFactory.getLogger(FontDiagnostic.class);
 
