@@ -273,4 +273,10 @@ public class SalonServicio implements ISalonServicio {
         return salonRepositorio
                 .obtenerSalonesDisponiblesPorGrado(idGrado);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<String> buscarSeccionesPorGrado(Integer idGrado) {
+        return salonRepositorio.buscarSeccionesPorGrado(idGrado);
+    }
 }

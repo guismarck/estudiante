@@ -63,6 +63,12 @@ public class SalonControler {
         return ResponseEntity.ok(salones);
     }
 
+    @GetMapping("/salones/secciones/{idGrado}")
+    public ResponseEntity<List<String>> buscarSeccionesPorGrado(
+            @PathVariable Integer idGrado) {
+        return ResponseEntity.ok(salonServicio.buscarSeccionesPorGrado(idGrado));
+    }
+
     // Registrar un salón
     @PostMapping("/salones/create")
     public ResponseEntity<?> agregarSalon(

@@ -17,5 +17,6 @@ public interface ISalonServicio {
     Salon actualizarSalon(Integer idSalon, SalonRequestDTO request);
     void eliminarSalonPorId(Integer idSalon);
     List<Salon> obtenerSalonesDisponiblesPorGrado(Integer idGrado);
+    List<String> buscarSeccionesPorGrado(Integer idGrado);
 
 }

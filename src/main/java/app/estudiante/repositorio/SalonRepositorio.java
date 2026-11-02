@@ -11,6 +11,14 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface SalonRepositorio extends JpaRepository<Salon, Integer> {
+    @Query("""
+            SELECT DISTINCT s.seccion
+            FROM Salon s
+            WHERE s.grado.idGrado = :idGrado
+            ORDER BY s.seccion
+            """)
+    List<String> buscarSeccionesPorGrado(@Param("idGrado") Integer idGrado);
+
     boolean existsByCatalogoSalon_IdCatalogoSalonAndTurnoAndAnioLectivo(
             Long idCatalogoSalon, String turno, Short anioLectivo);
 
