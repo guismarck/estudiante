@@ -18,7 +18,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("estudiante-app")
-@CrossOrigin(value = "http://localhost:3000")
 public class DocenteControler {
     private static final
     Logger logger = LoggerFactory.getLogger(GradoControlador.class);//Infomacion de la consol
