@@ -1,6 +1,8 @@
 package app.estudiante.utils;
 
-import org.springframework.boot.CommandLineRunner;
+import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.awt.GraphicsEnvironment;
