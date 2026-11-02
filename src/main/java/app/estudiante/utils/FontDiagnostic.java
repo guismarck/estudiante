@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import java.awt.GraphicsEnvironment;
 import java.util.Arrays;
 
-@Component
 public class FontDiagnostic {
  private static final Logger logger =
             LoggerFactory.getLogger(FontDiagnostic.class);
